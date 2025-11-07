@@ -98,6 +98,13 @@ export default function Profile() {
                 <Badge variant="secondary" className="mt-2">
                   {user.role === "admin" ? "Administrator" : "Benutzer"}
                 </Badge>
+                {user.role === "admin" && (
+                  <Link href="/admin">
+                    <Button variant="default" size="sm" className="mt-4">
+                      Admin Portal
+                    </Button>
+                  </Link>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">

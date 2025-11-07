@@ -14,6 +14,7 @@ import Trips from "./pages/Trips";
 import Profile from "./pages/Profile";
 import Planner from "./pages/Planner";
 import PlannerDetail from "./pages/PlannerDetail";
+import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 
 function Router() {
@@ -30,6 +31,7 @@ function Router() {
       <Route path={"/profile"} component={Profile} />
       <Route path={"/planner"} component={Planner} />
       <Route path={"/planner/:id"} component={PlannerDetail} />
+      <Route path={"/admin"} component={Admin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
