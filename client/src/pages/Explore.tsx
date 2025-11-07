@@ -72,14 +72,16 @@ export default function Explore() {
     imageUrl: "",
   });
 
-  // Read query parameters on mount
+  // Read query parameters on mount and when location changes
   useEffect(() => {
     const params = new URLSearchParams(location.split('?')[1]);
     const costParam = params.get('cost');
     if (costParam) {
       setCost(costParam);
+    } else {
+      setCost("");
     }
-  }, []);
+  }, [location]);
 
   const { data: trips, isLoading } = trpc.trips.search.useQuery({
     keyword: keyword || undefined,
