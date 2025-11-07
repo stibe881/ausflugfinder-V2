@@ -8,9 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain } from "lucide-react";
+import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, DollarSign, Flame, MapIcon, Eye, Share2 } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 
 export default function Trips() {
@@ -158,93 +158,129 @@ export default function Trips() {
                   Neue Planung
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-card border-2 border-border max-w-2xl">
+              <DialogContent className="bg-card border-2 border-border max-w-3xl max-h-[90vh] overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                   <DialogHeader>
                     <DialogTitle className="text-card-foreground text-2xl">Neuen Ausflug erstellen</DialogTitle>
                     <DialogDescription>
-                      Fülle die Details für deinen neuen Ausflug aus
+                      Fülle die Details für deinen neuen Ausflug aus. Mit * gekennzeichnete Felder sind erforderlich.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="title">Titel *</Label>
-                      <Input
-                        id="title"
-                        name="title"
-                        placeholder="z.B. Wanderung in den Alpen"
-                        required
-                        className="bg-background border-input"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="destination">Ziel *</Label>
-                      <Input
-                        id="destination"
-                        name="destination"
-                        placeholder="z.B. Garmisch-Partenkirchen"
-                        required
-                        className="bg-background border-input"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="description">Beschreibung</Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        placeholder="Beschreibe deinen Ausflug..."
-                        rows={3}
-                        className="bg-background border-input"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Basic Information */}
+                    <div className="border-b border-border pb-4">
+                      <h3 className="font-semibold text-sm mb-3">Grundinformationen</h3>
                       <div className="grid gap-2">
-                        <Label htmlFor="startDate">Startdatum *</Label>
+                        <Label htmlFor="title">Titel *</Label>
                         <Input
-                          id="startDate"
-                          name="startDate"
-                          type="date"
+                          id="title"
+                          name="title"
+                          placeholder="z.B. Wanderung in den Alpen"
                           required
                           className="bg-background border-input"
                         />
                       </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="endDate">Enddatum *</Label>
+                      <div className="grid gap-2 mt-3">
+                        <Label htmlFor="destination">Ziel *</Label>
                         <Input
-                          id="endDate"
-                          name="endDate"
-                          type="date"
+                          id="destination"
+                          name="destination"
+                          placeholder="z.B. Garmisch-Partenkirchen"
                           required
+                          className="bg-background border-input"
+                        />
+                      </div>
+                      <div className="grid gap-2 mt-3">
+                        <Label htmlFor="description">Beschreibung</Label>
+                        <Textarea
+                          id="description"
+                          name="description"
+                          placeholder="Beschreibe deinen Ausflug..."
+                          rows={3}
                           className="bg-background border-input"
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="participants">Teilnehmer *</Label>
-                        <Input
-                          id="participants"
-                          name="participants"
-                          type="number"
-                          min="1"
-                          defaultValue="1"
-                          required
-                          className="bg-background border-input"
-                        />
+
+                    {/* Date & Participants */}
+                    <div className="border-b border-border pb-4">
+                      <h3 className="font-semibold text-sm mb-3">Zeitplanung & Teilnehmer</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="startDate">Startdatum *</Label>
+                          <Input
+                            id="startDate"
+                            name="startDate"
+                            type="date"
+                            required
+                            className="bg-background border-input"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="endDate">Enddatum *</Label>
+                          <Input
+                            id="endDate"
+                            name="endDate"
+                            type="date"
+                            required
+                            className="bg-background border-input"
+                          />
+                        </div>
                       </div>
+                      <div className="grid grid-cols-2 gap-4 mt-3">
+                        <div className="grid gap-2">
+                          <Label htmlFor="participants">Teilnehmer *</Label>
+                          <Input
+                            id="participants"
+                            name="participants"
+                            type="number"
+                            min="1"
+                            defaultValue="1"
+                            required
+                            className="bg-background border-input"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="status">Status</Label>
+                          <Select name="status" defaultValue="planned">
+                            <SelectTrigger className="bg-background border-input">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="planned">Geplant</SelectItem>
+                              <SelectItem value="ongoing">Laufend</SelectItem>
+                              <SelectItem value="completed">Abgeschlossen</SelectItem>
+                              <SelectItem value="cancelled">Abgesagt</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Options */}
+                    <div>
+                      <h3 className="font-semibold text-sm mb-3">Zusätzliche Optionen</h3>
                       <div className="grid gap-2">
-                        <Label htmlFor="status">Status</Label>
-                        <Select name="status" defaultValue="planned">
-                          <SelectTrigger className="bg-background border-input">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="planned">Geplant</SelectItem>
-                            <SelectItem value="ongoing">Laufend</SelectItem>
-                            <SelectItem value="completed">Abgeschlossen</SelectItem>
-                            <SelectItem value="cancelled">Abgesagt</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="isFavorite" className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="isFavorite"
+                            name="isFavorite"
+                            className="rounded border-input"
+                          />
+                          <span>Als Favorit markieren</span>
+                        </Label>
+                      </div>
+                      <div className="grid gap-2 mt-3">
+                        <Label htmlFor="isPublic" className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id="isPublic"
+                            name="isPublic"
+                            className="rounded border-input"
+                          />
+                          <span>Öffentlich teilen</span>
+                        </Label>
                       </div>
                     </div>
                   </div>
@@ -299,43 +335,84 @@ export default function Trips() {
             {trips.map((trip) => (
               <Card
                 key={trip.id}
-                className="bg-card border-2 border-border hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl group"
+                className="bg-card border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl group overflow-hidden"
               >
+                {/* Optional: Trip Image Placeholder */}
+                <div className="h-32 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
+                    <Mountain className="w-16 h-16" />
+                  </div>
+                </div>
+
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-xl text-card-foreground group-hover:text-primary transition-colors">
-                      {trip.title}
-                    </CardTitle>
-                    <Badge className={getStatusColor(trip.status)}>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-card-foreground group-hover:text-primary transition-colors line-clamp-1">
+                        {trip.title}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-2 text-muted-foreground mt-1">
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="line-clamp-1">{trip.destination}</span>
+                      </CardDescription>
+                    </div>
+                    <Badge className={`${getStatusColor(trip.status)} flex-shrink-0`}>
                       {getStatusLabel(trip.status)}
                     </Badge>
                   </div>
-                  <CardDescription className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    {trip.destination}
-                  </CardDescription>
                 </CardHeader>
+
                 <CardContent className="space-y-3">
                   {trip.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {trip.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 text-secondary" />
-                    <span>
-                      {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+
+                  {/* Trip Details Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-secondary flex-shrink-0" />
+                      <span className="text-muted-foreground text-xs">
+                        {formatDate(trip.startDate)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-accent flex-shrink-0" />
+                      <span className="text-muted-foreground text-xs">
+                        {trip.participants} <span className="hidden sm:inline">Pers.</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Trip Duration */}
+                  <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1.5">
+                    <span className="font-medium">
+                      {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} Tage
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="w-4 h-4 text-accent" />
-                    <span>{trip.participants} Teilnehmer</span>
+
+                  {/* Trip Status Indicators */}
+                  <div className="flex gap-2 flex-wrap">
+                    {trip.isFavorite && (
+                      <Badge variant="outline" className="text-xs">
+                        <Flame className="w-3 h-3 mr-1" />
+                        Favorit
+                      </Badge>
+                    )}
+                    {trip.isPublic && (
+                      <Badge variant="outline" className="text-xs">
+                        <Share2 className="w-3 h-3 mr-1" />
+                        Öffentlich
+                      </Badge>
+                    )}
                   </div>
                 </CardContent>
+
                 <CardFooter className="gap-2">
                   <Link href={`/trips/${trip.id}`} className="flex-1">
                     <Button variant="default" size="sm" className="w-full">
-                      Details
+                      <Eye className="w-4 h-4 mr-2" />
+                      Öffnen
                     </Button>
                   </Link>
                   <Button
@@ -346,6 +423,7 @@ export default function Trips() {
                         deleteMutation.mutate({ id: trip.id });
                       }
                     }}
+                    title="Löschen"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
