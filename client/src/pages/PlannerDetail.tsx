@@ -1,0 +1,822 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { trpc } from "@/lib/trpc";
+import { ArrowLeft, Plus, Trash2, Check, X, Clock, Loader2, Package, DollarSign, ListChecks, Calendar, MapPin, Cloud, Download, FileText } from "lucide-react";
+import { useState } from "react";
+import { Link, useParams } from "wouter";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import WeatherForecast from "@/components/WeatherForecast";
+import RouteMap from "@/components/RouteMap";
+
+export default function PlannerDetail() {
+  const params = useParams();
+  const planId = params.id ? parseInt(params.id) : 0;
+  const { user } = useAuth();
+  
+  const [addTripDialog, setAddTripDialog] = useState(false);
+  const [packingDialog, setPackingDialog] = useState(false);
+  const [budgetDialog, setBudgetDialog] = useState(false);
+  const [checklistDialog, setChecklistDialog] = useState(false);
+  
+  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
+  const [tripTime, setTripTime] = useState({ start: "", end: "" });
+  const [tripNotes, setTripNotes] = useState("");
+  
+  const [packingItem, setPackingItem] = useState({ item: "", quantity: 1, category: "" });
+  const [budgetItem, setBudgetItem] = useState({ category: "", description: "", estimatedCost: "", actualCost: "" });
+  const [checklistItem, setChecklistItem] = useState({ title: "", priority: "medium" as "low" | "medium" | "high" });
+
+  const { data: plan, isLoading: planLoading } = trpc.dayPlans.getById.useQuery({ id: planId });
+  const { data: planItems, refetch: refetchItems } = trpc.dayPlans.getItems.useQuery({ dayPlanId: planId });
+  const { data: allTrips } = trpc.trips.search.useQuery({ keyword: "", category: "", region: "", cost: "" });
+  const { data: packingList, refetch: refetchPacking } = trpc.packingList.list.useQuery({ dayPlanId: planId });
+  const { data: budget, refetch: refetchBudget } = trpc.budget.list.useQuery({ dayPlanId: planId });
+  const { data: checklist, refetch: refetchChecklist } = trpc.checklist.list.useQuery({ dayPlanId: planId });
+
+  const addTripMutation = trpc.dayPlans.addTrip.useMutation({
+    onSuccess: () => {
+      toast.success("Ausflug hinzugefügt!");
+      refetchItems();
+      setAddTripDialog(false);
+      setSelectedTripId(null);
+      setTripTime({ start: "", end: "" });
+      setTripNotes("");
+    },
+  });
+
+  const removeTripMutation = trpc.dayPlans.removeTrip.useMutation({
+    onSuccess: () => {
+      toast.success("Ausflug entfernt!");
+      refetchItems();
+    },
+  });
+
+  const addPackingMutation = trpc.packingList.add.useMutation({
+    onSuccess: () => {
+      toast.success("Artikel hinzugefügt!");
+      refetchPacking();
+      setPackingDialog(false);
+      setPackingItem({ item: "", quantity: 1, category: "" });
+    },
+  });
+
+  const togglePackingMutation = trpc.packingList.toggle.useMutation({
+    onSuccess: () => refetchPacking(),
+  });
+
+  const deletePackingMutation = trpc.packingList.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Artikel gelöscht!");
+      refetchPacking();
+    },
+  });
+
+  const addBudgetMutation = trpc.budget.add.useMutation({
+    onSuccess: () => {
+      toast.success("Budget-Eintrag hinzugefügt!");
+      refetchBudget();
+      setBudgetDialog(false);
+      setBudgetItem({ category: "", description: "", estimatedCost: "", actualCost: "" });
+    },
+  });
+
+  const deleteBudgetMutation = trpc.budget.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Budget-Eintrag gelöscht!");
+      refetchBudget();
+    },
+  });
+
+  const addChecklistMutation = trpc.checklist.add.useMutation({
+    onSuccess: () => {
+      toast.success("Aufgabe hinzugefügt!");
+      refetchChecklist();
+      setChecklistDialog(false);
+      setChecklistItem({ title: "", priority: "medium" });
+    },
+  });
+
+  const toggleChecklistMutation = trpc.checklist.toggle.useMutation({
+    onSuccess: () => refetchChecklist(),
+  });
+
+  const deleteChecklistMutation = trpc.checklist.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Aufgabe gelöscht!");
+      refetchChecklist();
+    },
+  });
+
+  const updatePlanMutation = trpc.dayPlans.update.useMutation({
+    onSuccess: () => {
+      toast.success("Planung aktualisiert!");
+      window.location.reload();
+    },
+  });
+
+  const handleToggleDraft = (isDraft: number) => {
+    updatePlanMutation.mutate({
+      id: planId,
+      isDraft,
+    });
+  };
+
+  const handleAddTrip = () => {
+    if (!selectedTripId) {
+      toast.error("Bitte wähle einen Ausflug aus");
+      return;
+    }
+    
+    const orderIndex = (planItems?.length || 0) + 1;
+    addTripMutation.mutate({
+      dayPlanId: planId,
+      tripId: selectedTripId,
+      orderIndex,
+      startTime: tripTime.start || undefined,
+      endTime: tripTime.end || undefined,
+      notes: tripNotes || undefined,
+    });
+  };
+
+  const handleAddPacking = () => {
+    if (!packingItem.item.trim()) {
+      toast.error("Bitte gib einen Artikel ein");
+      return;
+    }
+    addPackingMutation.mutate({
+      dayPlanId: planId,
+      ...packingItem,
+    });
+  };
+
+  const handleAddBudget = () => {
+    if (!budgetItem.category.trim() || !budgetItem.description.trim() || !budgetItem.estimatedCost.trim()) {
+      toast.error("Bitte fülle alle Pflichtfelder aus");
+      return;
+    }
+    addBudgetMutation.mutate({
+      dayPlanId: planId,
+      ...budgetItem,
+    });
+  };
+
+  const handleAddChecklist = () => {
+    if (!checklistItem.title.trim()) {
+      toast.error("Bitte gib einen Titel ein");
+      return;
+    }
+    addChecklistMutation.mutate({
+      dayPlanId: planId,
+      ...checklistItem,
+    });
+  };
+
+  const calculateTotalBudget = () => {
+    if (!budget) return { estimated: 0, actual: 0 };
+    const estimated = budget.reduce((sum, item) => sum + parseFloat(item.estimatedCost || "0"), 0);
+    const actual = budget.reduce((sum, item) => sum + parseFloat(item.actualCost || "0"), 0);
+    return { estimated, actual };
+  };
+
+  const [exportType, setExportType] = useState<'ical' | 'pdf' | null>(null);
+
+  const { data: icalData } = trpc.export.planToICal.useQuery(
+    { planId },
+    { enabled: exportType === 'ical' }
+  );
+
+  const { data: pdfData } = trpc.export.planToPDF.useQuery(
+    { planId },
+    { enabled: exportType === 'pdf' }
+  );
+
+  const handleExportICal = () => {
+    setExportType('ical');
+    if (icalData) {
+      const blob = new Blob([icalData.content], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${plan?.title || 'plan'}.ics`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("iCal-Datei heruntergeladen!");
+      setExportType(null);
+    }
+  };
+
+  const handleExportPDF = () => {
+    setExportType('pdf');
+    if (pdfData) {
+      const blob = new Blob([pdfData.content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${plan?.title || 'plan'}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF-Datei heruntergeladen!");
+      setExportType(null);
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high": return "bg-red-500/10 text-red-600";
+      case "medium": return "bg-yellow-500/10 text-yellow-600";
+      case "low": return "bg-blue-500/10 text-blue-600";
+      default: return "bg-gray-500/10 text-gray-600";
+    }
+  };
+
+  if (planLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!plan) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <h1 className="text-2xl font-bold mb-4">Planung nicht gefunden</h1>
+        <Link href="/planner">
+          <Button>Zurück zur Übersicht</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const totalBudget = calculateTotalBudget();
+  const packedItems = packingList?.filter(item => item.isPacked).length || 0;
+  const totalPackingItems = packingList?.length || 0;
+  const completedTasks = checklist?.filter(item => item.isCompleted).length || 0;
+  const totalTasks = checklist?.length || 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-12">
+      <div className="container max-w-6xl">
+        <Link href="/planner">
+          <Button variant="ghost" className="mb-6 gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Zurück
+          </Button>
+        </Link>
+
+        {/* Plan Header */}
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <CardTitle className="text-3xl">{plan.title}</CardTitle>
+                  {plan.isDraft === 1 && (
+                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-600">
+                      Entwurf
+                    </Badge>
+                  )}
+                  {plan.isDraft === 0 && (
+                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-600">
+                      Veröffentlicht
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription className="text-base">{plan.description}</CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportICal}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  iCal
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportPDF}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
+                {plan.isDraft === 1 && (
+                  <Button
+                    size="sm"
+                    onClick={() => handleToggleDraft(0)}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Veröffentlichen
+                  </Button>
+                )}
+                {plan.isDraft === 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleToggleDraft(1)}
+                  >
+                    Zurück zu Entwurf
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Calendar className="w-5 h-5 text-primary" />
+                <div>
+                  <div className="text-xs">Zeitraum</div>
+                  <div className="font-medium text-foreground">
+                    {format(new Date(plan.startDate), "dd.MM.yyyy", { locale: de })} - {format(new Date(plan.endDate), "dd.MM.yyyy", { locale: de })}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <Package className="w-5 h-5 text-primary" />
+                <div>
+                  <div className="text-xs">Packliste</div>
+                  <div className="font-medium text-foreground">{packedItems} / {totalPackingItems}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <DollarSign className="w-5 h-5 text-primary" />
+                <div>
+                  <div className="text-xs">Budget</div>
+                  <div className="font-medium text-foreground">CHF {totalBudget.estimated.toFixed(2)}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <ListChecks className="w-5 h-5 text-primary" />
+                <div>
+                  <div className="text-xs">Aufgaben</div>
+                  <div className="font-medium text-foreground">{completedTasks} / {totalTasks}</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="timeline" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="route">Route</TabsTrigger>
+            <TabsTrigger value="weather">Wetter</TabsTrigger>
+            <TabsTrigger value="packing">Packliste</TabsTrigger>
+            <TabsTrigger value="budget">Budget</TabsTrigger>
+            <TabsTrigger value="checklist">Checkliste</TabsTrigger>
+          </TabsList>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Ausflüge & Zeitplan</CardTitle>
+                  <Dialog open={addTripDialog} onOpenChange={setAddTripDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Ausflug hinzufügen
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Ausflug zur Planung hinzufügen</DialogTitle>
+                        <DialogDescription>
+                          Wähle einen Ausflug aus und lege optional Zeiten fest
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Ausflug</Label>
+                          <Select value={selectedTripId?.toString()} onValueChange={(v) => setSelectedTripId(parseInt(v))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Ausflug wählen..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allTrips?.map((trip) => (
+                                <SelectItem key={trip.id} value={trip.id.toString()}>
+                                  {trip.title} - {trip.destination}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Startzeit</Label>
+                            <Input
+                              type="time"
+                              value={tripTime.start}
+                              onChange={(e) => setTripTime({ ...tripTime, start: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <Label>Endzeit</Label>
+                            <Input
+                              type="time"
+                              value={tripTime.end}
+                              onChange={(e) => setTripTime({ ...tripTime, end: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Notizen</Label>
+                          <Textarea
+                            value={tripNotes}
+                            onChange={(e) => setTripNotes(e.target.value)}
+                            placeholder="Optionale Notizen..."
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setAddTripDialog(false)}>
+                          Abbrechen
+                        </Button>
+                        <Button onClick={handleAddTrip} disabled={addTripMutation.isPending}>
+                          Hinzufügen
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {planItems && planItems.length > 0 ? (
+                  <div className="space-y-4">
+                    {planItems.map((item: any, index: number) => (
+                      <div key={item.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-1">{item.trip?.title || "Unbekannter Ausflug"}</h3>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                            {item.startTime && item.endTime && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {item.startTime} - {item.endTime}
+                              </div>
+                            )}
+                            {item.trip?.destination && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {item.trip.destination}
+                              </div>
+                            )}
+                          </div>
+                          {item.notes && (
+                            <p className="text-sm text-muted-foreground">{item.notes}</p>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeTripMutation.mutate({ id: item.id })}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Noch keine Ausflüge hinzugefügt. Klicke auf "Ausflug hinzufügen" um zu starten.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Route Tab */}
+          <TabsContent value="route" className="space-y-4">
+            <RouteMap planItems={planItems || []} />
+          </TabsContent>
+
+          {/* Weather Tab */}
+          <TabsContent value="weather" className="space-y-4">
+            <WeatherForecast plan={plan} />
+          </TabsContent>
+
+          {/* Packing List Tab */}
+          <TabsContent value="packing" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Packliste</CardTitle>
+                  <Dialog open={packingDialog} onOpenChange={setPackingDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Artikel hinzufügen
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Artikel zur Packliste hinzufügen</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Artikel</Label>
+                          <Input
+                            value={packingItem.item}
+                            onChange={(e) => setPackingItem({ ...packingItem, item: e.target.value })}
+                            placeholder="z.B. Wanderschuhe"
+                          />
+                        </div>
+                        <div>
+                          <Label>Anzahl</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={packingItem.quantity}
+                            onChange={(e) => setPackingItem({ ...packingItem, quantity: parseInt(e.target.value) })}
+                          />
+                        </div>
+                        <div>
+                          <Label>Kategorie</Label>
+                          <Input
+                            value={packingItem.category}
+                            onChange={(e) => setPackingItem({ ...packingItem, category: e.target.value })}
+                            placeholder="z.B. Kleidung, Ausrüstung"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setPackingDialog(false)}>
+                          Abbrechen
+                        </Button>
+                        <Button onClick={handleAddPacking} disabled={addPackingMutation.isPending}>
+                          Hinzufügen
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {packingList && packingList.length > 0 ? (
+                  <div className="space-y-2">
+                    {packingList.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => togglePackingMutation.mutate({ id: item.id, isPacked: item.isPacked ? 0 : 1 })}
+                          className="h-6 w-6 p-0"
+                        >
+                          {item.isPacked ? <Check className="w-4 h-4 text-green-600" /> : <div className="w-4 h-4 border-2 rounded" />}
+                        </Button>
+                        <div className="flex-1">
+                          <span className={item.isPacked ? "line-through text-muted-foreground" : ""}>
+                            {item.item} {item.quantity > 1 && `(${item.quantity}x)`}
+                          </span>
+                          {item.category && (
+                            <Badge variant="outline" className="ml-2 text-xs">
+                              {item.category}
+                            </Badge>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deletePackingMutation.mutate({ id: item.id })}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Noch keine Artikel auf der Packliste
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Budget Tab */}
+          <TabsContent value="budget" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Budget-Planung</CardTitle>
+                    <CardDescription>
+                      Geschätzt: CHF {totalBudget.estimated.toFixed(2)} | Tatsächlich: CHF {totalBudget.actual.toFixed(2)}
+                    </CardDescription>
+                  </div>
+                  <Dialog open={budgetDialog} onOpenChange={setBudgetDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Eintrag hinzufügen
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Budget-Eintrag hinzufügen</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Kategorie</Label>
+                          <Input
+                            value={budgetItem.category}
+                            onChange={(e) => setBudgetItem({ ...budgetItem, category: e.target.value })}
+                            placeholder="z.B. Transport, Verpflegung"
+                          />
+                        </div>
+                        <div>
+                          <Label>Beschreibung</Label>
+                          <Input
+                            value={budgetItem.description}
+                            onChange={(e) => setBudgetItem({ ...budgetItem, description: e.target.value })}
+                            placeholder="z.B. Zugtickets nach Zürich"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Geschätzte Kosten (CHF)</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={budgetItem.estimatedCost}
+                              onChange={(e) => setBudgetItem({ ...budgetItem, estimatedCost: e.target.value })}
+                              placeholder="0.00"
+                            />
+                          </div>
+                          <div>
+                            <Label>Tatsächliche Kosten (CHF)</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={budgetItem.actualCost}
+                              onChange={(e) => setBudgetItem({ ...budgetItem, actualCost: e.target.value })}
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setBudgetDialog(false)}>
+                          Abbrechen
+                        </Button>
+                        <Button onClick={handleAddBudget} disabled={addBudgetMutation.isPending}>
+                          Hinzufügen
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {budget && budget.length > 0 ? (
+                  <div className="space-y-3">
+                    {budget.map((item) => (
+                      <div key={item.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline">{item.category}</Badge>
+                            <span className="font-medium">{item.description}</span>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Geschätzt: CHF {parseFloat(item.estimatedCost).toFixed(2)}
+                            {item.actualCost && ` | Tatsächlich: CHF ${parseFloat(item.actualCost).toFixed(2)}`}
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteBudgetMutation.mutate({ id: item.id })}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Noch keine Budget-Einträge
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Checklist Tab */}
+          <TabsContent value="checklist" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Aufgaben & Checkliste</CardTitle>
+                  <Dialog open={checklistDialog} onOpenChange={setChecklistDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Aufgabe hinzufügen
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Aufgabe zur Checkliste hinzufügen</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Aufgabe</Label>
+                          <Input
+                            value={checklistItem.title}
+                            onChange={(e) => setChecklistItem({ ...checklistItem, title: e.target.value })}
+                            placeholder="z.B. Tickets buchen"
+                          />
+                        </div>
+                        <div>
+                          <Label>Priorität</Label>
+                          <Select value={checklistItem.priority} onValueChange={(v: "low" | "medium" | "high") => setChecklistItem({ ...checklistItem, priority: v })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Niedrig</SelectItem>
+                              <SelectItem value="medium">Mittel</SelectItem>
+                              <SelectItem value="high">Hoch</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setChecklistDialog(false)}>
+                          Abbrechen
+                        </Button>
+                        <Button onClick={handleAddChecklist} disabled={addChecklistMutation.isPending}>
+                          Hinzufügen
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {checklist && checklist.length > 0 ? (
+                  <div className="space-y-2">
+                    {checklist.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => toggleChecklistMutation.mutate({ id: item.id, isCompleted: item.isCompleted ? 0 : 1 })}
+                          className="h-6 w-6 p-0"
+                        >
+                          {item.isCompleted ? <Check className="w-4 h-4 text-green-600" /> : <div className="w-4 h-4 border-2 rounded" />}
+                        </Button>
+                        <div className="flex-1">
+                          <span className={item.isCompleted ? "line-through text-muted-foreground" : ""}>
+                            {item.title}
+                          </span>
+                          <Badge variant="outline" className={`ml-2 text-xs ${getPriorityColor(item.priority)}`}>
+                            {item.priority === "high" && "Hoch"}
+                            {item.priority === "medium" && "Mittel"}
+                            {item.priority === "low" && "Niedrig"}
+                          </Badge>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteChecklistMutation.mutate({ id: item.id })}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Noch keine Aufgaben auf der Checkliste
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

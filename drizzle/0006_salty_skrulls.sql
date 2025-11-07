@@ -1,0 +1,1 @@
+ALTER TABLE `dayPlans` ADD `isDraft` int DEFAULT 1 NOT NULL;

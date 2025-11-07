@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1762458765256,
+      "tag": "0000_tricky_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1762458814052,
+      "tag": "0001_groovy_ultimatum",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1762465743661,
+      "tag": "0002_youthful_ben_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1762466693671,
+      "tag": "0003_green_eternity",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1762494509976,
+      "tag": "0004_giant_karen_page",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1762496214536,
+      "tag": "0005_slippery_jetstream",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1762498724369,
+      "tag": "0006_salty_skrulls",
+      "breakpoints": true
+    }
+  ]
+}
