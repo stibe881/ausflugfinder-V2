@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - CACHE_BUST=1
     container_name: ausflug-manager-app
     ports:
       - "3000:3000"

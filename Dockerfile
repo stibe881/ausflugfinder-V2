@@ -12,11 +12,15 @@ RUN npm install -g pnpm && pnpm install --frozen-lockfile
 # Copy application files
 COPY . .
 
+# Build argument to force rebuild when needed
+ARG CACHE_BUST=1
+RUN echo "Building with cache bust: $CACHE_BUST"
+
 # Build the application
 RUN pnpm build
 
 # Expose port
-EXPOSE 5173
+EXPOSE 3000
 
 # Start the application
 CMD ["pnpm", "start"]
