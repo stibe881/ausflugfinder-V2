@@ -39,6 +39,15 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     }
   );
 
+  // Get unique dates from plan items
+  const tripsWithDates = new Set<string>();
+  planItems?.forEach((item) => {
+    if (item.dateAssigned) {
+      const dateStr = new Date(item.dateAssigned).toISOString().split('T')[0];
+      tripsWithDates.add(dateStr);
+    }
+  });
+
   if (!plan) {
     return null;
   }
@@ -73,6 +82,28 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     );
   }
 
+  // Filter forecasts to only show days with trips
+  const filteredForecasts = weather?.forecasts.filter((forecast) => {
+    const forecastDate = new Date(forecast.date).toISOString().split('T')[0];
+    return tripsWithDates.has(forecastDate);
+  }) || [];
+
+  if (filteredForecasts.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Cloud className="w-5 h-5" />
+            Wettervorhersage
+          </CardTitle>
+          <CardDescription>
+            Ordne Ausflüge einem Datum zu, um die Wettervorhersage zu sehen
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -81,12 +112,12 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
           Wettervorhersage
         </CardTitle>
         <CardDescription>
-          7-Tage-Vorhersage für {firstTripWithCoords.trip?.destination || "ausgewählten Standort"}
+          Vorhersage für {firstTripWithCoords.trip?.destination || "ausgewählten Standort"} ({filteredForecasts.length} Tage mit Ausflügen)
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {weather?.forecasts.map((forecast, index) => (
+          {filteredForecasts.map((forecast, index) => (
             <Card key={index} className="bg-gradient-to-br from-blue-50 to-cyan-50">
               <CardContent className="pt-6">
                 <div className="text-center space-y-3">
