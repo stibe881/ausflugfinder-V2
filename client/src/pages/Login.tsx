@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Mountain, Sun, Compass } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 type AuthMode = "login" | "register";
 
@@ -18,6 +19,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { refresh } = useAuth();
   const [location, setLocation] = useLocation();
+  const utils = trpc.useUtils();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +62,8 @@ export default function Login() {
         setPassword("");
       } else {
         toast.success("Anmeldung erfolgreich!");
+        // Invalidate the auth cache to force a refetch
+        await utils.auth.me.invalidate();
         // Refresh the auth state to get the new session
         await refresh();
         // Wait a moment to ensure the session is updated, then redirect
