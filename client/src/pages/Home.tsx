@@ -242,10 +242,10 @@ export default function Home() {
               {
                 icon: Plane,
                 title: "Ausflüge planen",
-                description: "Erstelle und organisiere deine Reisen mit allen wichtigen Details",
+                description: "Plane deine Ausflugstage mit allen nützlichen Funktionen",
                 color: "text-primary",
                 bgColor: "bg-primary/10",
-                link: "/trips"
+                link: "/planner"
               },
               {
                 icon: MapPin,
@@ -253,7 +253,7 @@ export default function Home() {
                 description: "Entdecke spannende Orte und speichere deine Lieblingsziele",
                 color: "text-accent",
                 bgColor: "bg-accent/10",
-                link: "/destinations"
+                link: "/explore"
               },
               {
                 icon: Users,
