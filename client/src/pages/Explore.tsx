@@ -5,10 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Calendar, Users, Heart, CheckCircle2, Euro, Filter, Grid, List, Map as MapIcon, ArrowLeft } from "lucide-react";
+import { Search, MapPin, Calendar, Users, Heart, CheckCircle2, Euro, Filter, Grid, List, Map as MapIcon, ArrowLeft, Edit, Trash2, Plus, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE } from "@/const";
 import { MapView } from "@/components/Map";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 const CATEGORIES = [
   "Action",
@@ -44,6 +48,7 @@ const COST_LABELS: Record<string, string> = {
 };
 
 export default function Explore() {
+  const [activeTab, setActiveTab] = useState<"trips" | "destinations">("trips");
   const [keyword, setKeyword] = useState("");
   const [region, setRegion] = useState<string>("");
   const [category, setCategory] = useState<string>("");
@@ -56,6 +61,16 @@ export default function Explore() {
   const [sortBy, setSortBy] = useState<"name" | "date" | "cost">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  // Destination form state
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingDestId, setEditingDestId] = useState<number | null>(null);
+  const [destFormData, setDestFormData] = useState({
+    name: "",
+    description: "",
+    location: "",
+    imageUrl: "",
+  });
+
   const { data: trips, isLoading } = trpc.trips.search.useQuery({
     keyword: keyword || undefined,
     region: region || undefined,
@@ -65,6 +80,71 @@ export default function Explore() {
   });
 
   const { data: stats } = trpc.trips.statistics.useQuery();
+
+  // Destinations queries
+  const { data: allDestinations, isLoading: destLoading, refetch: refetchDestinations } = trpc.destinations.list.useQuery();
+  const createDestMutation = trpc.destinations.create.useMutation({
+    onSuccess: () => {
+      toast.success("Destination erfolgreich erstellt!");
+      refetchDestinations();
+      setIsDialogOpen(false);
+      resetDestForm();
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Erstellen: " + error.message);
+    },
+  });
+  const updateDestMutation = trpc.destinations.update.useMutation({
+    onSuccess: () => {
+      toast.success("Destination erfolgreich aktualisiert!");
+      refetchDestinations();
+      setIsDialogOpen(false);
+      resetDestForm();
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Aktualisieren: " + error.message);
+    },
+  });
+  const deleteDestMutation = trpc.destinations.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Destination gelöscht!");
+      refetchDestinations();
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Löschen: " + error.message);
+    },
+  });
+
+  const resetDestForm = () => {
+    setDestFormData({ name: "", description: "", location: "", imageUrl: "" });
+    setEditingDestId(null);
+  };
+
+  const handleDestSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingDestId) {
+      updateDestMutation.mutate({ id: editingDestId, ...destFormData });
+    } else {
+      createDestMutation.mutate(destFormData);
+    }
+  };
+
+  const handleEditDest = (destination: any) => {
+    setEditingDestId(destination.id);
+    setDestFormData({
+      name: destination.name,
+      description: destination.description || "",
+      location: destination.location,
+      imageUrl: destination.imageUrl || "",
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteDest = (id: number) => {
+    if (confirm("Möchten Sie diese Destination wirklich löschen?")) {
+      deleteDestMutation.mutate({ id });
+    }
+  };
 
   // Get user location
   useEffect(() => {
@@ -164,11 +244,31 @@ export default function Explore() {
       <section className="py-12 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
         <div className="container">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Entdecke spannende Ausflüge
+            Ausflüge entdecken und Destinationen
           </h2>
           <p className="text-center text-muted-foreground text-lg mb-8">
-            Finde das perfekte Abenteuer für deine Familie
+            Finde das perfekte Abenteuer und inspiriere dich für deine nächste Reise
           </p>
+
+          {/* Tabs */}
+          <div className="flex justify-center gap-4 mb-8">
+            <Button
+              variant={activeTab === "trips" ? "default" : "outline"}
+              size="lg"
+              onClick={() => setActiveTab("trips")}
+              className="px-6"
+            >
+              Ausflüge
+            </Button>
+            <Button
+              variant={activeTab === "destinations" ? "default" : "outline"}
+              size="lg"
+              onClick={() => setActiveTab("destinations")}
+              className="px-6"
+            >
+              Destinationen
+            </Button>
+          </div>
 
           {/* Statistics */}
           {stats && (
@@ -196,7 +296,8 @@ export default function Explore() {
         </div>
       </section>
 
-      {/* Search and Filter Section */}
+      {/* Search and Filter Section - Trips Tab */}
+      {activeTab === "trips" && (
       <section className="py-8 bg-card border-b">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -341,8 +442,10 @@ export default function Explore() {
           </div>
         </div>
       </section>
+      )}
 
-      {/* Results Section */}
+      {/* Results Section - Trips Tab */}
+      {activeTab === "trips" && (
       <section className="py-12">
         <div className="container">
           {isLoading ? (
@@ -458,6 +561,170 @@ export default function Explore() {
           )}
         </div>
       </section>
+      )}
+
+      {/* Destinations Section - Destinations Tab */}
+      {activeTab === "destinations" && (
+      <section className="py-12">
+        <div className="container">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Meine Destinationen</h2>
+              <p className="text-muted-foreground">
+                Speichere deine Lieblingsorte für zukünftige Ausflüge
+              </p>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) resetDestForm();
+            }}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="gap-2">
+                  <Plus className="w-5 h-5" />
+                  Neue Destination
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <form onSubmit={handleDestSubmit}>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingDestId ? "Destination bearbeiten" : "Neue Destination"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      Füge einen neuen Lieblingsort hinzu
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label htmlFor="name">Name *</Label>
+                      <Input
+                        id="name"
+                        value={destFormData.name}
+                        onChange={(e) => setDestFormData({ ...destFormData, name: e.target.value })}
+                        required
+                        placeholder="z.B. Schwarzwald"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Ort *</Label>
+                      <Input
+                        id="location"
+                        value={destFormData.location}
+                        onChange={(e) => setDestFormData({ ...destFormData, location: e.target.value })}
+                        required
+                        placeholder="z.B. Baden-Württemberg, Deutschland"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Beschreibung</Label>
+                      <Textarea
+                        id="description"
+                        value={destFormData.description}
+                        onChange={(e) => setDestFormData({ ...destFormData, description: e.target.value })}
+                        placeholder="Was macht diesen Ort besonders?"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="imageUrl">Bild-URL (optional)</Label>
+                      <Input
+                        id="imageUrl"
+                        value={destFormData.imageUrl}
+                        onChange={(e) => setDestFormData({ ...destFormData, imageUrl: e.target.value })}
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button type="submit" disabled={createDestMutation.isPending || updateDestMutation.isPending}>
+                      {(createDestMutation.isPending || updateDestMutation.isPending) && (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      )}
+                      {editingDestId ? "Aktualisieren" : "Erstellen"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {destLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : allDestinations && allDestinations.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allDestinations.map((destination) => (
+                <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+                  {destination.imageUrl && (
+                    <div className="h-48 bg-muted overflow-hidden">
+                      <img
+                        src={destination.imageUrl}
+                        alt={destination.name}
+                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      {destination.name}
+                    </CardTitle>
+                    <CardDescription>{destination.location}</CardDescription>
+                  </CardHeader>
+                  {destination.description && (
+                    <CardContent className="flex-grow">
+                      <p className="text-sm text-muted-foreground">{destination.description}</p>
+                    </CardContent>
+                  )}
+                  <CardFooter className="gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditDest(destination)}
+                      className="flex-1"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Bearbeiten
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteDest(destination.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-6">Keine Destinationen vorhanden. Erstelle deine erste Destination!</p>
+              <Dialog open={isDialogOpen} onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) resetDestForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2">
+                    <Plus className="w-5 h-5" />
+                    Erste Destination erstellen
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
+            </div>
+          )}
+        </div>
+      </section>
+      )}
     </div>
   );
 }
