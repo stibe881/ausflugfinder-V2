@@ -58,6 +58,7 @@ export default function PlannerDetail() {
   const [customTripLocation, setCustomTripLocation] = useState("");
   const [tripTime, setTripTime] = useState({ start: "", end: "" });
   const [tripNotes, setTripNotes] = useState("");
+  const [tripAssignedDate, setTripAssignedDate] = useState("");
   
   const [packingItem, setPackingItem] = useState({ item: "", quantity: 1, category: "" });
   const [budgetItem, setBudgetItem] = useState({ category: "", description: "", estimatedCost: "", actualCost: "" });
@@ -78,6 +79,7 @@ export default function PlannerDetail() {
       setSelectedTripId(null);
       setTripTime({ start: "", end: "" });
       setTripNotes("");
+      setTripAssignedDate("");
     },
   });
 
@@ -205,6 +207,11 @@ export default function PlannerDetail() {
         return;
       }
 
+      if (!tripAssignedDate) {
+        toast.error("Bitte gib ein Datum für die Wettervorhersage an");
+        return;
+      }
+
       const orderIndex = (planItems?.length || 0) + 1;
       addTripMutation.mutate({
         dayPlanId: planId,
@@ -213,6 +220,7 @@ export default function PlannerDetail() {
         startTime: tripTime.start || undefined,
         endTime: tripTime.end || undefined,
         notes: tripNotes || undefined,
+        dateAssigned: tripAssignedDate,
       });
     } else {
       // Custom trip mode - we'll display it as a note/reminder
@@ -234,6 +242,7 @@ export default function PlannerDetail() {
       setCustomTripLocation("");
       setTripTime({ start: "", end: "" });
       setTripNotes("");
+      setTripAssignedDate("");
       setAddTripDialog(false);
       setAddTripMode("select");
     }
@@ -655,6 +664,22 @@ export default function PlannerDetail() {
                               onChange={(e) => setTripTime({ ...tripTime, end: e.target.value })}
                             />
                           </div>
+                        </div>
+
+                        <div>
+                          <Label>Datum für Wettervorhersage *</Label>
+                          <Input
+                            type="date"
+                            value={tripAssignedDate}
+                            onChange={(e) => setTripAssignedDate(e.target.value)}
+                            min={plan?.startDate ? format(new Date(plan.startDate), "yyyy-MM-dd") : undefined}
+                            max={plan?.endDate ? format(new Date(plan.endDate), "yyyy-MM-dd") : undefined}
+                          />
+                          {plan?.startDate && plan?.endDate && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Verfügbar von {format(new Date(plan.startDate), "dd.MM.yyyy", { locale: de })} bis {format(new Date(plan.endDate), "dd.MM.yyyy", { locale: de })}
+                            </p>
+                          )}
                         </div>
 
                         {addTripMode === "select" && (

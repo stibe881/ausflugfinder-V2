@@ -397,10 +397,29 @@ export const appRouter = router({
           startTime: z.string().optional(),
           endTime: z.string().optional(),
           notes: z.string().optional(),
+          dateAssigned: z.string().optional(), // ISO date string (YYYY-MM-DD)
         })
       )
-      .mutation(async ({ input }) => {
-        await addTripToDayPlan(input);
+      .mutation(async ({ input, ctx }) => {
+        // If dateAssigned is provided, validate it's within the trip's duration
+        if (input.dateAssigned) {
+          const trip = await getTripById(input.tripId);
+          const dateAssigned = new Date(input.dateAssigned);
+
+          if (trip?.startDate && trip?.endDate) {
+            const tripStart = new Date(trip.startDate);
+            const tripEnd = new Date(trip.endDate);
+
+            if (dateAssigned < tripStart || dateAssigned > tripEnd) {
+              throw new Error(`Das Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+            }
+          }
+        }
+
+        await addTripToDayPlan({
+          ...input,
+          dateAssigned: input.dateAssigned ? new Date(input.dateAssigned) : undefined,
+        });
         return { success: true };
       }),
     removeTrip: protectedProcedure
