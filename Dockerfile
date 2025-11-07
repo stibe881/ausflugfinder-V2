@@ -16,6 +16,9 @@ COPY . .
 ARG CACHE_BUST=1
 RUN echo "Building with cache bust: $CACHE_BUST"
 
+# Remove any cached build artifacts to ensure fresh build
+RUN rm -rf dist .turbo
+
 # Build the application
 RUN pnpm build
 
