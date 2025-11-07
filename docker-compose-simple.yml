@@ -13,7 +13,7 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mysql://admin2:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2
+      - DATABASE_URL=mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2
       - JWT_SECRET=aB3xY9mK2pQ8vL5nR7tW4sU6dF1gH0j9k2m5n8p0r3t5u7v9w1x3z5a7b9c1d3
       - VITE_APP_ID=ausflug-manager
       - VITE_APP_LOGO=
