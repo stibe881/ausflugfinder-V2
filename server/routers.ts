@@ -170,6 +170,8 @@ export const appRouter = router({
           endDate: z.date(),
           participants: z.number().min(1).default(1),
           status: z.enum(["planned", "ongoing", "completed", "cancelled"]).default("planned"),
+          isFavorite: z.number().optional().default(0),
+          isPublic: z.number().optional().default(0),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -190,6 +192,8 @@ export const appRouter = router({
           endDate: z.date().optional(),
           participants: z.number().min(1).optional(),
           status: z.enum(["planned", "ongoing", "completed", "cancelled"]).optional(),
+          isFavorite: z.number().optional(),
+          isPublic: z.number().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {

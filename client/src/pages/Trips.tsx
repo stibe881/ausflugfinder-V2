@@ -26,6 +26,9 @@ export default function Trips() {
     onSuccess: () => {
       refetch();
       setIsCreateOpen(false);
+      // Reset form
+      const form = document.querySelector('form');
+      if (form) form.reset();
       toast.success("Ausflug erfolgreich erstellt! 🎉");
     },
     onError: (error) => {
@@ -46,7 +49,7 @@ export default function Trips() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const formData = new FormData(e.currentTarget);
     const data = {
       title: formData.get("title") as string,
@@ -56,6 +59,8 @@ export default function Trips() {
       endDate: new Date(formData.get("endDate") as string),
       participants: parseInt(formData.get("participants") as string),
       status: formData.get("status") as "planned" | "ongoing" | "completed" | "cancelled",
+      isFavorite: formData.get("isFavorite") ? 1 : 0,
+      isPublic: formData.get("isPublic") ? 1 : 0,
     };
 
     try {
@@ -260,27 +265,31 @@ export default function Trips() {
                     {/* Additional Options */}
                     <div>
                       <h3 className="font-semibold text-sm mb-3">Zusätzliche Optionen</h3>
-                      <div className="grid gap-2">
-                        <Label htmlFor="isFavorite" className="flex items-center gap-2">
+                      <div className="grid gap-3">
+                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                           <input
                             type="checkbox"
                             id="isFavorite"
                             name="isFavorite"
-                            className="rounded border-input"
+                            className="w-4 h-4 rounded border-input cursor-pointer"
                           />
-                          <span>Als Favorit markieren</span>
-                        </Label>
-                      </div>
-                      <div className="grid gap-2 mt-3">
-                        <Label htmlFor="isPublic" className="flex items-center gap-2">
+                          <Label htmlFor="isFavorite" className="cursor-pointer flex-1 mb-0">
+                            <Flame className="w-4 h-4 inline mr-2 text-yellow-500" />
+                            <span>Als Favorit markieren</span>
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                           <input
                             type="checkbox"
                             id="isPublic"
                             name="isPublic"
-                            className="rounded border-input"
+                            className="w-4 h-4 rounded border-input cursor-pointer"
                           />
-                          <span>Öffentlich teilen</span>
-                        </Label>
+                          <Label htmlFor="isPublic" className="cursor-pointer flex-1 mb-0">
+                            <Share2 className="w-4 h-4 inline mr-2 text-blue-500" />
+                            <span>Öffentlich teilen</span>
+                          </Label>
+                        </div>
                       </div>
                     </div>
                   </div>

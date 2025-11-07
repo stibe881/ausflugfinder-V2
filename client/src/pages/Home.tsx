@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { Plane, MapPin, Users, Calendar, Compass, Mountain, Sun, Moon, Zap, DollarSign, Globe } from "lucide-react";
+import { Plane, MapPin, Users, Compass, Mountain, Sun, Moon, Globe } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -216,22 +216,28 @@ export default function Home() {
           {/* Statistics */}
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-16">
-              <div className="bg-primary/10 rounded-2xl p-6 text-center border-2 border-primary/20 hover:border-primary/40 transition-all">
-                <div className="text-4xl font-bold text-primary mb-2">{stats.totalActivities}</div>
-                <div className="text-sm text-muted-foreground">Aktivitäten</div>
-              </div>
-              <div className="bg-secondary/10 rounded-2xl p-6 text-center border-2 border-secondary/20 hover:border-secondary/40 transition-all">
-                <div className="text-4xl font-bold text-secondary mb-2">{stats.freeActivities}</div>
-                <div className="text-sm text-muted-foreground">Kostenlos</div>
-              </div>
-              <div className="bg-accent/10 rounded-2xl p-6 text-center border-2 border-accent/20 hover:border-accent/40 transition-all">
-                <div className="text-4xl font-bold text-accent mb-2">{stats.totalCategories}</div>
-                <div className="text-sm text-muted-foreground">Kategorien</div>
-              </div>
+              <Link href="/explore">
+                <div className="bg-primary/10 rounded-2xl p-6 text-center border-2 border-primary/20 hover:border-primary/40 transition-all cursor-pointer hover:scale-105">
+                  <div className="text-4xl font-bold text-primary mb-2">{stats.totalActivities}</div>
+                  <div className="text-sm text-muted-foreground">Aktivitäten</div>
+                </div>
+              </Link>
+              <Link href="/explore?cost=free">
+                <div className="bg-secondary/10 rounded-2xl p-6 text-center border-2 border-secondary/20 hover:border-secondary/40 transition-all cursor-pointer hover:scale-105">
+                  <div className="text-4xl font-bold text-secondary mb-2">{stats.freeActivities}</div>
+                  <div className="text-sm text-muted-foreground">Kostenlos</div>
+                </div>
+              </Link>
+              <Link href="/explore">
+                <div className="bg-accent/10 rounded-2xl p-6 text-center border-2 border-accent/20 hover:border-accent/40 transition-all cursor-pointer hover:scale-105">
+                  <div className="text-4xl font-bold text-accent mb-2">{stats.totalCategories}</div>
+                  <div className="text-sm text-muted-foreground">Kategorien</div>
+                </div>
+              </Link>
             </div>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 icon: Plane,
@@ -256,30 +262,6 @@ export default function Home() {
                 color: "text-secondary",
                 bgColor: "bg-secondary/10",
                 link: "/friends"
-              },
-              {
-                icon: Zap,
-                title: "Aktivitäten",
-                description: "Entdecke spannende Aktivitäten und Erlebnisse",
-                color: "text-yellow-500",
-                bgColor: "bg-yellow-500/10",
-                link: "/explore"
-              },
-              {
-                icon: DollarSign,
-                title: "Kostenlos",
-                description: "Finde kostenlose Aktivitäten und Ausflüge",
-                color: "text-green-500",
-                bgColor: "bg-green-500/10",
-                link: "/explore?free=true"
-              },
-              {
-                icon: Calendar,
-                title: "Kategorien",
-                description: "Sortiere Ausflüge nach Kategorie",
-                color: "text-chart-2",
-                bgColor: "bg-blue-500/10",
-                link: "/explore"
               }
             ].map((feature, index) => (
               <Link key={index} href={feature.link}>
