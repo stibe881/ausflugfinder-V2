@@ -513,53 +513,135 @@ export default function Explore() {
                     }}
                   />
                 </div>
-              ) : (
-              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+              ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredTrips.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
-                    <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer h-full overflow-hidden flex flex-col">
+                    <Card className="overflow-hidden cursor-pointer h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-lg border border-border/50">
+                      {/* Image Container */}
                       {trip.image && (
                         <div className="relative w-full h-48 bg-muted overflow-hidden">
                           <img
                             src={trip.image}
                             alt={trip.title}
-                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                           />
                         </div>
                       )}
-                      <CardHeader>
-                        <div className="flex justify-between items-start mb-2">
-                          <CardTitle className="text-xl">{trip.title}</CardTitle>
-                          {trip.isFavorite === 1 && <Heart className="w-5 h-5 fill-red-500 text-red-500" />}
+
+                      {/* Content */}
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start gap-2 mb-1">
+                          <CardTitle className="text-lg font-bold line-clamp-2">{trip.title}</CardTitle>
+                          {trip.isFavorite === 1 && (
+                            <Heart className="w-5 h-5 fill-red-500 text-red-500 flex-shrink-0" />
+                          )}
                         </div>
-                        <CardDescription className="line-clamp-2">{trip.description}</CardDescription>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <span className="line-clamp-1">{trip.destination}</span>
+                        </div>
                       </CardHeader>
-                      <CardContent className="flex-grow">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            <span>{trip.destination}</span>
-                          </div>
+
+                      <CardContent className="flex-grow pb-3">
+                        {trip.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {trip.description}
+                          </p>
+                        )}
+
+                        {/* Badges */}
+                        <div className="flex flex-wrap gap-2">
                           {trip.region && (
-                            <Badge variant="outline">{trip.region}</Badge>
+                            <Badge variant="outline" className="text-xs">{trip.region}</Badge>
                           )}
                           {trip.category && (
-                            <Badge variant="secondary">{trip.category}</Badge>
+                            <Badge variant="secondary" className="text-xs">{trip.category}</Badge>
+                          )}
+                          {trip.isDone === 1 && (
+                            <Badge className="bg-green-500 text-white text-xs gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Erledigt
+                            </Badge>
                           )}
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <Euro className="w-4 h-4" />
-                          <span className="text-sm font-medium">{COST_LABELS[trip.cost]}</span>
+
+                      {/* Footer */}
+                      <CardFooter className="pt-3 border-t">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Euro className="w-4 h-4 text-primary" />
+                          <span className="font-medium">{COST_LABELS[trip.cost]}</span>
                         </div>
-                        {trip.isDone === 1 && (
-                          <Badge variant="default" className="bg-green-500">
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Erledigt
-                          </Badge>
-                        )}
                       </CardFooter>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+              ) : (
+              /* List View */
+              <div className="space-y-4">
+                {filteredTrips.map((trip) => (
+                  <Link key={trip.id} href={`/trips/${trip.id}`}>
+                    <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-lg border border-border/50">
+                      <div className="flex gap-4">
+                        {/* Image - Left Side */}
+                        {trip.image && (
+                          <div className="relative w-40 h-40 flex-shrink-0 bg-muted overflow-hidden hidden sm:block">
+                            <img
+                              src={trip.image}
+                              alt={trip.title}
+                              className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                            />
+                          </div>
+                        )}
+
+                        {/* Content - Right Side */}
+                        <div className="flex-grow p-4 flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-start gap-2 mb-2">
+                              <div>
+                                <h3 className="font-bold text-lg line-clamp-2">{trip.title}</h3>
+                                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                                  <span>{trip.destination}</span>
+                                </div>
+                              </div>
+                              {trip.isFavorite === 1 && (
+                                <Heart className="w-5 h-5 fill-red-500 text-red-500 flex-shrink-0" />
+                              )}
+                            </div>
+
+                            {trip.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2 my-2">
+                                {trip.description}
+                              </p>
+                            )}
+
+                            {/* Badges */}
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {trip.region && (
+                                <Badge variant="outline" className="text-xs">{trip.region}</Badge>
+                              )}
+                              {trip.category && (
+                                <Badge variant="secondary" className="text-xs">{trip.category}</Badge>
+                              )}
+                              {trip.isDone === 1 && (
+                                <Badge className="bg-green-500 text-white text-xs gap-1">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  Erledigt
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Footer Info */}
+                          <div className="flex items-center gap-2 text-sm mt-3 pt-3 border-t">
+                            <Euro className="w-4 h-4 text-primary" />
+                            <span className="font-medium">{COST_LABELS[trip.cost]}</span>
+                          </div>
+                        </div>
+                      </div>
                     </Card>
                   </Link>
                 ))}
