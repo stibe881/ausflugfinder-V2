@@ -69,7 +69,7 @@ export default function TripDetail() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const base64 = event.target?.result as string;
+        const base64 = (event.target?.result as string).replace(/\s+/g, '');
         setEditForm({ ...editForm, image: base64 });
         setImagePreview(base64);
       };

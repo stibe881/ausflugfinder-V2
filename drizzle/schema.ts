@@ -55,7 +55,7 @@ export const trips = mysqlTable("trips", {
   contactPhone: varchar("contactPhone", { length: 50 }),
   latitude: varchar("latitude", { length: 50 }),
   longitude: varchar("longitude", { length: 50 }),
-  image: longtext("image"), // Title image/cover image for trip details and explore view (Base64 data URL or URL)
+  image: text("image"), // Title image/cover image for trip details and explore view (Base64 data URL or URL)
   isFavorite: int("isFavorite").default(0).notNull(),
   isDone: int("isDone").default(0).notNull(),
   isPublic: int("isPublic").default(0).notNull(),
