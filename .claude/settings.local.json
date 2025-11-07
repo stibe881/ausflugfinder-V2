@@ -12,7 +12,11 @@
       "Bash(pnpm build:*)",
       "Bash(npm install -g pnpm)",
       "Bash(docker-compose down:*)",
-      "Bash(ssh root@docker01:*)"
+      "Bash(ssh root@docker01:*)",
+      "Bash(ssh root@185.178.193.60 \"mysql -u ausflugfinder -p''!LeliBist.1561!'' -h localhost -e \"\"SHOW GRANTS FOR ''ausflugfinder''@''%'';\"\"\")",
+      "Bash(ssh:*)",
+      "Bash(nul)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
