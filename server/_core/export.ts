@@ -80,41 +80,110 @@ export function generateICalendar(plan: ExportPlan): string {
 }
 
 /**
- * Generate simple text-based "PDF" content
- * Note: For real PDF generation, you'd use a library like pdfkit or puppeteer
+ * Generate a modern, beautifully formatted PDF
  */
-export function generatePDFContent(plan: ExportPlan): string {
-  let content = `AUSFLUG MANAGER - PLANUNG\n\n`;
-  content += `Titel: ${plan.title}\n`;
-  content += `Zeitraum: ${plan.startDate.toLocaleDateString('de-DE')} - ${plan.endDate.toLocaleDateString('de-DE')}\n`;
-  
-  if (plan.description) {
-    content += `\nBeschreibung:\n${plan.description}\n`;
-  }
-
-  content += `\n\n=== GEPLANTE AUSFLÜGE ===\n\n`;
-
-  plan.items.forEach((item, index) => {
-    content += `${index + 1}. ${item.trip.title}\n`;
-    content += `   Ziel: ${item.trip.destination}\n`;
-    
-    if (item.startTime) {
-      content += `   Zeit: ${item.startTime}`;
-      if (item.endTime) {
-        content += ` - ${item.endTime}`;
-      }
-      content += `\n`;
-    }
-    
-    if (item.notes) {
-      content += `   Notizen: ${item.notes}\n`;
-    }
-    
-    content += `\n`;
+export async function generatePDFContent(plan: ExportPlan): Promise<Buffer> {
+  const PDFDocument = require('pdfkit');
+  const doc = new PDFDocument({
+    size: 'A4',
+    margin: 40,
   });
 
-  content += `\n\n---\nErstellt mit AusflugFinder\n`;
-  content += `Generiert am: ${new Date().toLocaleString('de-DE')}\n`;
+  // Collect PDF content into buffer
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
 
-  return content;
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    // Header with gradient effect simulation
+    doc.fontSize(28).font('Helvetica-Bold').fillColor('#3b82f6');
+    doc.text('AusflugFinder', { align: 'center' });
+
+    doc.fontSize(12).fillColor('#666666');
+    doc.text('Ausflugplanung', { align: 'center' });
+
+    // Line separator
+    doc.moveTo(40, doc.y + 10).lineTo(555, doc.y + 10).stroke('#3b82f6');
+    doc.moveDown();
+
+    // Title section
+    doc.fontSize(24).font('Helvetica-Bold').fillColor('#1f2937');
+    doc.text(plan.title);
+
+    // Date range
+    doc.fontSize(11).font('Helvetica').fillColor('#666666');
+    const startDate = new Date(plan.startDate).toLocaleDateString('de-DE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    const endDate = new Date(plan.endDate).toLocaleDateString('de-DE', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    doc.text(`📅 ${startDate} bis ${endDate}`);
+
+    if (plan.description) {
+      doc.moveDown(0.5);
+      doc.fontSize(10).fillColor('#555555');
+      doc.text(plan.description);
+    }
+
+    doc.moveDown();
+
+    // Trips section header
+    doc.fontSize(16).font('Helvetica-Bold').fillColor('#1f2937');
+    doc.text('🗺️ Geplante Ausflüge');
+
+    doc.moveTo(40, doc.y + 5).lineTo(555, doc.y + 5).stroke('#e5e7eb');
+    doc.moveDown();
+
+    // Trip items
+    plan.items.forEach((item, index) => {
+      // Item number and title
+      doc.fontSize(13).font('Helvetica-Bold').fillColor('#1f2937');
+      doc.text(`${index + 1}. ${item.trip.title}`);
+
+      // Trip details
+      doc.fontSize(10).font('Helvetica').fillColor('#666666');
+      doc.text(`📍 Zielort: ${item.trip.destination}`);
+
+      if (item.startTime) {
+        let timeStr = `🕐 Zeit: ${item.startTime}`;
+        if (item.endTime) {
+          timeStr += ` - ${item.endTime}`;
+        }
+        doc.text(timeStr);
+      }
+
+      if (item.notes) {
+        doc.fontSize(9).fillColor('#555555').font('Helvetica-Oblique');
+        doc.text(`Notizen: ${item.notes}`);
+        doc.font('Helvetica');
+      }
+
+      // Item separator
+      doc.moveDown(0.3);
+      if (index < plan.items.length - 1) {
+        doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#f0f0f0');
+      }
+      doc.moveDown(0.5);
+    });
+
+    // Footer
+    doc.moveDown();
+    doc.moveTo(40, doc.y).lineTo(555, doc.y).stroke('#3b82f6');
+    doc.moveDown();
+
+    doc.fontSize(9).fillColor('#999999').font('Helvetica-Oblique');
+    doc.text('Erstellt mit AusflugFinder', { align: 'center' });
+    doc.text(`${new Date().toLocaleString('de-DE')}`, { align: 'center' });
+
+    doc.end();
+  });
 }

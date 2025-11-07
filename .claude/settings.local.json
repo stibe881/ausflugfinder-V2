@@ -30,7 +30,9 @@
       "Bash(node add-columns.mjs:*)",
       "Bash(node check-schema.mjs:*)",
       "Bash(sort:*)",
-      "Bash(node assign-photos.mjs:*)"
+      "Bash(node assign-photos.mjs:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []

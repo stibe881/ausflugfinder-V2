@@ -218,11 +218,18 @@ export default function PlannerDetail() {
   const handleExportPDF = () => {
     setExportType('pdf');
     if (pdfData) {
-      const blob = new Blob([pdfData.content], { type: 'text/plain' });
+      // Decode base64 string to binary data
+      const binaryString = atob(pdfData.content);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      const blob = new Blob([bytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${plan?.title || 'plan'}.txt`;
+      a.download = `${plan?.title || 'plan'}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("PDF-Datei heruntergeladen!");

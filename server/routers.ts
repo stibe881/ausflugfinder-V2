@@ -578,10 +578,10 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const plan = await getDayPlanById(input.planId);
         const items = await getDayPlanItemsWithTrips(input.planId);
-        
+
         if (!plan) throw new Error("Plan not found");
-        
-        const pdfContent = generatePDFContent({
+
+        const pdfBuffer = await generatePDFContent({
           title: plan.title,
           description: plan.description || undefined,
           startDate: plan.startDate,
@@ -600,8 +600,8 @@ export const appRouter = router({
             notes: item.notes || undefined,
           })),
         });
-        
-        return { content: pdfContent };
+
+        return { content: pdfBuffer.toString('base64') };
       }),
   }),
 });
