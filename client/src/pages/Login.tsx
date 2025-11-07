@@ -60,10 +60,12 @@ export default function Login() {
         setPassword("");
       } else {
         toast.success("Anmeldung erfolgreich!");
-        // Refresh the auth state
+        // Refresh the auth state to get the new session
         await refresh();
-        // Redirect to home page
-        setLocation("/");
+        // Wait a moment to ensure the session is updated, then redirect
+        setTimeout(() => {
+          setLocation("/");
+        }, 500);
       }
     } catch (error) {
       console.error("Auth error:", error);
