@@ -18,17 +18,31 @@ import { de } from "date-fns/locale";
 import WeatherForecast from "@/components/WeatherForecast";
 import RouteMap from "@/components/RouteMap";
 
+const BUDGET_CATEGORIES = [
+  "Transport",
+  "Verpflegung",
+  "Unterkunft",
+  "Eintritte",
+  "Aktivitäten",
+  "Einkaufen",
+  "Versicherung",
+  "Sonstiges",
+];
+
 export default function PlannerDetail() {
   const params = useParams();
   const planId = params.id ? parseInt(params.id) : 0;
   const { user } = useAuth();
   
   const [addTripDialog, setAddTripDialog] = useState(false);
+  const [addTripMode, setAddTripMode] = useState<"select" | "custom">("select");
   const [packingDialog, setPackingDialog] = useState(false);
   const [budgetDialog, setBudgetDialog] = useState(false);
   const [checklistDialog, setChecklistDialog] = useState(false);
-  
+
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
+  const [customTripTitle, setCustomTripTitle] = useState("");
+  const [customTripLocation, setCustomTripLocation] = useState("");
   const [tripTime, setTripTime] = useState({ start: "", end: "" });
   const [tripNotes, setTripNotes] = useState("");
   
@@ -132,20 +146,44 @@ export default function PlannerDetail() {
   };
 
   const handleAddTrip = () => {
-    if (!selectedTripId) {
-      toast.error("Bitte wähle einen Ausflug aus");
-      return;
+    if (addTripMode === "select") {
+      if (!selectedTripId) {
+        toast.error("Bitte wähle einen Ausflug aus");
+        return;
+      }
+
+      const orderIndex = (planItems?.length || 0) + 1;
+      addTripMutation.mutate({
+        dayPlanId: planId,
+        tripId: selectedTripId,
+        orderIndex,
+        startTime: tripTime.start || undefined,
+        endTime: tripTime.end || undefined,
+        notes: tripNotes || undefined,
+      });
+    } else {
+      // Custom trip mode - we'll display it as a note/reminder
+      if (!customTripTitle.trim() || !customTripLocation.trim()) {
+        toast.error("Bitte gib einen Titel und einen Ort an");
+        return;
+      }
+
+      // For now, we'll add it as a checklist item to represent it
+      // In a real app, you might want to create an actual trip in the database
+      addChecklistMutation.mutate({
+        dayPlanId: planId,
+        title: `${customTripTitle} (${customTripLocation})${tripTime.start ? ` - ${tripTime.start}` : ''}`,
+        priority: "high",
+      });
+
+      // Reset custom fields
+      setCustomTripTitle("");
+      setCustomTripLocation("");
+      setTripTime({ start: "", end: "" });
+      setTripNotes("");
+      setAddTripDialog(false);
+      setAddTripMode("select");
     }
-    
-    const orderIndex = (planItems?.length || 0) + 1;
-    addTripMutation.mutate({
-      dayPlanId: planId,
-      tripId: selectedTripId,
-      orderIndex,
-      startTime: tripTime.start || undefined,
-      endTime: tripTime.end || undefined,
-      notes: tripNotes || undefined,
-    });
   };
 
   const handleAddPacking = () => {
@@ -392,7 +430,17 @@ export default function PlannerDetail() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Ausflüge & Zeitplan</CardTitle>
-                  <Dialog open={addTripDialog} onOpenChange={setAddTripDialog}>
+                  <Dialog open={addTripDialog} onOpenChange={(open) => {
+                    setAddTripDialog(open);
+                    if (!open) {
+                      setAddTripMode("select");
+                      setSelectedTripId(null);
+                      setCustomTripTitle("");
+                      setCustomTripLocation("");
+                      setTripTime({ start: "", end: "" });
+                      setTripNotes("");
+                    }
+                  }}>
                     <DialogTrigger asChild>
                       <Button className="gap-2">
                         <Plus className="w-4 h-4" />
@@ -403,25 +451,70 @@ export default function PlannerDetail() {
                       <DialogHeader>
                         <DialogTitle>Ausflug zur Planung hinzufügen</DialogTitle>
                         <DialogDescription>
-                          Wähle einen Ausflug aus und lege optional Zeiten fest
+                          Wähle einen bestehenden Ausflug oder erstelle einen benutzerdefinierten
                         </DialogDescription>
                       </DialogHeader>
+
+                      {/* Mode Tabs */}
+                      <div className="flex gap-2 mb-4">
+                        <Button
+                          variant={addTripMode === "select" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setAddTripMode("select")}
+                          className="flex-1"
+                        >
+                          Ausflug wählen
+                        </Button>
+                        <Button
+                          variant={addTripMode === "custom" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setAddTripMode("custom")}
+                          className="flex-1"
+                        >
+                          Neu erstellen
+                        </Button>
+                      </div>
+
                       <div className="space-y-4">
-                        <div>
-                          <Label>Ausflug</Label>
-                          <Select value={selectedTripId?.toString()} onValueChange={(v) => setSelectedTripId(parseInt(v))}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Ausflug wählen..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {allTrips?.map((trip) => (
-                                <SelectItem key={trip.id} value={trip.id.toString()}>
-                                  {trip.title} - {trip.destination}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        {addTripMode === "select" ? (
+                          <>
+                            <div>
+                              <Label>Ausflug</Label>
+                              <Select value={selectedTripId?.toString()} onValueChange={(v) => setSelectedTripId(parseInt(v))}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Ausflug wählen..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {allTrips?.map((trip) => (
+                                    <SelectItem key={trip.id} value={trip.id.toString()}>
+                                      {trip.title} - {trip.destination}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <Label>Ausflug-Titel *</Label>
+                              <Input
+                                placeholder="z.B. Zoo Besuch"
+                                value={customTripTitle}
+                                onChange={(e) => setCustomTripTitle(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <Label>Ort/Zielort *</Label>
+                              <Input
+                                placeholder="z.B. Zürich Zoo"
+                                value={customTripLocation}
+                                onChange={(e) => setCustomTripLocation(e.target.value)}
+                              />
+                            </div>
+                          </>
+                        )}
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label>Startzeit</Label>
@@ -440,21 +533,25 @@ export default function PlannerDetail() {
                             />
                           </div>
                         </div>
-                        <div>
-                          <Label>Notizen</Label>
-                          <Textarea
-                            value={tripNotes}
-                            onChange={(e) => setTripNotes(e.target.value)}
-                            placeholder="Optionale Notizen..."
-                            rows={3}
-                          />
-                        </div>
+
+                        {addTripMode === "select" && (
+                          <div>
+                            <Label>Notizen</Label>
+                            <Textarea
+                              value={tripNotes}
+                              onChange={(e) => setTripNotes(e.target.value)}
+                              placeholder="Optionale Notizen..."
+                              rows={3}
+                            />
+                          </div>
+                        )}
                       </div>
+
                       <DialogFooter>
                         <Button variant="outline" onClick={() => setAddTripDialog(false)}>
                           Abbrechen
                         </Button>
-                        <Button onClick={handleAddTrip} disabled={addTripMutation.isPending}>
+                        <Button onClick={handleAddTrip} disabled={addTripMutation.isPending || addChecklistMutation.isPending}>
                           Hinzufügen
                         </Button>
                       </DialogFooter>
@@ -644,11 +741,18 @@ export default function PlannerDetail() {
                       <div className="space-y-4">
                         <div>
                           <Label>Kategorie</Label>
-                          <Input
-                            value={budgetItem.category}
-                            onChange={(e) => setBudgetItem({ ...budgetItem, category: e.target.value })}
-                            placeholder="z.B. Transport, Verpflegung"
-                          />
+                          <Select value={budgetItem.category} onValueChange={(v) => setBudgetItem({ ...budgetItem, category: v })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Kategorie wählen..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {BUDGET_CATEGORIES.map((cat) => (
+                                <SelectItem key={cat} value={cat}>
+                                  {cat}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div>
                           <Label>Beschreibung</Label>
