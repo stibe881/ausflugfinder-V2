@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Calendar, Users, Heart, CheckCircle2, Euro, Filter, Grid, List, Map as MapIcon, ArrowLeft, Edit, Trash2, Plus, Loader2 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { APP_TITLE } from "@/const";
 import { MapView } from "@/components/Map";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -48,6 +48,7 @@ const COST_LABELS: Record<string, string> = {
 };
 
 export default function Explore() {
+  const [location] = useLocation();
   const [activeTab, setActiveTab] = useState<"trips" | "destinations">("trips");
   const [keyword, setKeyword] = useState("");
   const [region, setRegion] = useState<string>("");
@@ -70,6 +71,15 @@ export default function Explore() {
     location: "",
     imageUrl: "",
   });
+
+  // Read query parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.split('?')[1]);
+    const costParam = params.get('cost');
+    if (costParam) {
+      setCost(costParam);
+    }
+  }, []);
 
   const { data: trips, isLoading } = trpc.trips.search.useQuery({
     keyword: keyword || undefined,
