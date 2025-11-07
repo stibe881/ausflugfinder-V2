@@ -27,7 +27,8 @@
       "Bash(node import-ausfluge-final.mjs:*)",
       "Bash(node import-all-ausfluge.mjs:*)",
       "Bash(node import-ausfluge-complete.mjs:*)",
-      "Bash(node add-columns.mjs:*)"
+      "Bash(node add-columns.mjs:*)",
+      "Bash(node check-schema.mjs:*)"
     ],
     "deny": [],
     "ask": []

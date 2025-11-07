@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getWeatherForecast } from "./_core/weather";
 import { generateICalendar, generatePDFContent } from "./_core/export";
@@ -194,17 +194,40 @@ export const appRouter = router({
           status: z.enum(["planned", "ongoing", "completed", "cancelled"]).optional(),
           isFavorite: z.number().optional(),
           isPublic: z.number().optional(),
+          region: z.string().optional(),
+          category: z.string().optional(),
+          cost: z.enum(["free", "low", "medium", "high", "very_high"]).optional(),
+          latitude: z.string().optional(),
+          longitude: z.string().optional(),
+          durationMin: z.number().optional(),
+          durationMax: z.number().optional(),
+          distanceMin: z.number().optional(),
+          distanceMax: z.number().optional(),
+          ageRecommendation: z.string().optional(),
+          niceToKnow: z.string().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
         const { id, ...data } = input;
-        await updateTrip(id, ctx.user.id, data);
+        // Allow owner or admin to update
+        const trip = await getTripById(id);
+        if (!trip) throw new Error("Trip not found");
+        if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new Error("Not authorized to update this trip");
+        }
+        await updateTrip(id, trip.userId, data);
         return { success: true };
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await deleteTrip(input.id, ctx.user.id);
+        // Allow owner or admin to delete
+        const trip = await getTripById(input.id);
+        if (!trip) throw new Error("Trip not found");
+        if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new Error("Not authorized to delete this trip");
+        }
+        await deleteTrip(input.id, trip.userId);
         return { success: true };
       }),
     search: publicProcedure
