@@ -112,10 +112,12 @@ export default function Login() {
                 <label className="block text-sm font-medium mb-2">Name</label>
                 <Input
                   type="text"
+                  name="name"
                   placeholder="Ihr vollständiger Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
+                  required={mode === "register"}
                   className="border-border/50"
                 />
               </div>
@@ -125,10 +127,12 @@ export default function Login() {
               <label className="block text-sm font-medium mb-2">Benutzername</label>
               <Input
                 type="text"
+                name="username"
                 placeholder="Benutzername"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
+                required
                 className="border-border/50"
               />
             </div>
@@ -137,10 +141,12 @@ export default function Login() {
               <label className="block text-sm font-medium mb-2">Passwort</label>
               <Input
                 type="password"
+                name="password"
                 placeholder="Passwort"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
+                required
                 className="border-border/50"
               />
             </div>
@@ -150,6 +156,7 @@ export default function Login() {
                 <label className="block text-sm font-medium mb-2">E-Mail (optional)</label>
                 <Input
                   type="email"
+                  name="email"
                   placeholder="E-Mail-Adresse"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
