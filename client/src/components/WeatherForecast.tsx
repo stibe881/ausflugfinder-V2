@@ -28,7 +28,8 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     (item) => item.trip?.latitude && item.trip?.longitude
   );
 
-  const { data: weather, isLoading } = trpc.weather.forecast.useQuery(
+  // Get hourly weather instead of daily
+  const { data: hourlyWeather, isLoading } = trpc.weather.hourly.useQuery(
     {
       latitude: Number(firstTripWithCoords?.trip?.latitude) || 0,
       longitude: Number(firstTripWithCoords?.trip?.longitude) || 0,
@@ -82,13 +83,13 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     );
   }
 
-  // Filter forecasts to only show days with trips
-  const filteredForecasts = weather?.forecasts.filter((forecast) => {
-    const forecastDate = new Date(forecast.date).toISOString().split('T')[0];
-    return tripsWithDates.has(forecastDate);
+  // Filter hourly forecasts to only show hours for days with trips
+  const filteredHourlyForecasts = hourlyWeather?.hourly.filter((hourly) => {
+    const hourDate = new Date(hourly.time).toISOString().split('T')[0];
+    return tripsWithDates.has(hourDate);
   }) || [];
 
-  if (filteredForecasts.length === 0) {
+  if (filteredHourlyForecasts.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -104,51 +105,63 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     );
   }
 
+  // Group hourly forecasts by date
+  const forecastsByDate = new Map<string, typeof filteredHourlyForecasts>();
+  filteredHourlyForecasts.forEach((forecast) => {
+    const dateStr = new Date(forecast.time).toISOString().split('T')[0];
+    if (!forecastsByDate.has(dateStr)) {
+      forecastsByDate.set(dateStr, []);
+    }
+    forecastsByDate.get(dateStr)!.push(forecast);
+  });
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Cloud className="w-5 h-5" />
-          Wettervorhersage
+          Stündliche Wettervorhersage
         </CardTitle>
         <CardDescription>
-          Vorhersage für {firstTripWithCoords.trip?.destination || "ausgewählten Standort"} ({filteredForecasts.length} Tage mit Ausflügen)
+          Vorhersage für {firstTripWithCoords.trip?.destination || "ausgewählten Standort"} ({forecastsByDate.size} Tage mit Ausflügen)
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredForecasts.map((forecast, index) => (
-            <Card key={index} className="bg-gradient-to-br from-blue-50 to-cyan-50">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-3">
-                  <div className="font-medium text-sm text-muted-foreground">
-                    {format(new Date(forecast.date), "EEEE, d. MMM", { locale: de })}
-                  </div>
-                  <div className="flex justify-center">
-                    {getWeatherIcon(forecast.weather_code)}
-                  </div>
-                  <div className="text-sm font-medium text-gray-700">
-                    {forecast.weather_description}
-                  </div>
-                  <div className="flex items-center justify-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Thermometer className="w-4 h-4 text-red-500" />
-                      <span className="font-semibold">{forecast.temperature_max}°C</span>
+        <div className="space-y-6">
+          {Array.from(forecastsByDate.entries()).map(([dateStr, forecasts]) => (
+            <div key={dateStr}>
+              <h3 className="font-semibold text-lg mb-3 text-gray-700">
+                {format(new Date(dateStr), "EEEE, d. MMMM yyyy", { locale: de })}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 overflow-x-auto pb-2">
+                {forecasts.map((forecast, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-3 text-center border border-blue-100"
+                  >
+                    <div className="text-xs font-medium text-muted-foreground mb-2">
+                      {format(new Date(forecast.time), "HH:mm", { locale: de })}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Thermometer className="w-4 h-4 text-blue-500" />
-                      <span>{forecast.temperature_min}°C</span>
+                    <div className="flex justify-center mb-2">
+                      {getWeatherIcon(forecast.weather_code)}
                     </div>
+                    <div className="text-xs font-medium text-gray-700 mb-2 line-clamp-2">
+                      {forecast.weather_description}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-xs mb-2">
+                      <Thermometer className="w-3 h-3 text-orange-500" />
+                      <span className="font-semibold">{forecast.temperature}°C</span>
+                    </div>
+                    {forecast.precipitation_probability > 0 && (
+                      <div className="flex items-center justify-center gap-1 text-xs text-blue-600">
+                        <Droplets className="w-3 h-3" />
+                        <span>{forecast.precipitation_probability}%</span>
+                      </div>
+                    )}
                   </div>
-                  {forecast.precipitation_probability > 0 && (
-                    <div className="flex items-center justify-center gap-1 text-sm text-blue-600">
-                      <Droplets className="w-4 h-4" />
-                      <span>{forecast.precipitation_probability}% Regen</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </CardContent>

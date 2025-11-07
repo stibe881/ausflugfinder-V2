@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { getWeatherForecast } from "./_core/weather";
+import { getWeatherForecast, getHourlyWeatherForecast } from "./_core/weather";
 import { generateICalendar, generatePDFContent } from "./_core/export";
 import {
   createTrip, deleteTrip, getAllTrips, getTripById, getUserTrips, updateTrip,
@@ -587,6 +587,21 @@ export const appRouter = router({
       )
       .query(async ({ input }) => {
         return await getWeatherForecast(
+          input.latitude,
+          input.longitude,
+          input.days || 7
+        );
+      }),
+    hourly: publicProcedure
+      .input(
+        z.object({
+          latitude: z.number(),
+          longitude: z.number(),
+          days: z.number().min(1).max(16).optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await getHourlyWeatherForecast(
           input.latitude,
           input.longitude,
           input.days || 7

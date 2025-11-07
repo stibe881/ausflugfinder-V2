@@ -12,11 +12,26 @@ export interface WeatherForecast {
   weather_description: string;
 }
 
+export interface HourlyWeatherForecast {
+  time: string;
+  temperature: number;
+  precipitation_probability: number;
+  weather_code: number;
+  weather_description: string;
+}
+
 export interface WeatherData {
   location: string;
   latitude: number;
   longitude: number;
   forecasts: WeatherForecast[];
+}
+
+export interface HourlyWeatherData {
+  location: string;
+  latitude: number;
+  longitude: number;
+  hourly: HourlyWeatherForecast[];
 }
 
 const WEATHER_CODES: Record<number, string> = {
@@ -53,15 +68,15 @@ export async function getWeatherForecast(
 ): Promise<WeatherData> {
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Europe/Zurich&forecast_days=${days}`;
-    
+
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`Weather API error: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
-    
+
     const forecasts: WeatherForecast[] = data.daily.time.map((date: string, index: number) => ({
       date,
       temperature_max: Math.round(data.daily.temperature_2m_max[index]),
@@ -70,7 +85,7 @@ export async function getWeatherForecast(
       weather_code: data.daily.weather_code[index],
       weather_description: WEATHER_CODES[data.daily.weather_code[index]] || "Unbekannt",
     }));
-    
+
     return {
       location: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
       latitude,
@@ -80,5 +95,41 @@ export async function getWeatherForecast(
   } catch (error) {
     console.error("[Weather] Failed to fetch weather data:", error);
     throw new Error("Wettervorhersage konnte nicht abgerufen werden");
+  }
+}
+
+export async function getHourlyWeatherForecast(
+  latitude: number,
+  longitude: number,
+  days: number = 7
+): Promise<HourlyWeatherData> {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,weather_code&timezone=Europe/Zurich&forecast_days=${days}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    const hourly: HourlyWeatherForecast[] = data.hourly.time.map((time: string, index: number) => ({
+      time,
+      temperature: Math.round(data.hourly.temperature_2m[index]),
+      precipitation_probability: data.hourly.precipitation_probability[index] || 0,
+      weather_code: data.hourly.weather_code[index],
+      weather_description: WEATHER_CODES[data.hourly.weather_code[index]] || "Unbekannt",
+    }));
+
+    return {
+      location: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
+      latitude,
+      longitude,
+      hourly,
+    };
+  } catch (error) {
+    console.error("[Weather] Failed to fetch hourly weather data:", error);
+    throw new Error("Stündliche Wettervorhersage konnte nicht abgerufen werden");
   }
 }

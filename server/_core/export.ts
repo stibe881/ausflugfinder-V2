@@ -1,6 +1,7 @@
 /**
  * Export service for PDF and iCal formats
  */
+import PDFDocument from 'pdfkit';
 
 export interface ExportTrip {
   title: string;
@@ -83,7 +84,6 @@ export function generateICalendar(plan: ExportPlan): string {
  * Generate a modern, beautifully formatted PDF
  */
 export async function generatePDFContent(plan: ExportPlan): Promise<Buffer> {
-  const PDFDocument = require('pdfkit');
   const doc = new PDFDocument({
     size: 'A4',
     margin: 40,
