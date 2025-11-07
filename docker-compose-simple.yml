@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile
       args:
         - CACHE_BUST=1
-      target: production
     container_name: ausflug-manager-app
     ports:
       - "3000:3000"
