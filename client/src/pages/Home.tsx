@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { Plane, MapPin, Users, Calendar, Compass, Mountain, Sun } from "lucide-react";
+import { Plane, MapPin, Users, Calendar, Compass, Mountain, Sun, Zap, DollarSign } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -196,19 +196,35 @@ export default function Home() {
               },
               {
                 icon: Users,
-                title: "Teilnehmer",
-                description: "Verwalte Gruppengröße und halte alle auf dem Laufenden",
+                title: "Freunde",
+                description: "Verwalte deine Freunde und teile Ausflüge mit ihnen",
                 color: "text-secondary",
                 bgColor: "bg-secondary/10",
-                link: "/trips"
+                link: "/friends"
+              },
+              {
+                icon: Zap,
+                title: "Aktivitäten",
+                description: "Entdecke spannende Aktivitäten und Erlebnisse",
+                color: "text-yellow-500",
+                bgColor: "bg-yellow-500/10",
+                link: "/explore"
+              },
+              {
+                icon: DollarSign,
+                title: "Kostenlos",
+                description: "Finde kostenlose Aktivitäten und Ausflüge",
+                color: "text-green-500",
+                bgColor: "bg-green-500/10",
+                link: "/explore?free=true"
               },
               {
                 icon: Calendar,
-                title: "Zeitplanung",
-                description: "Behalte den Überblick über alle wichtigen Termine",
+                title: "Kategorien",
+                description: "Sortiere Ausflüge nach Kategorie",
                 color: "text-chart-2",
                 bgColor: "bg-blue-500/10",
-                link: "/trips"
+                link: "/explore"
               }
             ].map((feature, index) => (
               <Link key={index} href={feature.link}>

@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./contexts/i18nContext";
 import Home from "./pages/Home";
 import Destinations from "./pages/Destinations";
+import Friends from "./pages/Friends";
 import TripDetail from "./pages/TripDetail";
 import Explore from "./pages/Explore";
 import Trips from "./pages/Trips";
@@ -25,6 +26,7 @@ function Router() {
       <Route path={"/trips"} component={Trips} />
       <Route path={"/trips/:id"} component={TripDetail} />
       <Route path={"/destinations"} component={Destinations} />
+      <Route path={"/friends"} component={Friends} />
       <Route path={"/profile"} component={Profile} />
       <Route path={"/planner"} component={Planner} />
       <Route path={"/planner/:id"} component={PlannerDetail} />
