@@ -10,6 +10,13 @@ export const APP_LOGO =
 export const getLoginUrl = () => {
   const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
   const appId = import.meta.env.VITE_APP_ID;
+
+  // Check if OAuth portal URL is configured
+  if (!oauthPortalUrl) {
+    console.error("VITE_OAUTH_PORTAL_URL is not configured");
+    throw new Error("OAuth configuration is missing. Contact your administrator.");
+  }
+
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
   const state = btoa(redirectUri);
 
