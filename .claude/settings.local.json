@@ -38,7 +38,8 @@
       "Bash(DATABASE_URL=\"mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2\" node:*)",
       "Bash(npm run build:*)",
       "Bash(xcopy:*)",
-      "WebFetch(domain:ausflugfinder.ch)"
+      "WebFetch(domain:ausflugfinder.ch)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -175,6 +175,7 @@ export const appRouter = router({
           status: z.enum(["planned", "ongoing", "completed", "cancelled"]).default("planned"),
           isFavorite: z.number().optional().default(0),
           isPublic: z.number().optional().default(0),
+          image: z.string().url().optional(), // Title image for trip details and explore view
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -202,6 +203,7 @@ export const appRouter = router({
           cost: z.enum(["free", "low", "medium", "high", "very_high"]).optional(),
           latitude: z.string().optional(),
           longitude: z.string().optional(),
+          image: z.string().url().optional(), // Title image for trip details and explore view
           durationMin: z.number().optional(),
           durationMax: z.number().optional(),
           distanceMin: z.number().optional(),

@@ -50,6 +50,7 @@ export default function TripDetail() {
     region: "",
     category: "",
     cost: "free" as const,
+    image: "",
   });
 
   const canEdit = user && trip && (user.id === trip.userId || user.role === "admin");
@@ -71,6 +72,7 @@ export default function TripDetail() {
         region: trip.region || "",
         category: trip.category || "",
         cost: (trip.cost || "free") as const,
+        image: trip.image || "",
       });
       setEditDialog(true);
     }
@@ -86,6 +88,7 @@ export default function TripDetail() {
       region: editForm.region,
       category: editForm.category,
       cost: editForm.cost,
+      image: editForm.image || undefined,
     });
   };
 
@@ -455,6 +458,28 @@ export default function TripDetail() {
                 placeholder="Beschreibung des Ausflugs"
                 rows={4}
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Titelbild URL</label>
+              <Input
+                value={editForm.image}
+                onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
+                placeholder="https://example.com/image.jpg"
+                type="url"
+              />
+              {editForm.image && (
+                <div className="mt-3">
+                  <p className="text-xs text-muted-foreground mb-2">Vorschau:</p>
+                  <img
+                    src={editForm.image}
+                    alt="Titelbild Vorschau"
+                    className="w-full h-32 object-cover rounded-md border"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
