@@ -1,16 +1,28 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { Plane, MapPin, Users, Calendar, Compass, Mountain, Sun, Zap, DollarSign } from "lucide-react";
+import { Plane, MapPin, Users, Calendar, Compass, Mountain, Sun, Moon, Zap, DollarSign, Globe } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useI18n, type Language } from "@/contexts/i18nContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const { isAuthenticated, loading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage } = useI18n();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
   const { data: stats } = trpc.trips.statistics.useQuery();
+
+  const languages: { code: Language; name: string }[] = [
+    { code: "de", name: "Deutsch" },
+    { code: "en", name: "English" },
+    { code: "fr", name: "Français" },
+    { code: "it", name: "Italiano" },
+  ];
 
   useEffect(() => {
     const video = videoRef.current;
@@ -52,6 +64,49 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
+      {/* Header with Theme and Language Toggle */}
+      <header className="fixed top-0 right-0 z-40 p-4 flex gap-2">
+        {/* Theme Toggle */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleTheme}
+          className="rounded-lg"
+          title={theme === "light" ? "Dark Mode" : "Light Mode"}
+        >
+          {theme === "light" ? (
+            <Moon className="h-[1.2rem] w-[1.2rem]" />
+          ) : (
+            <Sun className="h-[1.2rem] w-[1.2rem]" />
+          )}
+        </Button>
+
+        {/* Language Selector */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="rounded-lg" title="Select Language">
+              <Globe className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Sprache / Language</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {languages.map((lang) => (
+              <DropdownMenuItem
+                key={lang.code}
+                onClick={() => setLanguage(lang.code)}
+                className={language === lang.code ? "bg-accent" : ""}
+              >
+                {lang.name}
+                {language === lang.code && (
+                  <span className="ml-2 text-primary font-bold">✓</span>
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </header>
+
       {/* Hero Section with Video Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Video Background */}

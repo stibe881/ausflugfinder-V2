@@ -8,9 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, DollarSign, Flame, MapIcon, Eye, Share2 } from "lucide-react";
+import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, DollarSign, Flame, Eye, Share2, Zap } from "lucide-react";
 import { Link } from "wouter";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Trips() {
