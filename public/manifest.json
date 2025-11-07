@@ -1,6 +1,6 @@
 {
-  "name": "Ausflug Manager",
-  "short_name": "Ausflug",
+  "name": "AusflugFinder",
+  "short_name": "AusflugFinder",
   "description": "Plan and manage unforgettable family trips and adventures",
   "start_url": "/",
   "scope": "/",

@@ -1,4 +1,4 @@
-# Docker Setup für Ausflug Manager
+# Docker Setup für AusflugFinder
 
 ## Voraussetzungen
 - Docker & Docker Compose installiert

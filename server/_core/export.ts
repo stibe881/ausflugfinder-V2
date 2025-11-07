@@ -37,7 +37,7 @@ export function generateICalendar(plan: ExportPlan): string {
   let ical = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Ausflug Manager//DE',
+    'PRODID:-//AusflugFinder//DE',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-WR-CALNAME:' + plan.title,
@@ -113,7 +113,7 @@ export function generatePDFContent(plan: ExportPlan): string {
     content += `\n`;
   });
 
-  content += `\n\n---\nErstellt mit Ausflug Manager\n`;
+  content += `\n\n---\nErstellt mit AusflugFinder\n`;
   content += `Generiert am: ${new Date().toLocaleString('de-DE')}\n`;
 
   return content;

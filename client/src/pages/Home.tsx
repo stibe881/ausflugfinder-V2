@@ -155,7 +155,7 @@ export default function Home() {
               <Compass className="w-12 h-12 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
             </div>
             <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg">
-              Ausflug Manager
+              AusflugFinder
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium">
               Entdecke, plane und verwalte unvergessliche Familienausflüge und Abenteuer

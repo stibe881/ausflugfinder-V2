@@ -1,4 +1,4 @@
-# Ausflug Manager - Projekt Fortschritt
+# AusflugFinder - Projekt Fortschritt
 
 ## ✅ Abgeschlossene Features
 

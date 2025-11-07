@@ -5,7 +5,7 @@ export type Language = "de" | "fr" | "it" | "en";
 // Translation strings
 const translations: Record<Language, Record<string, string>> = {
   de: {
-    "app.title": "Ausflug Manager",
+    "app.title": "AusflugFinder",
     "app.tagline": "Entdecke, plane und verwalte unvergessliche Familienausflüge und Abenteuer",
     "nav.myTrips": "Meine Ausflüge",
     "nav.profile": "Mein Profil",

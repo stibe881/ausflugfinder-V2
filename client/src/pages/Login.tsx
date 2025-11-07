@@ -101,7 +101,7 @@ export default function Login() {
             <Compass className="w-8 h-8 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-2">
-            Ausflug Manager
+            AusflugFinder
           </h1>
           <p className="text-muted-foreground">
             {mode === "login" ? "Melden Sie sich an" : "Erstellen Sie ein Konto"}
