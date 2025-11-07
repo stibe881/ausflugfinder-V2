@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ausflug-manager-app
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mysql://YOUR_USERNAME:YOUR_PASSWORD@YOUR_HOST:3306/YOUR_DATABASE
+      - JWT_SECRET=your-secret-key-here-change-this-to-something-random
+      - VITE_APP_ID=ausflug-manager
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    networks:
+      - ausflug-network
+
+  nginx:
+    image: nginx:latest
+    container_name: ausflug-manager-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    restart: unless-stopped
+    networks:
+      - ausflug-network
+
+networks:
+  ausflug-network:
+    driver: bridge
