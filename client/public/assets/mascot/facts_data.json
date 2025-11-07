@@ -1,0 +1,84 @@
+{
+  "facts": [
+    {
+      "category": "natur",
+      "text": "Wusstest du, dass Murmeltiere bis zu 9 Monate im Winterschlaf verbringen? Sie senken dabei ihre Körpertemperatur auf nur 5 Grad Celsius!"
+    },
+    {
+      "category": "natur",
+      "text": "Der Edelweiss wächst nur auf Höhen zwischen 1800 und 3000 Metern. Die Schweizer nennen ihn liebevoll 'Königin der Alpenblumen'."
+    },
+    {
+      "category": "natur",
+      "text": "In der Schweiz gibt es über 3000 Bergseen! Der tiefste ist der Lago Maggiore mit 372 Metern Tiefe."
+    },
+    {
+      "category": "berge",
+      "text": "Die Schweiz hat 48 Viertausender! Der höchste Berg ist die Dufourspitze mit 4634 Metern."
+    },
+    {
+      "category": "berge",
+      "text": "Das Matterhorn ist einer der meistfotografierten Berge der Welt. Seine perfekte Pyramidenform macht es so einzigartig!"
+    },
+    {
+      "category": "berge",
+      "text": "Der Aletschgletscher ist mit 23 Kilometern Länge der längste Gletscher der Alpen. Er enthält etwa 11 Milliarden Tonnen Eis!"
+    },
+    {
+      "category": "tiere",
+      "text": "Steinböcke können an fast senkrechten Felswänden klettern! Ihre Hufe haben eine weiche Sohle, die wie Gummi haftet."
+    },
+    {
+      "category": "tiere",
+      "text": "Der Bartgeier hat eine Flügelspannweite von bis zu 2,9 Metern! Er ist der größte Vogel der Alpen."
+    },
+    {
+      "category": "tiere",
+      "text": "Gämsen können bis zu 8 Meter weit und 2 Meter hoch springen! Sie sind wahre Kletterkünstler."
+    },
+    {
+      "category": "geschichte",
+      "text": "Die Schweiz ist seit 1815 neutral. Das ist über 200 Jahre Frieden!"
+    },
+    {
+      "category": "geschichte",
+      "text": "Wilhelm Tell ist die berühmteste Schweizer Legende. Der Apfelschuss soll im Jahr 1307 stattgefunden haben."
+    },
+    {
+      "category": "geschichte",
+      "text": "Die erste Zahnradbahn Europas wurde 1871 auf die Rigi gebaut. Sie fährt noch heute!"
+    },
+    {
+      "category": "ausflüge",
+      "text": "Der Rheinfall bei Schaffhausen ist der größte Wasserfall Europas! Pro Sekunde stürzen bis zu 600.000 Liter Wasser in die Tiefe."
+    },
+    {
+      "category": "ausflüge",
+      "text": "Die Pilatus-Bahn ist die steilste Zahnradbahn der Welt mit einer Steigung von bis zu 48 Prozent!"
+    },
+    {
+      "category": "ausflüge",
+      "text": "Im Verzasca-Tal gibt es einen türkisfarbenen Fluss mit kristallklarem Wasser. Man kann bis zu 15 Meter tief sehen!"
+    },
+    {
+      "category": "natur",
+      "text": "Die Schweiz hat über 65.000 Kilometer markierte Wanderwege. Das entspricht mehr als dem Erdumfang!"
+    },
+    {
+      "category": "berge",
+      "text": "Der Jungfraujoch ist mit 3454 Metern die höchstgelegene Bahnstation Europas. Man nennt es das 'Top of Europe'!"
+    },
+    {
+      "category": "tiere",
+      "text": "Murmeltiere pfeifen zur Warnung vor Gefahr! Jeder Pfiff hat eine andere Bedeutung - je nach Art der Bedrohung."
+    },
+    {
+      "category": "natur",
+      "text": "Alpenrosen blühen nur auf kalkfreien Böden. Ihre leuchtend roten Blüten sind ein Symbol der Schweizer Alpen."
+    },
+    {
+      "category": "ausflüge",
+      "text": "Der Creux du Van ist ein natürliches Felsenamphitheater mit 160 Meter hohen Felswänden. Ein spektakuläres Naturwunder!"
+    }
+  ]
+}

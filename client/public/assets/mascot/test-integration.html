@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maskottchen Widget Test - Integration</title>
+    
+    <!-- Widget CSS -->
+    <link rel="stylesheet" href="mascot-widget.css">
+    
+    <!-- Sound Effects -->
+    <script src="sounds.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .info-box {
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        .info-box h2 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .info-box p {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+        
+        .code-box {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        
+        .code-box code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🏔️ Widget Integration Test</h1>
+        <p class="subtitle">Standalone Maskottchen Widget für ausflugfinder.ch</p>
+        
+        <div class="info-box success">
+            <h2>✅ Widget erfolgreich geladen!</h2>
+            <p>Das Maskottchen sollte jetzt in der unteren rechten Ecke erscheinen. Klicken Sie darauf, um die Interaktionen zu testen!</p>
+        </div>
+        
+        <div class="info-box">
+            <h2>📦 Benötigte Dateien</h2>
+            <ul class="feature-list">
+                <li>mascot-widget.css</li>
+                <li>mascot-widget.js</li>
+                <li>facts_data.json</li>
+                <li>5 Maskottchen-Bilder (PNG)</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h2>🚀 Integration Code</h2>
+            <p>Fügen Sie diesen Code in Ihre Webseite ein:</p>
+            <div class="code-box">
+                <code>&lt;!-- Im &lt;head&gt; Bereich --&gt;<br>
+&lt;link rel="stylesheet" href="/pfad/zu/mascot-widget.css"&gt;<br>
+&lt;script src="/pfad/zu/mascot-widget.js"&gt;&lt;/script&gt;<br>
+<br>
+&lt;!-- Im &lt;body&gt; Bereich --&gt;<br>
+&lt;div id="ausflugfinder-mascot"&gt;&lt;/div&gt;</code>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h2>🎯 Features</h2>
+            <ul class="feature-list">
+                <li>Interaktive Animationen (Winken, Springen, Jubeln)</li>
+                <li>20+ interessante Fakten über die Schweiz</li>
+                <li>Responsive Design für alle Geräte</li>
+                <li>Keine externen Abhängigkeiten</li>
+                <li>Einfache Anpassung möglich</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Widget Container -->
+    <div id="ausflugfinder-mascot"></div>
+    
+    <!-- Widget JavaScript -->
+    <script src="mascot-widget.js"></script>
+</body>
+</html>
