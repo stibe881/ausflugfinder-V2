@@ -1,6 +1,6 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
-import { hash, verify } from "argon2";
+import bcrypt from "bcryptjs";
 import { getSessionCookieOptions } from "./cookies";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
@@ -36,8 +36,8 @@ export function registerLocalAuthRoutes(app: Express) {
         return;
       }
 
-      // Hash password
-      const passwordHash = await hash(password);
+      // Hash password (using bcryptjs for better Alpine Docker compatibility)
+      const passwordHash = await bcrypt.hash(password, 10);
 
       // Create user - use a pseudo-openId for local users
       const pseudoOpenId = `local_${username}_${Date.now()}`;
@@ -97,7 +97,7 @@ export function registerLocalAuthRoutes(app: Express) {
       }
 
       // Verify password
-      const passwordValid = await verify(user.passwordHash, password);
+      const passwordValid = await bcrypt.compare(password, user.passwordHash);
 
       if (!passwordValid) {
         res.status(401).json({ error: "Invalid username or password" });

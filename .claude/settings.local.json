@@ -6,7 +6,9 @@
       "Bash(git remote set-url:*)",
       "Bash(gh:*)",
       "Bash(docker exec:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []
