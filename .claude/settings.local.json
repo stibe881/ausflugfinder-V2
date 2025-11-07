@@ -24,7 +24,10 @@
       "Bash(node import-ausfluge.mjs:*)",
       "Bash(mysql:*)",
       "Bash(node import-ausfluege-v2.mjs:*)",
-      "Bash(node import-ausfluge-final.mjs:*)"
+      "Bash(node import-ausfluge-final.mjs:*)",
+      "Bash(node import-all-ausfluge.mjs:*)",
+      "Bash(node import-ausfluge-complete.mjs:*)",
+      "Bash(node add-columns.mjs:*)"
     ],
     "deny": [],
     "ask": []
