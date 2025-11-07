@@ -9,24 +9,6 @@
     <link rel="icon" type="image/png" href="%VITE_APP_LOGO%" />
     <link rel="apple-touch-icon" href="%VITE_APP_LOGO%" />
     <title>%VITE_APP_TITLE%</title>
-    <script>
-      // Fallback for missing environment variables in HTML
-      (function() {
-        // Replace empty placeholders with defaults
-        document.querySelectorAll('[href*="%VITE_"], [src*="%VITE_"], [data-website-id*="%VITE_"]').forEach(el => {
-          if (el.href && el.href.includes('%VITE_')) {
-            el.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"></svg>';
-          }
-          if (el.src && el.src.includes('%VITE_')) {
-            el.remove();
-          }
-        });
-        // Update title if it still contains placeholder
-        if (document.title.includes('%VITE_')) {
-          document.title = 'App';
-        }
-      })();
-    </script>
     <!-- Add Google Fonts here, example:
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,20 +19,10 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Analytics script - only load if endpoint is configured -->
-    <script>
-      (function() {
-        const endpoint = "%VITE_ANALYTICS_ENDPOINT%";
-        const websiteId = "%VITE_ANALYTICS_WEBSITE_ID%";
-        if (endpoint && endpoint !== "%VITE_ANALYTICS_ENDPOINT%" && websiteId && websiteId !== "%VITE_ANALYTICS_WEBSITE_ID%") {
-          const script = document.createElement("script");
-          script.defer = true;
-          script.src = endpoint + "/umami";
-          script.setAttribute("data-website-id", websiteId);
-          document.body.appendChild(script);
-        }
-      })();
-    </script>
+    <script
+      defer
+      src="%VITE_ANALYTICS_ENDPOINT%/umami"
+      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
   </body>
 
 </html>
