@@ -21,7 +21,7 @@ export default function Login() {
   const [location, setLocation] = useLocation();
   const utils = trpc.useUtils();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!username || !password) {
@@ -36,12 +36,14 @@ export default function Login() {
 
     setLoading(true);
     try {
+      console.log("Submitting form with mode:", mode, { username, password, name, email });
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(
           mode === "login"
             ? { username, password }
@@ -50,6 +52,7 @@ export default function Login() {
       });
 
       const data = await response.json();
+      console.log("Response:", response.status, data);
 
       if (!response.ok) {
         toast.error(data.error || "Authentifizierung fehlgeschlagen");
