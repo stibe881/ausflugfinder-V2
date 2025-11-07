@@ -178,6 +178,7 @@ export const dayPlanItems = mysqlTable("dayPlanItems", {
   startTime: varchar("startTime", { length: 10 }), // e.g., "09:00"
   endTime: varchar("endTime", { length: 10 }), // e.g., "12:00"
   notes: text("notes"),
+  dateAssigned: timestamp("dateAssigned"), // The specific date this trip is assigned to
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

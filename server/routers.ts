@@ -5,7 +5,7 @@ import { protectedProcedure, publicProcedure, router, adminProcedure } from "./_
 import { z } from "zod";
 import { getWeatherForecast } from "./_core/weather";
 import { generateICalendar, generatePDFContent } from "./_core/export";
-import { 
+import {
   createTrip, deleteTrip, getAllTrips, getTripById, getUserTrips, updateTrip,
   createDestination, getUserDestinations, getDestinationById, updateDestination, deleteDestination,
   addTripParticipant, getTripParticipants, updateParticipantStatus, deleteParticipant,
@@ -17,8 +17,11 @@ import {
   addTripToDayPlan, getDayPlanItems, getDayPlanItemsWithTrips, removeTripFromDayPlan, updateDayPlanItem,
   addPackingListItem, getPackingListItems, updatePackingListItem, updatePackingListItemFull, deletePackingListItem,
   addBudgetItem, getBudgetItems, updateBudgetItem, deleteBudgetItem,
-  addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem
+  addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem,
+  getDb
 } from "./db";
+import { eq } from "drizzle-orm";
+import { dayPlanItems } from "./drizzle/schema";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -415,11 +418,34 @@ export const appRouter = router({
           startTime: z.string().optional(),
           endTime: z.string().optional(),
           notes: z.string().optional(),
+          dateAssigned: z.date().optional(),
         })
       )
-      .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        await updateDayPlanItem(id, data);
+      .mutation(async ({ input, ctx }) => {
+        const { id, dateAssigned, ...data } = input;
+
+        // If dateAssigned is provided, validate it's within the trip duration
+        if (dateAssigned) {
+          const db = await getDb();
+          if (db) {
+            const item = await db.select().from(dayPlanItems).where(eq(dayPlanItems.id, id)).limit(1);
+            if (item.length > 0) {
+              const tripId = item[0].tripId;
+              const trip = await getTripById(tripId);
+              if (trip) {
+                const tripStart = new Date(trip.startDate);
+                const tripEnd = new Date(trip.endDate);
+                const assignedDate = new Date(dateAssigned);
+
+                if (assignedDate < tripStart || assignedDate > tripEnd) {
+                  throw new Error(`Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+                }
+              }
+            }
+          }
+        }
+
+        await updateDayPlanItem(id, { ...data, ...(dateAssigned && { dateAssigned }) });
         return { success: true };
       }),
   }),
