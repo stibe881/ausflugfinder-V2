@@ -16,7 +16,10 @@
       "Bash(ssh root@185.178.193.60 \"mysql -u ausflugfinder -p''!LeliBist.1561!'' -h localhost -e \"\"SHOW GRANTS FOR ''ausflugfinder''@''%'';\"\"\")",
       "Bash(ssh:*)",
       "Bash(nul)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(DATABASE_URL='mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2' JWT_SECRET='your-super-secret-jwt-key-minimum-32-characters-longg' node test-login.mjs)",
+      "Bash(curl:*)",
+      "Bash(node create-test-user.mjs:*)"
     ],
     "deny": [],
     "ask": []
