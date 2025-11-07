@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Plus, Trash2, Check, X, Clock, Loader2, Package, DollarSign, ListChecks, Calendar, MapPin, Cloud, Download, FileText } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "wouter";
 import { toast } from "sonner";
 import { format } from "date-fns";
