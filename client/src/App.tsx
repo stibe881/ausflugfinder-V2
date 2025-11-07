@@ -12,12 +12,14 @@ import Trips from "./pages/Trips";
 import Profile from "./pages/Profile";
 import Planner from "./pages/Planner";
 import PlannerDetail from "./pages/PlannerDetail";
+import Login from "./pages/Login";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/login"} component={Login} />
       <Route path={"/explore"} component={Explore} />
       <Route path={"/trips"} component={Trips} />
       <Route path={"/trips/:id"} component={TripDetail} />
