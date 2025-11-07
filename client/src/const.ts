@@ -13,8 +13,9 @@ export const getLoginUrl = () => {
 
   // Check if OAuth portal URL is configured
   if (!oauthPortalUrl) {
-    console.error("VITE_OAUTH_PORTAL_URL is not configured");
-    throw new Error("OAuth configuration is missing. Contact your administrator.");
+    console.warn("VITE_OAUTH_PORTAL_URL is not configured - OAuth login will not be available");
+    // Return a fallback URL - this page will show an error when clicked
+    return "/login?error=oauth_not_configured";
   }
 
   const redirectUri = `${window.location.origin}/api/oauth/callback`;

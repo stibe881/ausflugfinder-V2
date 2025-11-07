@@ -75,10 +75,10 @@ export function serveStatic(app: Express) {
       for (const [key, value] of Object.entries(process.env)) {
         if (key.startsWith("VITE_")) {
           const placeholder = `%${key}%`;
-          processedHtml = processedHtml.replace(
-            new RegExp(placeholder, "g"),
-            String(value || "")
-          );
+          // Use simple string replacement to avoid regex issues
+          while (processedHtml.includes(placeholder)) {
+            processedHtml = processedHtml.replace(placeholder, String(value || ""));
+          }
         }
       }
 
