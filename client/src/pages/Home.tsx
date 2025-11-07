@@ -62,6 +62,31 @@ export default function Home() {
     };
   }, []);
 
+  // Load Mascot Widget
+  useEffect(() => {
+    const loadMascotWidget = async () => {
+      // Load CSS
+      const cssLink = document.createElement('link');
+      cssLink.rel = 'stylesheet';
+      cssLink.href = '/assets/mascot/mascot-widget.css';
+      document.head.appendChild(cssLink);
+
+      // Load sounds.js
+      const soundsScript = document.createElement('script');
+      soundsScript.src = '/assets/mascot/sounds.js';
+      soundsScript.async = true;
+      document.body.appendChild(soundsScript);
+
+      // Load mascot-widget.js
+      const widgetScript = document.createElement('script');
+      widgetScript.src = '/assets/mascot/mascot-widget.js';
+      widgetScript.async = true;
+      document.body.appendChild(widgetScript);
+    };
+
+    loadMascotWidget();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       {/* Header with Theme and Language Toggle */}
@@ -306,6 +331,9 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* Mascot Widget Container */}
+      <div id="ausflugfinder-mascot"></div>
     </div>
   );
 }
