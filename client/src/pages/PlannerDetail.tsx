@@ -38,6 +38,8 @@ export default function PlannerDetail() {
   const [addTripMode, setAddTripMode] = useState<"select" | "custom">("select");
   const [packingDialog, setPackingDialog] = useState(false);
   const [budgetDialog, setBudgetDialog] = useState(false);
+  const [editBudgetId, setEditBudgetId] = useState<number | null>(null);
+  const [editBudgetActualCost, setEditBudgetActualCost] = useState("");
   const [checklistDialog, setChecklistDialog] = useState(false);
 
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
@@ -108,6 +110,18 @@ export default function PlannerDetail() {
     onSuccess: () => {
       toast.success("Budget-Eintrag gelöscht!");
       refetchBudget();
+    },
+  });
+
+  const updateBudgetMutation = trpc.budget.updateActual.useMutation({
+    onSuccess: () => {
+      toast.success("Kosten aktualisiert!");
+      refetchBudget();
+      setEditBudgetId(null);
+      setEditBudgetActualCost("");
+    },
+    onError: () => {
+      toast.error("Fehler beim Aktualisieren der Kosten");
     },
   });
 
@@ -205,6 +219,25 @@ export default function PlannerDetail() {
     addBudgetMutation.mutate({
       dayPlanId: planId,
       ...budgetItem,
+    });
+  };
+
+  const handleEditBudget = (budgetId: number) => {
+    const item = budget?.find(b => b.id === budgetId);
+    if (item) {
+      setEditBudgetId(budgetId);
+      setEditBudgetActualCost(item.actualCost || "");
+    }
+  };
+
+  const handleSaveActualCost = () => {
+    if (!editBudgetId || !editBudgetActualCost.trim()) {
+      toast.error("Bitte gib die tatsächlichen Kosten ein");
+      return;
+    }
+    updateBudgetMutation.mutate({
+      id: editBudgetId,
+      actualCost: editBudgetActualCost,
     });
   };
 
@@ -812,6 +845,51 @@ export default function PlannerDetail() {
                             {item.actualCost && ` | Tatsächlich: CHF ${parseFloat(item.actualCost).toFixed(2)}`}
                           </div>
                         </div>
+                        <Dialog open={editBudgetId === item.id} onOpenChange={(open) => {
+                          if (!open) {
+                            setEditBudgetId(null);
+                            setEditBudgetActualCost("");
+                          }
+                        }}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditBudget(item.id)}
+                          >
+                            Bearbeiten
+                          </Button>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Tatsächliche Kosten eingeben</DialogTitle>
+                              <DialogDescription>
+                                {item.description} - Geschätzt: CHF {parseFloat(item.estimatedCost).toFixed(2)}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Tatsächliche Kosten (CHF)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={editBudgetActualCost}
+                                  onChange={(e) => setEditBudgetActualCost(e.target.value)}
+                                  placeholder="0.00"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => {
+                                setEditBudgetId(null);
+                                setEditBudgetActualCost("");
+                              }}>
+                                Abbrechen
+                              </Button>
+                              <Button onClick={handleSaveActualCost} disabled={updateBudgetMutation.isPending}>
+                                Speichern
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                         <Button
                           size="sm"
                           variant="ghost"
