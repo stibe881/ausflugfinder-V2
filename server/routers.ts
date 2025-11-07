@@ -175,7 +175,7 @@ export const appRouter = router({
           status: z.enum(["planned", "ongoing", "completed", "cancelled"]).default("planned"),
           isFavorite: z.number().optional().default(0),
           isPublic: z.number().optional().default(0),
-          image: z.string().url().optional(), // Title image for trip details and explore view
+          image: z.string().optional(), // Title image for trip details and explore view (URL or Base64 data URL)
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -203,7 +203,7 @@ export const appRouter = router({
           cost: z.enum(["free", "low", "medium", "high", "very_high"]).optional(),
           latitude: z.string().optional(),
           longitude: z.string().optional(),
-          image: z.string().url().optional(), // Title image for trip details and explore view
+          image: z.string().optional(), // Title image for trip details and explore view (URL or Base64 data URL)
           durationMin: z.number().optional(),
           durationMax: z.number().optional(),
           distanceMin: z.number().optional(),
@@ -608,6 +608,35 @@ export const appRouter = router({
           input.longitude,
           input.days || 7
         );
+      }),
+  }),
+
+  upload: router({
+    tripImage: protectedProcedure
+      .input(
+        z.object({
+          base64: z.string(), // Data URL or base64 string
+          filename: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        try {
+          // For now, just return the base64 as-is
+          // In production, you might want to:
+          // 1. Save to file system
+          // 2. Save to cloud storage (S3, etc)
+          // 3. Compress the image
+
+          // Since we're storing as data URL, just validate and return
+          if (!input.base64.startsWith('data:image/')) {
+            throw new Error("Invalid image format");
+          }
+
+          return { url: input.base64 };
+        } catch (error) {
+          console.error('Image upload error:', error);
+          throw new Error("Fehler beim Hochladen des Bildes");
+        }
       }),
   }),
 

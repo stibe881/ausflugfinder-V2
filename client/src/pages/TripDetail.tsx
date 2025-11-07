@@ -52,6 +52,7 @@ export default function TripDetail() {
     cost: "free" as const,
     image: "",
   });
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const canEdit = user && trip && (user.id === trip.userId || user.role === "admin");
 
@@ -61,6 +62,19 @@ export default function TripDetail() {
     medium: "€€",
     high: "€€€",
     very_high: "€€€€",
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setEditForm({ ...editForm, image: base64 });
+        setImagePreview(base64);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleEditOpen = () => {
@@ -74,6 +88,7 @@ export default function TripDetail() {
         cost: (trip.cost || "free") as const,
         image: trip.image || "",
       });
+      setImagePreview(trip.image || "");
       setEditDialog(true);
     }
   };
@@ -460,18 +475,21 @@ export default function TripDetail() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Titelbild URL</label>
-              <Input
-                value={editForm.image}
-                onChange={(e) => setEditForm({ ...editForm, image: e.target.value })}
-                placeholder="https://example.com/image.jpg"
-                type="url"
+              <label className="block text-sm font-medium mb-2">Titelbild hochladen</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
               />
-              {editForm.image && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Unterstützte Formate: JPG, PNG, WebP (max. ~5 MB empfohlen)
+              </p>
+              {imagePreview && (
                 <div className="mt-3">
                   <p className="text-xs text-muted-foreground mb-2">Vorschau:</p>
                   <img
-                    src={editForm.image}
+                    src={imagePreview}
                     alt="Titelbild Vorschau"
                     className="w-full h-32 object-cover rounded-md border"
                     onError={(e) => {
