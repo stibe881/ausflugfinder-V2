@@ -5,20 +5,54 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Heart, Share2, Copy, Mail, Phone, MessageCircle, FileText, Loader2, MapPin, Euro } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Copy, Mail, Phone, MessageCircle, FileText, Loader2, MapPin, Euro, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useLocation } from "wouter";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function TripDetail() {
   const params = useParams();
   const tripId = params.id ? parseInt(params.id) : 0;
   const [isFavorite, setIsFavorite] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
+  const [editDialog, setEditDialog] = useState(false);
+  const [, navigate] = useLocation();
+  const { user } = useAuth();
 
   const { data: trip, isLoading: tripLoading } = trpc.trips.getById.useQuery({ id: tripId });
+  const updateTripMutation = trpc.trips.update.useMutation({
+    onSuccess: () => {
+      toast.success("Ausflug aktualisiert!");
+      setEditDialog(false);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Aktualisieren des Ausflugs");
+    },
+  });
+  const deleteTripMutation = trpc.trips.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Ausflug gelöscht!");
+      navigate("/explore");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Löschen des Ausflugs");
+    },
+  });
+
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    destination: "",
+    region: "",
+    category: "",
+    cost: "free" as const,
+  });
+
+  const canEdit = user && trip && (user.id === trip.userId || user.role === "admin");
 
   const COST_LABELS: Record<string, string> = {
     free: "Kostenlos",
@@ -26,6 +60,40 @@ export default function TripDetail() {
     medium: "€€",
     high: "€€€",
     very_high: "€€€€",
+  };
+
+  const handleEditOpen = () => {
+    if (trip) {
+      setEditForm({
+        title: trip.title || "",
+        description: trip.description || "",
+        destination: trip.destination || "",
+        region: trip.region || "",
+        category: trip.category || "",
+        cost: (trip.cost || "free") as const,
+      });
+      setEditDialog(true);
+    }
+  };
+
+  const handleEditSave = () => {
+    if (!trip) return;
+    updateTripMutation.mutate({
+      id: trip.id,
+      title: editForm.title,
+      description: editForm.description,
+      destination: editForm.destination,
+      region: editForm.region,
+      category: editForm.category,
+      cost: editForm.cost,
+    });
+  };
+
+  const handleDeleteTrip = () => {
+    if (!trip) return;
+    if (confirm("Möchten Sie diesen Ausflug wirklich löschen? Dies kann nicht rückgängig gemacht werden.")) {
+      deleteTripMutation.mutate({ id: trip.id });
+    }
   };
 
   if (tripLoading) {
@@ -121,6 +189,28 @@ export default function TripDetail() {
             <FileText className="w-4 h-4" />
             Drucken
           </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEditOpen}
+                className="gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Bearbeiten
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteTrip}
+                className="gap-2 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="w-4 h-4" />
+                Löschen
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -295,6 +385,89 @@ export default function TripDetail() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialog} onOpenChange={setEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Ausflug bearbeiten</DialogTitle>
+            <DialogDescription>
+              Aktualisiere die Details dieses Ausflugs
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Titel</label>
+              <Input
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                placeholder="Ausflugstitel"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Zielort</label>
+              <Input
+                value={editForm.destination}
+                onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
+                placeholder="Zielort"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Region</label>
+                <Input
+                  value={editForm.region}
+                  onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
+                  placeholder="Region"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Kategorie</label>
+                <Input
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  placeholder="Kategorie"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Kosten</label>
+              <Select value={editForm.cost} onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Kostenlos</SelectItem>
+                  <SelectItem value="low">€</SelectItem>
+                  <SelectItem value="medium">€€</SelectItem>
+                  <SelectItem value="high">€€€</SelectItem>
+                  <SelectItem value="very_high">€€€€</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Beschreibung</label>
+              <Textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                placeholder="Beschreibung des Ausflugs"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialog(false)}>
+              Abbrechen
+            </Button>
+            <Button
+              onClick={handleEditSave}
+              disabled={updateTripMutation.isPending}
+            >
+              {updateTripMutation.isPending ? "Speichern..." : "Speichern"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
