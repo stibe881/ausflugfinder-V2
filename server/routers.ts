@@ -15,7 +15,7 @@ import {
   searchTrips, toggleFavorite, toggleDone, getPublicTrips, getStatistics,
   createDayPlan, getDayPlansByUser, getDayPlanById, updateDayPlan, deleteDayPlan,
   addTripToDayPlan, getDayPlanItems, getDayPlanItemsWithTrips, removeTripFromDayPlan, updateDayPlanItem,
-  addPackingListItem, getPackingListItems, updatePackingListItem, deletePackingListItem,
+  addPackingListItem, getPackingListItems, updatePackingListItem, updatePackingListItemFull, deletePackingListItem,
   addBudgetItem, getBudgetItems, updateBudgetItem, deleteBudgetItem,
   addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem
 } from "./db";
@@ -446,6 +446,13 @@ export const appRouter = router({
       .input(z.object({ id: z.number(), isPacked: z.number() }))
       .mutation(async ({ input }) => {
         await updatePackingListItem(input.id, input.isPacked);
+        return { success: true };
+      }),
+    update: protectedProcedure
+      .input(z.object({ id: z.number(), item: z.string().optional(), quantity: z.number().optional(), category: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updatePackingListItemFull(id, data);
         return { success: true };
       }),
     delete: protectedProcedure

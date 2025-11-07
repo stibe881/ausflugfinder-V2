@@ -29,6 +29,16 @@ const BUDGET_CATEGORIES = [
   "Sonstiges",
 ];
 
+const PACKING_CATEGORIES = [
+  "Kleidung",
+  "Schuhe",
+  "Elektronik",
+  "Toilettenartikel",
+  "Ausrüstung",
+  "Dokumente",
+  "Sonstiges",
+];
+
 export default function PlannerDetail() {
   const params = useParams();
   const planId = params.id ? parseInt(params.id) : 0;
@@ -40,6 +50,7 @@ export default function PlannerDetail() {
   const [budgetDialog, setBudgetDialog] = useState(false);
   const [editBudgetId, setEditBudgetId] = useState<number | null>(null);
   const [editBudgetActualCost, setEditBudgetActualCost] = useState("");
+  const [editPackingId, setEditPackingId] = useState<number | null>(null);
   const [checklistDialog, setChecklistDialog] = useState(false);
 
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
@@ -88,6 +99,18 @@ export default function PlannerDetail() {
 
   const togglePackingMutation = trpc.packingList.toggle.useMutation({
     onSuccess: () => refetchPacking(),
+  });
+
+  const updatePackingMutation = trpc.packingList.update.useMutation({
+    onSuccess: () => {
+      toast.success("Artikel aktualisiert!");
+      refetchPacking();
+      setEditPackingId(null);
+      setPackingItem({ item: "", quantity: 1, category: "" });
+    },
+    onError: () => {
+      toast.error("Fehler beim Aktualisieren des Artikels");
+    },
   });
 
   const deletePackingMutation = trpc.packingList.delete.useMutation({
@@ -207,6 +230,25 @@ export default function PlannerDetail() {
     }
     addPackingMutation.mutate({
       dayPlanId: planId,
+      ...packingItem,
+    });
+  };
+
+  const handleEditPacking = (id: number) => {
+    const item = packingList?.find(p => p.id === id);
+    if (item) {
+      setEditPackingId(id);
+      setPackingItem({ item: item.item, quantity: item.quantity || 1, category: item.category || "" });
+    }
+  };
+
+  const handleSavePackingItem = () => {
+    if (!packingItem.item.trim()) {
+      toast.error("Bitte gib einen Artikel ein");
+      return;
+    }
+    updatePackingMutation.mutate({
+      id: editPackingId!,
       ...packingItem,
     });
   };
@@ -656,7 +698,15 @@ export default function PlannerDetail() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Packliste</CardTitle>
-                  <Dialog open={packingDialog} onOpenChange={setPackingDialog}>
+                  <Dialog open={packingDialog} onOpenChange={(open) => {
+                    if (!open) {
+                      setPackingDialog(false);
+                      setEditPackingId(null);
+                      setPackingItem({ item: "", quantity: 1, category: "" });
+                    } else {
+                      setPackingDialog(true);
+                    }
+                  }}>
                     <DialogTrigger asChild>
                       <Button className="gap-2">
                         <Plus className="w-4 h-4" />
@@ -665,7 +715,9 @@ export default function PlannerDetail() {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Artikel zur Packliste hinzufügen</DialogTitle>
+                        <DialogTitle>
+                          {editPackingId ? "Artikel bearbeiten" : "Artikel zur Packliste hinzufügen"}
+                        </DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>
@@ -682,24 +734,35 @@ export default function PlannerDetail() {
                             type="number"
                             min="1"
                             value={packingItem.quantity}
-                            onChange={(e) => setPackingItem({ ...packingItem, quantity: parseInt(e.target.value) })}
+                            onChange={(e) => setPackingItem({ ...packingItem, quantity: parseInt(e.target.value) || 1 })}
                           />
                         </div>
                         <div>
                           <Label>Kategorie</Label>
-                          <Input
-                            value={packingItem.category}
-                            onChange={(e) => setPackingItem({ ...packingItem, category: e.target.value })}
-                            placeholder="z.B. Kleidung, Ausrüstung"
-                          />
+                          <Select value={packingItem.category} onValueChange={(v) => setPackingItem({ ...packingItem, category: v })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Kategorie wählen..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PACKING_CATEGORIES.map((cat) => (
+                                <SelectItem key={cat} value={cat}>
+                                  {cat}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button variant="outline" onClick={() => setPackingDialog(false)}>
+                        <Button variant="outline" onClick={() => {
+                          setPackingDialog(false);
+                          setEditPackingId(null);
+                          setPackingItem({ item: "", quantity: 1, category: "" });
+                        }}>
                           Abbrechen
                         </Button>
-                        <Button onClick={handleAddPacking} disabled={addPackingMutation.isPending}>
-                          Hinzufügen
+                        <Button onClick={editPackingId ? handleSavePackingItem : handleAddPacking} disabled={addPackingMutation.isPending || updatePackingMutation.isPending}>
+                          {editPackingId ? "Speichern" : "Hinzufügen"}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
@@ -729,6 +792,17 @@ export default function PlannerDetail() {
                             </Badge>
                           )}
                         </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            handleEditPacking(item.id);
+                            setPackingDialog(true);
+                          }}
+                          className="text-blue-600"
+                        >
+                          Bearbeiten
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"

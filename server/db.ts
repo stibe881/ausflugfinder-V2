@@ -504,6 +504,12 @@ export async function updatePackingListItem(id: number, isPacked: number) {
   return await db.update(packingListItems).set({ isPacked }).where(eq(packingListItems.id, id));
 }
 
+export async function updatePackingListItemFull(id: number, data: { item?: string; quantity?: number; category?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(packingListItems).set(data).where(eq(packingListItems.id, id));
+}
+
 export async function deletePackingListItem(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
