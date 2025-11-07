@@ -3,14 +3,23 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install build dependencies required for native node modules (like argon2)
-RUN apk add --no-cache python3 make g++
+# These must be installed before npm/pnpm install so they're available during dependency compilation
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    gcc \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 COPY patches ./patches
 
 # Install pnpm and dependencies
-RUN npm install -g pnpm && pnpm install
+RUN npm install -g pnpm@10.4.1 && pnpm install
 
 # Copy application files
 COPY . .
