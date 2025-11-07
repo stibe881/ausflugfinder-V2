@@ -21,8 +21,9 @@ export default function Login() {
   const [location, setLocation] = useLocation();
   const utils = trpc.useUtils();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+    if (e) e.preventDefault?.();
+    if (e) e.stopPropagation?.();
 
     if (!username || !password) {
       toast.error("Benutzername und Passwort sind erforderlich");
@@ -109,7 +110,7 @@ export default function Login() {
 
         {/* Login/Register Card */}
         <Card className="p-8 border-2 border-border/50 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             {mode === "register" && (
               <div>
                 <label className="block text-sm font-medium mb-2">Name</label>
@@ -170,13 +171,13 @@ export default function Login() {
             )}
 
             <Button
-              type="submit"
               disabled={loading}
+              onClick={handleSubmit as any}
               className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
             >
               {loading ? "Wird verarbeitet..." : (mode === "login" ? "Anmelden" : "Registrieren")}
             </Button>
-          </form>
+          </div>
 
           {/* Mode Toggle */}
           <div className="mt-6 text-center text-sm text-muted-foreground">
