@@ -175,11 +175,27 @@ export default function PlannerDetail() {
     },
   });
 
+  const deletePlanMutation = trpc.dayPlans.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Planung gelöscht!");
+      window.location.href = "/planner";
+    },
+    onError: () => {
+      toast.error("Fehler beim Löschen der Planung");
+    },
+  });
+
   const handleToggleDraft = (isDraft: number) => {
     updatePlanMutation.mutate({
       id: planId,
       isDraft,
     });
+  };
+
+  const handleDeleteDraft = () => {
+    if (confirm("Möchten Sie diese Planung wirklich löschen? Dies kann nicht rückgängig gemacht werden.")) {
+      deletePlanMutation.mutate({ id: planId });
+    }
   };
 
   const handleAddTrip = () => {
@@ -295,27 +311,27 @@ export default function PlannerDetail() {
   };
 
   const calculateTotalBudget = () => {
-    if (!budget) return { estimated: 0, actual: 0 };
+    if (!budget) return { estimated: 0, actual: 0, difference: 0 };
     const estimated = budget.reduce((sum, item) => sum + parseFloat(item.estimatedCost || "0"), 0);
     const actual = budget.reduce((sum, item) => sum + parseFloat(item.actualCost || "0"), 0);
-    return { estimated, actual };
+    return { estimated, actual, difference: actual - estimated };
   };
 
   const [exportType, setExportType] = useState<'ical' | 'pdf' | null>(null);
 
-  const { data: icalData } = trpc.export.planToICal.useQuery(
+  const { data: icalData, isLoading: icalLoading } = trpc.export.planToICal.useQuery(
     { planId },
     { enabled: exportType === 'ical' }
   );
 
-  const { data: pdfData } = trpc.export.planToPDF.useQuery(
+  const { data: pdfData, isLoading: pdfLoading } = trpc.export.planToPDF.useQuery(
     { planId },
     { enabled: exportType === 'pdf' }
   );
 
-  const handleExportICal = () => {
-    setExportType('ical');
-    if (icalData) {
+  // Handle iCal export when data arrives
+  useEffect(() => {
+    if (icalData && exportType === 'ical' && !icalLoading) {
       const blob = new Blob([icalData.content], { type: 'text/calendar' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -326,28 +342,42 @@ export default function PlannerDetail() {
       toast.success("iCal-Datei heruntergeladen!");
       setExportType(null);
     }
+  }, [icalData, icalLoading, exportType, plan]);
+
+  // Handle PDF export when data arrives
+  useEffect(() => {
+    if (pdfData && exportType === 'pdf' && !pdfLoading) {
+      try {
+        // Decode base64 string to binary data
+        const binaryString = atob(pdfData.content);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${plan?.title || 'plan'}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("PDF-Datei heruntergeladen!");
+        setExportType(null);
+      } catch (error) {
+        toast.error("Fehler beim Herunterladen der PDF");
+        console.error("PDF export error:", error);
+        setExportType(null);
+      }
+    }
+  }, [pdfData, pdfLoading, exportType, plan]);
+
+  const handleExportICal = () => {
+    setExportType('ical');
   };
 
   const handleExportPDF = () => {
     setExportType('pdf');
-    if (pdfData) {
-      // Decode base64 string to binary data
-      const binaryString = atob(pdfData.content);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      const blob = new Blob([bytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${plan?.title || 'plan'}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("PDF-Datei heruntergeladen!");
-      setExportType(null);
-    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -450,6 +480,17 @@ export default function PlannerDetail() {
                     Zurück zu Entwurf
                   </Button>
                 )}
+                {plan.isDraft === 1 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteDraft}
+                    disabled={deletePlanMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Löschen
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -475,7 +516,14 @@ export default function PlannerDetail() {
                 <DollarSign className="w-5 h-5 text-primary" />
                 <div>
                   <div className="text-xs">Budget</div>
-                  <div className="font-medium text-foreground">CHF {totalBudget.estimated.toFixed(2)}</div>
+                  <div className="font-medium text-foreground">
+                    CHF {totalBudget.estimated.toFixed(2)}
+                    {totalBudget.actual > 0 && (
+                      <span className={totalBudget.difference >= 0 ? "text-orange-600 ml-2" : "text-green-600 ml-2"}>
+                        {totalBudget.difference >= 0 ? "+" : ""}{totalBudget.difference.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
@@ -832,6 +880,11 @@ export default function PlannerDetail() {
                     <CardTitle>Budget-Planung</CardTitle>
                     <CardDescription>
                       Geschätzt: CHF {totalBudget.estimated.toFixed(2)} | Tatsächlich: CHF {totalBudget.actual.toFixed(2)}
+                      {totalBudget.actual > 0 && (
+                        <span className={totalBudget.difference >= 0 ? " text-orange-600" : " text-green-600"}>
+                          {" "}| Differenz: {totalBudget.difference >= 0 ? "+" : ""}{totalBudget.difference.toFixed(2)}
+                        </span>
+                      )}
                     </CardDescription>
                   </div>
                   <Dialog open={budgetDialog} onOpenChange={setBudgetDialog}>
@@ -916,7 +969,19 @@ export default function PlannerDetail() {
                           </div>
                           <div className="text-sm text-muted-foreground">
                             Geschätzt: CHF {parseFloat(item.estimatedCost).toFixed(2)}
-                            {item.actualCost && ` | Tatsächlich: CHF ${parseFloat(item.actualCost).toFixed(2)}`}
+                            {item.actualCost && (
+                              <>
+                                {` | Tatsächlich: CHF ${parseFloat(item.actualCost).toFixed(2)}`}
+                                {(() => {
+                                  const diff = parseFloat(item.actualCost) - parseFloat(item.estimatedCost);
+                                  return (
+                                    <span className={diff >= 0 ? " text-orange-600" : " text-green-600"}>
+                                      {` | ${diff >= 0 ? "+" : ""}${diff.toFixed(2)}`}
+                                    </span>
+                                  );
+                                })()}
+                              </>
+                            )}
                           </div>
                         </div>
                         <Dialog open={editBudgetId === item.id} onOpenChange={(open) => {
