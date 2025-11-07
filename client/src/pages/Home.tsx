@@ -228,7 +228,7 @@ export default function Home() {
                   <div className="text-sm text-muted-foreground">Kostenlos</div>
                 </div>
               </Link>
-              <Link href="/explore">
+              <Link href="/explore?cost=free">
                 <div className="bg-accent/10 rounded-2xl p-6 text-center border-2 border-accent/20 hover:border-accent/40 transition-all cursor-pointer hover:scale-105">
                   <div className="text-4xl font-bold text-accent mb-2">{stats.totalCategories}</div>
                   <div className="text-sm text-muted-foreground">Kategorien</div>

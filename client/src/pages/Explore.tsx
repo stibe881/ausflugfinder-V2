@@ -402,7 +402,16 @@ export default function Explore() {
               <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
                 {filteredTrips.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
-                    <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer h-full">
+                    <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer h-full overflow-hidden flex flex-col">
+                      {trip.image && (
+                        <div className="relative w-full h-48 bg-muted overflow-hidden">
+                          <img
+                            src={trip.image}
+                            alt={trip.title}
+                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
                       <CardHeader>
                         <div className="flex justify-between items-start mb-2">
                           <CardTitle className="text-xl">{trip.title}</CardTitle>
@@ -410,7 +419,7 @@ export default function Explore() {
                         </div>
                         <CardDescription className="line-clamp-2">{trip.description}</CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="flex-grow">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="w-4 h-4" />
