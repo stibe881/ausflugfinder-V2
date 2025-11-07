@@ -579,12 +579,13 @@ export const appRouter = router({
     planToICal: publicProcedure
       .input(z.object({ planId: z.number() }))
       .query(async ({ input }) => {
-        const plan = await getDayPlanById(input.planId);
-        const items = await getDayPlanItemsWithTrips(input.planId);
-        
-        if (!plan) throw new Error("Plan not found");
-        
-        const icalContent = generateICalendar({
+        try {
+          const plan = await getDayPlanById(input.planId);
+          const items = await getDayPlanItemsWithTrips(input.planId);
+
+          if (!plan) throw new Error("Plan not found");
+
+          const icalContent = generateICalendar({
           title: plan.title,
           description: plan.description || undefined,
           startDate: plan.startDate,
@@ -603,18 +604,23 @@ export const appRouter = router({
             notes: item.notes || undefined,
           })),
         });
-        
-        return { content: icalContent };
+
+          return { content: icalContent };
+        } catch (error) {
+          console.error('iCal export error:', error);
+          throw error;
+        }
       }),
     planToPDF: publicProcedure
       .input(z.object({ planId: z.number() }))
       .query(async ({ input }) => {
-        const plan = await getDayPlanById(input.planId);
-        const items = await getDayPlanItemsWithTrips(input.planId);
+        try {
+          const plan = await getDayPlanById(input.planId);
+          const items = await getDayPlanItemsWithTrips(input.planId);
 
-        if (!plan) throw new Error("Plan not found");
+          if (!plan) throw new Error("Plan not found");
 
-        const pdfBuffer = await generatePDFContent({
+          const pdfBuffer = await generatePDFContent({
           title: plan.title,
           description: plan.description || undefined,
           startDate: plan.startDate,
@@ -634,7 +640,11 @@ export const appRouter = router({
           })),
         });
 
-        return { content: pdfBuffer.toString('base64') };
+          return { content: pdfBuffer.toString('base64') };
+        } catch (error) {
+          console.error('PDF export error:', error);
+          throw error;
+        }
       }),
   }),
 });

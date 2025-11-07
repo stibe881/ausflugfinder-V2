@@ -34,7 +34,8 @@
       "Bash(npm install:*)",
       "Bash(pnpm add:*)",
       "Bash(NODE_ENV=development node:*)",
-      "Bash(DATABASE_URL=\"mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2\" npx tsx:*)"
+      "Bash(DATABASE_URL=\"mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2\" npx tsx:*)",
+      "Bash(DATABASE_URL=\"mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2\" node:*)"
     ],
     "deny": [],
     "ask": []
