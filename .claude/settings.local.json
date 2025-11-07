@@ -20,7 +20,11 @@
       "Bash(DATABASE_URL='mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2' JWT_SECRET='your-super-secret-jwt-key-minimum-32-characters-longg' node test-login.mjs)",
       "Bash(curl:*)",
       "Bash(node create-test-user.mjs:*)",
-      "Bash(node create-demo-data.mjs:*)"
+      "Bash(node create-demo-data.mjs:*)",
+      "Bash(node import-ausfluge.mjs:*)",
+      "Bash(mysql:*)",
+      "Bash(node import-ausfluege-v2.mjs:*)",
+      "Bash(node import-ausfluge-final.mjs:*)"
     ],
     "deny": [],
     "ask": []
