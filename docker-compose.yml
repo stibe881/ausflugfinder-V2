@@ -7,27 +7,12 @@ services:
       dockerfile: Dockerfile
     container_name: ausflug-manager-app
     ports:
-      - "5173:5173"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=mysql://admin2:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2
       - JWT_SECRET=aB3xY9mK2pQ8vL5nR7tW4sU6dF1gH0j9k2m5n8p0r3t5u7v9w1x3z5a7b9c1d3
       - VITE_APP_ID=ausflug-manager
-    restart: unless-stopped
-    depends_on:
-      - nginx
-    networks:
-      - ausflug-network
-
-  nginx:
-    image: nginx:latest
-    container_name: ausflug-manager-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
     restart: unless-stopped
     networks:
       - ausflug-network
