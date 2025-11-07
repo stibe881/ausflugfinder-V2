@@ -58,31 +58,71 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Middleware to inject environment variables into index.html before serving
+  const indexPath = path.resolve(distPath, "index.html");
+  let cachedHtml: string | null = null;
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    const indexPath = path.resolve(distPath, "index.html");
-    // Read the index.html file and replace environment variable placeholders
-    fs.readFile(indexPath, "utf-8", (err, html) => {
-      if (err) {
-        res.status(500).send("Could not load index.html");
-        return;
-      }
+  app.use((req, res, next) => {
+    // Only process requests for index.html or root path for SPA routing
+    if (req.path === "/" || req.path.endsWith(".html")) {
+      if (!cachedHtml) {
+        try {
+          let html = fs.readFileSync(indexPath, "utf-8");
 
-      // Replace VITE_* environment variables in the HTML
-      let processedHtml = html;
-      for (const [key, value] of Object.entries(process.env)) {
-        if (key.startsWith("VITE_")) {
-          const placeholder = `%${key}%`;
-          // Use simple string replacement to avoid regex issues
-          while (processedHtml.includes(placeholder)) {
-            processedHtml = processedHtml.replace(placeholder, String(value || ""));
+          // Replace VITE_* environment variables in the HTML
+          for (const [key, value] of Object.entries(process.env)) {
+            if (key.startsWith("VITE_")) {
+              const placeholder = `%${key}%`;
+              // Use simple string replacement to avoid regex issues
+              while (html.includes(placeholder)) {
+                html = html.replace(placeholder, String(value || ""));
+              }
+            }
           }
+
+          cachedHtml = html;
+        } catch (err) {
+          console.error("Failed to load index.html:", err);
+          cachedHtml = "<html><body>Error loading page</body></html>";
         }
       }
 
-      res.set({ "Content-Type": "text/html" }).send(processedHtml);
-    });
+      res.set({ "Content-Type": "text/html" });
+      res.send(cachedHtml);
+      return;
+    }
+
+    next();
+  });
+
+  // Serve static files
+  app.use(express.static(distPath));
+
+  // Fall through to index.html for SPA routing
+  app.use("*", (_req, res) => {
+    if (!cachedHtml) {
+      try {
+        let html = fs.readFileSync(indexPath, "utf-8");
+
+        // Replace VITE_* environment variables in the HTML
+        for (const [key, value] of Object.entries(process.env)) {
+          if (key.startsWith("VITE_")) {
+            const placeholder = `%${key}%`;
+            // Use simple string replacement to avoid regex issues
+            while (html.includes(placeholder)) {
+              html = html.replace(placeholder, String(value || ""));
+            }
+          }
+        }
+
+        cachedHtml = html;
+      } catch (err) {
+        console.error("Failed to load index.html:", err);
+        cachedHtml = "<html><body>Error loading page</body></html>";
+      }
+    }
+
+    res.set({ "Content-Type": "text/html" });
+    res.send(cachedHtml);
   });
 }
