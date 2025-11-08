@@ -81,12 +81,15 @@ export function generateICalendar(plan: ExportPlan): string {
 }
 
 /**
- * Generate a modern, beautifully formatted PDF
+ * Generate a modern, beautifully formatted PDF with proper encoding
  */
 export async function generatePDFContent(plan: ExportPlan): Promise<Buffer> {
   const doc = new PDFDocument({
     size: 'A4',
-    margin: 40,
+    margin: 50,
+    bufferPages: true,
+    // Force UTF-8 encoding for proper character handling
+    font: 'Helvetica',
   });
 
   // Collect PDF content into buffer
@@ -97,23 +100,36 @@ export async function generatePDFContent(plan: ExportPlan): Promise<Buffer> {
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    // Header with gradient effect simulation
-    doc.fontSize(28).font('Helvetica-Bold').fillColor('#3b82f6');
-    doc.text('AusflugFinder', { align: 'center' });
+    const colors = {
+      primary: '#0ea5e9',     // Modern cyan/blue
+      dark: '#0f172a',        // Dark slate
+      lightGray: '#f1f5f9',   // Light background
+      text: '#1e293b',        // Text color
+      lightText: '#64748b',   // Light text
+      border: '#cbd5e1',      // Border color
+    };
 
-    doc.fontSize(12).fillColor('#666666');
-    doc.text('Ausflugplanung', { align: 'center' });
+    // ===== HEADER =====
+    // Background box
+    doc.rect(0, 0, doc.page.width, 100).fill(colors.primary);
 
-    // Line separator
-    doc.moveTo(40, doc.y + 10).lineTo(555, doc.y + 10).stroke('#3b82f6');
-    doc.moveDown();
+    // Title
+    doc.fontSize(32).font('Helvetica-Bold').fillColor('#ffffff');
+    doc.text('AusflugFinder', 50, 25);
 
-    // Title section
-    doc.fontSize(24).font('Helvetica-Bold').fillColor('#1f2937');
+    // Subtitle
+    doc.fontSize(11).font('Helvetica').fillColor('#e0f2fe');
+    doc.text('Tagesplanung', 50, 60);
+
+    // Reset position
+    doc.moveDown(3);
+
+    // ===== PLAN TITLE & INFO =====
+    doc.fontSize(22).font('Helvetica-Bold').fillColor(colors.dark);
     doc.text(plan.title);
 
-    // Date range
-    doc.fontSize(11).font('Helvetica').fillColor('#666666');
+    // Date range with proper text (no emojis)
+    doc.fontSize(10).font('Helvetica').fillColor(colors.lightText);
     const startDate = new Date(plan.startDate).toLocaleDateString('de-DE', {
       weekday: 'long',
       year: 'numeric',
@@ -126,63 +142,78 @@ export async function generatePDFContent(plan: ExportPlan): Promise<Buffer> {
       month: 'long',
       day: 'numeric'
     });
-    doc.text(`📅 ${startDate} bis ${endDate}`);
+    doc.text(`[DATUM] ${startDate} bis ${endDate}`);
 
     if (plan.description) {
       doc.moveDown(0.5);
-      doc.fontSize(10).fillColor('#555555');
-      doc.text(plan.description);
+      doc.fontSize(10).fillColor(colors.text);
+      doc.text(plan.description, { width: 495 });
     }
 
-    doc.moveDown();
+    doc.moveDown(1.5);
 
-    // Trips section header
-    doc.fontSize(16).font('Helvetica-Bold').fillColor('#1f2937');
-    doc.text('🗺️ Geplante Ausflüge');
+    // ===== SECTION DIVIDER =====
+    doc.strokeColor(colors.primary);
+    doc.lineWidth(2);
+    doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+    doc.moveDown(0.8);
 
-    doc.moveTo(40, doc.y + 5).lineTo(555, doc.y + 5).stroke('#e5e7eb');
-    doc.moveDown();
+    // ===== TRIPS SECTION HEADER =====
+    doc.fontSize(14).font('Helvetica-Bold').fillColor(colors.dark);
+    doc.text('Geplante Ausflüge');
+    doc.moveDown(0.5);
 
-    // Trip items
+    // ===== TRIP ITEMS =====
     plan.items.forEach((item, index) => {
+      // Background for each item
+      doc.rect(45, doc.y - 3, 505, 75).fillAndStroke(colors.lightGray, colors.border);
+      doc.moveDown(0.3);
+
       // Item number and title
-      doc.fontSize(13).font('Helvetica-Bold').fillColor('#1f2937');
-      doc.text(`${index + 1}. ${item.trip.title}`);
+      doc.fontSize(12).font('Helvetica-Bold').fillColor(colors.primary);
+      doc.text(`${index + 1}. ${item.trip.title}`, 55, doc.y);
+      doc.moveDown(0.8);
 
       // Trip details
-      doc.fontSize(10).font('Helvetica').fillColor('#666666');
-      doc.text(`📍 Zielort: ${item.trip.destination}`);
+      doc.fontSize(9).font('Helvetica').fillColor(colors.text);
+      doc.text(`Zielort: ${item.trip.destination}`, 55);
 
-      if (item.startTime) {
-        let timeStr = `🕐 Zeit: ${item.startTime}`;
-        if (item.endTime) {
-          timeStr += ` - ${item.endTime}`;
+      if (item.startTime || item.endTime) {
+        let timeStr = 'Zeit: ';
+        if (item.startTime) {
+          timeStr += item.startTime;
         }
-        doc.text(timeStr);
+        if (item.endTime) {
+          timeStr += (item.startTime ? ' - ' : '') + item.endTime;
+        }
+        doc.text(timeStr, 55);
       }
 
       if (item.notes) {
-        doc.fontSize(9).fillColor('#555555').font('Helvetica-Oblique');
-        doc.text(`Notizen: ${item.notes}`);
-        doc.font('Helvetica');
+        doc.fontSize(8).font('Helvetica-Oblique').fillColor(colors.lightText);
+        doc.text(`Notizen: ${item.notes}`, 55, doc.y, { width: 480 });
       }
 
-      // Item separator
-      doc.moveDown(0.3);
-      if (index < plan.items.length - 1) {
-        doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#f0f0f0');
-      }
-      doc.moveDown(0.5);
+      doc.moveDown(0.8);
     });
 
-    // Footer
-    doc.moveDown();
-    doc.moveTo(40, doc.y).lineTo(555, doc.y).stroke('#3b82f6');
-    doc.moveDown();
+    doc.moveDown(1);
 
-    doc.fontSize(9).fillColor('#999999').font('Helvetica-Oblique');
+    // ===== FOOTER =====
+    doc.strokeColor(colors.primary);
+    doc.lineWidth(1);
+    doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+    doc.moveDown(0.8);
+
+    doc.fontSize(8).font('Helvetica').fillColor(colors.lightText);
     doc.text('Erstellt mit AusflugFinder', { align: 'center' });
-    doc.text(`${new Date().toLocaleString('de-DE')}`, { align: 'center' });
+    const timestamp = new Date().toLocaleDateString('de-DE') + ' ' +
+                     new Date().toLocaleTimeString('de-DE');
+    doc.text(timestamp, { align: 'center' });
+
+    // Page numbers
+    doc.fontSize(8).fillColor(colors.lightText);
+    doc.text(`Seite 1`, { align: 'right', at: [500, doc.page.height - 30] });
 
     doc.end();
   });
