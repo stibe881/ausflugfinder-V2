@@ -64,46 +64,71 @@ export default function Home() {
 
   // Load Mascot Widget on Home page
   useEffect(() => {
-    const loadMascotWidget = () => {
-      // Check if mascot div exists
-      const mascotDiv = document.getElementById('ausflugfinder-mascot');
-      if (!mascotDiv) {
-        console.warn('Mascot container div not found');
-        return;
-      }
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const loadMascotWidget = () => {
+        try {
+          // Check if mascot div exists
+          const mascotDiv = document.getElementById('ausflugfinder-mascot');
+          if (!mascotDiv) {
+            console.warn('Mascot container div not found');
+            return;
+          }
 
-      // Load CSS to document head
-      const cssLink = document.createElement('link');
-      cssLink.rel = 'stylesheet';
-      cssLink.href = '/assets/mascot/mascot-widget.css';
-      document.head.appendChild(cssLink);
-      console.log('Mascot CSS loaded');
+          // Load CSS to document head (check if not already loaded)
+          const existingCss = document.querySelector('link[href="/assets/mascot/mascot-widget.css"]');
+          if (!existingCss) {
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = '/assets/mascot/mascot-widget.css';
+            cssLink.onload = () => {
+              console.log('✓ Mascot CSS loaded successfully');
+            };
+            cssLink.onerror = () => {
+              console.error('✗ Failed to load mascot CSS from /assets/mascot/mascot-widget.css');
+            };
+            document.head.appendChild(cssLink);
+          }
 
-      // Set up configuration function on window
-      (window as any).MarmotMascotConfig = function(config: any) {
-        config.position = 'bottom-right';
-        config.size = 'medium';
-        config.basePath = '/assets/mascot';
-        config.factsPath = '/assets/mascot/facts_data.json';
+          // Set up configuration object with callback
+          (window as any).MarmotMascotConfig = {
+            position: 'bottom-right',
+            size: 'medium',
+            basePath: '/assets/mascot',
+            factsPath: '/assets/mascot/facts_data.json',
+            onInit: () => {
+              console.log('✓ Mascot widget initialized');
+            },
+            onError: (error: any) => {
+              console.error('✗ Mascot widget error:', error);
+            }
+          };
+          console.log('✓ Mascot config object set');
+
+          // Load mascot-widget.js script
+          const existingScript = document.querySelector('script[src="/assets/mascot/mascot-widget.js"]');
+          if (!existingScript) {
+            const widgetScript = document.createElement('script');
+            widgetScript.src = '/assets/mascot/mascot-widget.js';
+            widgetScript.async = false; // Load synchronously to ensure config is ready
+            widgetScript.onload = () => {
+              console.log('✓ Mascot widget script loaded successfully');
+            };
+            widgetScript.onerror = () => {
+              console.error('✗ Failed to load mascot widget script from /assets/mascot/mascot-widget.js');
+            };
+            document.body.appendChild(widgetScript);
+            console.log('→ Mascot widget script loading...');
+          }
+        } catch (error) {
+          console.error('✗ Error loading mascot widget:', error);
+        }
       };
-      console.log('Mascot config function set');
 
-      // Load mascot-widget.js script
-      const widgetScript = document.createElement('script');
-      widgetScript.src = '/assets/mascot/mascot-widget.js';
-      widgetScript.async = true;
-      widgetScript.onload = () => {
-        console.log('Mascot widget script loaded successfully');
-      };
-      widgetScript.onerror = () => {
-        console.error('Failed to load mascot widget script');
-      };
-      document.body.appendChild(widgetScript);
-      console.log('Mascot widget script loading started');
-    };
+      loadMascotWidget();
+    }, 100); // 100ms delay to ensure DOM is fully ready
 
-    // Load mascot widget when Home page mounts
-    loadMascotWidget();
+    return () => clearTimeout(timer);
   }, []);
 
   return (
