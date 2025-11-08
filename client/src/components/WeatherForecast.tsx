@@ -105,31 +105,20 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     );
   }
 
-  // Group hourly forecasts by date and filter to key hours (6, 12, 18 o'clock) for better readability
+  // Group all hourly forecasts by date (show all hours)
   const forecastsByDate = new Map<string, typeof filteredHourlyForecasts>();
   filteredHourlyForecasts.forEach((forecast) => {
     const dateStr = new Date(forecast.time).toISOString().split('T')[0];
-    const hour = new Date(forecast.time).getHours();
-
-    // Only include forecasts at 6, 12, and 18 o'clock to avoid too many tiles
-    if ([6, 12, 18].includes(hour)) {
-      if (!forecastsByDate.has(dateStr)) {
-        forecastsByDate.set(dateStr, []);
-      }
-      forecastsByDate.get(dateStr)!.push(forecast);
+    if (!forecastsByDate.has(dateStr)) {
+      forecastsByDate.set(dateStr, []);
     }
+    forecastsByDate.get(dateStr)!.push(forecast);
   });
 
-  // If no key hours found, fall back to showing all forecasts
-  if (forecastsByDate.size === 0) {
-    filteredHourlyForecasts.forEach((forecast) => {
-      const dateStr = new Date(forecast.time).toISOString().split('T')[0];
-      if (!forecastsByDate.has(dateStr)) {
-        forecastsByDate.set(dateStr, []);
-      }
-      forecastsByDate.get(dateStr)!.push(forecast);
-    });
-  }
+  // Sort forecasts by time
+  forecastsByDate.forEach((forecasts) => {
+    forecasts.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  });
 
   return (
     <Card>
@@ -143,39 +132,87 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {Array.from(forecastsByDate.entries())?.map(([dateStr, forecasts]) => (
-            <div key={dateStr}>
-              <h3 className="font-semibold text-lg mb-3 text-gray-700">
+            <div key={dateStr} className="border-b pb-8 last:border-b-0">
+              <h3 className="font-semibold text-lg mb-6 text-gray-700 dark:text-gray-300">
                 {format(new Date(dateStr), "EEEE, d. MMMM yyyy", { locale: de })}
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 overflow-x-auto pb-2">
-                {forecasts?.map((forecast, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-3 text-center border border-blue-100"
-                  >
-                    <div className="text-xs font-medium text-muted-foreground mb-2">
-                      {format(new Date(forecast.time), "HH:mm", { locale: de })}
-                    </div>
-                    <div className="flex justify-center mb-2">
-                      {getWeatherIcon(forecast.weather_code)}
-                    </div>
-                    <div className="text-xs font-medium text-gray-700 mb-2 line-clamp-2">
-                      {forecast.weather_description}
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-xs mb-2">
-                      <Thermometer className="w-3 h-3 text-orange-500" />
-                      <span className="font-semibold">{forecast.temperature}°C</span>
-                    </div>
-                    {forecast.precipitation_probability > 0 && (
-                      <div className="flex items-center justify-center gap-1 text-xs text-blue-600">
-                        <Droplets className="w-3 h-3" />
-                        <span>{forecast.precipitation_probability}%</span>
+
+              {/* Timeline Container */}
+              <div className="relative">
+                {/* Weather icons and temps above timeline */}
+                <div className="flex gap-2 mb-8 overflow-x-auto pb-4">
+                  {forecasts?.map((forecast, index) => {
+                    const hour = new Date(forecast.time).getHours();
+                    return (
+                      <div
+                        key={index}
+                        className="flex-shrink-0 flex flex-col items-center min-w-max"
+                      >
+                        {/* Icon */}
+                        <div className="mb-2 transition-transform hover:scale-125">
+                          {getWeatherIcon(forecast.weather_code)}
+                        </div>
+                        {/* Temperature */}
+                        <div className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">
+                          {Math.round(forecast.temperature)}°
+                        </div>
+                        {/* Description (abbreviated) */}
+                        <div className="text-xs text-muted-foreground text-center line-clamp-1 w-12 mb-1">
+                          {forecast.weather_description.substring(0, 10)}
+                        </div>
+                        {/* Precipitation if present */}
+                        {forecast.precipitation_probability > 0 && (
+                          <div className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5">
+                            <Droplets className="w-3 h-3" />
+                            <span>{forecast.precipitation_probability}%</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    );
+                  })}
+                </div>
+
+                {/* Timeline base line */}
+                <div className="bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-200 dark:from-blue-900 dark:via-cyan-900 dark:to-blue-900 h-1 rounded-full mb-3" />
+
+                {/* Time labels below timeline */}
+                <div className="flex gap-2 overflow-x-auto text-xs font-medium text-muted-foreground">
+                  {forecasts?.map((forecast, index) => {
+                    const hour = new Date(forecast.time).getHours();
+                    return (
+                      <div
+                        key={index}
+                        className="flex-shrink-0 text-center min-w-max px-1"
+                      >
+                        {hour}:00
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Summary stats */}
+              <div className="mt-6 grid grid-cols-3 gap-3">
+                <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3 text-center border border-blue-100 dark:border-blue-800">
+                  <div className="text-xs text-muted-foreground mb-1">Ø Temperatur</div>
+                  <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {Math.round(forecasts.reduce((sum, f) => sum + f.temperature, 0) / forecasts.length)}°C
                   </div>
-                ))}
+                </div>
+                <div className="bg-yellow-50 dark:bg-yellow-950/20 rounded-lg p-3 text-center border border-yellow-100 dark:border-yellow-800">
+                  <div className="text-xs text-muted-foreground mb-1">Max Temp</div>
+                  <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                    {Math.max(...forecasts.map(f => f.temperature))}°C
+                  </div>
+                </div>
+                <div className="bg-sky-50 dark:bg-sky-950/20 rounded-lg p-3 text-center border border-sky-100 dark:border-sky-800">
+                  <div className="text-xs text-muted-foreground mb-1">Max Regen</div>
+                  <div className="text-lg font-bold text-sky-600 dark:text-sky-400">
+                    {Math.max(...forecasts.map(f => f.precipitation_probability))}%
+                  </div>
+                </div>
               </div>
             </div>
           ))}
