@@ -212,7 +212,10 @@ export default function Planner() {
                         onChange={(e) => {
                           setNewPlanStartDate(e.target.value);
                           if (planType === "single") {
-                            setNewPlanEndDate(e.target.value);
+                            // For single-day plans, set end date to next day
+                            const nextDay = new Date(e.target.value);
+                            nextDay.setDate(nextDay.getDate() + 1);
+                            setNewPlanEndDate(nextDay.toISOString().split('T')[0]);
                           }
                         }}
                       />
