@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/contexts/i18nContext";
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 
 export default function Admin() {
+  const { t } = useI18n();
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -38,15 +40,15 @@ export default function Admin() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl flex items-center justify-center gap-2">
               <Lock className="w-6 h-6" />
-              Zugriff verweigert
+              {t("admin.accessDenied")}
             </CardTitle>
-            <CardDescription>Sie haben keine Admin-Berechtigung</CardDescription>
+            <CardDescription>{t("admin.noPermission")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/">
               <Button className="w-full">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Zurück zur Startseite
+                {t("admin.backHome")}
               </Button>
             </Link>
           </CardContent>
@@ -64,14 +66,14 @@ export default function Admin() {
             <Link href="/">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
-                Zurück
+                {t("admin.back")}
               </Button>
             </Link>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              Admin Portal
+              {t("admin.pageTitle")}
             </h1>
             <div className="flex items-center gap-2">
-              <Badge variant="default" className="bg-red-500">Admin</Badge>
+              <Badge variant="default" className="bg-red-500">{t("admin.adminBadge")}</Badge>
             </div>
           </div>
         </div>
@@ -82,19 +84,19 @@ export default function Admin() {
         <div className="container">
           {/* Dashboard Stats */}
           <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-6">Dashboard</h2>
+            <h2 className="text-3xl font-bold mb-6">{t("admin.dashboard")}</h2>
             {stats && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <Card>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <Activity className="w-4 h-4 text-primary" />
-                      Gesamt Ausflüge
+                      {t("admin.totalTrips")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-primary">{stats.totalActivities}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Alle registrierten Ausflüge</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("admin.allTrips")}</p>
                   </CardContent>
                 </Card>
 
@@ -102,12 +104,12 @@ export default function Admin() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-secondary" />
-                      Kategorien
+                      {t("admin.categoriesCount")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-secondary">{stats.totalCategories}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Verfügbare Kategorien</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("admin.availableCategories")}</p>
                   </CardContent>
                 </Card>
 
@@ -115,12 +117,12 @@ export default function Admin() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <BarChart3 className="w-4 h-4 text-accent" />
-                      Kostenlos
+                      {t("admin.freeActivities")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-accent">{stats.freeActivities}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Kostenlose Aktivitäten</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("admin.freeCount")}</p>
                   </CardContent>
                 </Card>
 
@@ -128,12 +130,12 @@ export default function Admin() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <Users className="w-4 h-4 text-purple-500" />
-                      Benutzerkonto
+                      {t("admin.userAccount")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold text-purple-500">{user.username}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Admin-Benutzer</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t("admin.adminUser")}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -142,7 +144,7 @@ export default function Admin() {
 
           {/* Trips Management */}
           <div>
-            <h2 className="text-3xl font-bold mb-6">Ausflug-Verwaltung</h2>
+            <h2 className="text-3xl font-bold mb-6">{t("admin.tripsManagement")}</h2>
             {allTrips && allTrips.length > 0 ? (
               <div className="space-y-4">
                 {allTrips.map((trip) => (
@@ -153,10 +155,10 @@ export default function Admin() {
                           <CardTitle className="text-xl flex items-center gap-2">
                             {trip.title}
                             {trip.isFavorite === 1 && (
-                              <Badge variant="secondary" className="bg-red-500/20 text-red-600">Favorit</Badge>
+                              <Badge variant="secondary" className="bg-red-500/20 text-red-600">{t("admin.favorite")}</Badge>
                             )}
                             {trip.isPublic === 1 && (
-                              <Badge variant="secondary" className="bg-blue-500/20 text-blue-600">Öffentlich</Badge>
+                              <Badge variant="secondary" className="bg-blue-500/20 text-blue-600">{t("admin.public")}</Badge>
                             )}
                           </CardTitle>
                           <CardDescription className="mt-1">{trip.description}</CardDescription>
@@ -165,7 +167,7 @@ export default function Admin() {
                           <Link href={`/trips/${trip.id}`}>
                             <Button variant="outline" size="sm" className="gap-2">
                               <Edit className="w-4 h-4" />
-                              Ansehen
+                              {t("admin.view")}
                             </Button>
                           </Link>
                         </div>
@@ -174,21 +176,21 @@ export default function Admin() {
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Zielort:</span>
+                          <span className="text-muted-foreground">{t("admin.destination")}</span>
                           <p className="font-medium">{trip.destination}</p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Kategorie:</span>
+                          <span className="text-muted-foreground">{t("admin.category")}</span>
                           <p className="font-medium">{trip.category || "—"}</p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Region:</span>
+                          <span className="text-muted-foreground">{t("admin.region")}</span>
                           <p className="font-medium">{trip.region || "—"}</p>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Kosten:</span>
+                          <span className="text-muted-foreground">{t("admin.cost")}</span>
                           <p className="font-medium">
-                            {trip.cost === 'free' ? 'Kostenlos' :
+                            {trip.cost === 'free' ? t("admin.costFree") :
                              trip.cost === 'low' ? '€' :
                              trip.cost === 'medium' ? '€€' :
                              trip.cost === 'high' ? '€€€' : '€€€€'}
@@ -202,7 +204,7 @@ export default function Admin() {
             ) : (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">Keine Ausflüge gefunden</p>
+                  <p className="text-muted-foreground">{t("admin.noTrips")}</p>
                 </CardContent>
               </Card>
             )}
