@@ -38,8 +38,6 @@
       this.currentFact = "";
       this.facts = [];
       this.isAnimating = false;
-      this.factsViewed = 0;
-      this.tricksPerformed = 0;
 
       this.init();
     }
@@ -88,18 +86,6 @@
               draggable="false"
             />
           </div>
-          <div class="mascot-stats" style="display: none;">
-            <div class="stats-item">
-              <span class="stats-icon">📚</span>
-              <span class="stats-value" id="facts-count">0</span>
-              <span class="stats-label">Fakten</span>
-            </div>
-            <div class="stats-item">
-              <span class="stats-icon">🎭</span>
-              <span class="stats-value" id="tricks-count">0</span>
-              <span class="stats-label">Tricks</span>
-            </div>
-          </div>
           <div class="mascot-hint">Klick mich! 👆</div>
         </div>
       `;
@@ -112,9 +98,6 @@
         mascotContainer: this.container.querySelector('.mascot-container'),
         mascotImage: this.container.querySelector('.mascot-image'),
         hint: this.container.querySelector('.mascot-hint'),
-        stats: this.container.querySelector('.mascot-stats'),
-        factsCount: this.container.querySelector('#facts-count'),
-        tricksCount: this.container.querySelector('#tricks-count'),
       };
     }
 
@@ -126,9 +109,7 @@
   performTrick(trick) {
     this.isAnimating = true;
     this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES[trick]);
-    this.tricksPerformed++;
-    this.updateStats();
-    
+
     // Sound abspielen
     if (window.MascotSounds) {
       if (trick === 'celebrating' || trick === 'jumping') {
@@ -149,7 +130,7 @@
 
       this.isAnimating = true;
       this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES.thinking);
-      
+
       // Click Sound
       if (window.MascotSounds) {
         window.MascotSounds.playClick();
@@ -163,9 +144,7 @@
         this.elements.hint.style.display = 'none';
         this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES.neutral);
         this.isAnimating = false;
-        this.factsViewed++;
-        this.updateStats();
-        
+
         // Pop Sound
         if (window.MascotSounds) {
           window.MascotSounds.playPop();
@@ -178,14 +157,6 @@
       setTimeout(() => {
         this.elements.factBubble.style.display = 'none';
       }, 300);
-    }
-
-    updateStats() {
-      if (this.factsViewed > 0 || this.tricksPerformed > 0) {
-        this.elements.stats.style.display = 'block';
-        this.elements.factsCount.textContent = this.factsViewed;
-        this.elements.tricksCount.textContent = this.tricksPerformed;
-      }
     }
 
     handleMascotClick() {
