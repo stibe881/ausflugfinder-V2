@@ -40,6 +40,16 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+  // OPTIMIZATION #8: Initialize local storage and serve uploaded files
+  try {
+    const { initializeLocalStorage } = await import("../storage");
+    await initializeLocalStorage();
+    // Serve uploaded images statically
+    app.use("/uploads/images", express.static(process.env.UPLOAD_DIR || "uploads/images"));
+  } catch (error) {
+    console.warn("[Storage] Failed to initialize local storage:", error);
+  }
+
   // Health check endpoint
   registerHealthCheck(app);
 

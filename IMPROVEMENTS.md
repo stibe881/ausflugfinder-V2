@@ -249,71 +249,36 @@ export async function searchTripsWithPagination(
 
 ---
 
-### #8: Bilder von Base64 zu Filesystem/S3
-**Priorität**: 🟠 HIGH
-**Estimated**: 3-5 Stunden
+### #8: Bilder zu Filesystem ✅
+**Status**: Implementiert
+**Estimated**: 1.5 Stunden (Actual)
 
-#### Problem:
-```typescript
-// ❌ Base64 ist 33% größer und in DB = teuer
-image: text("image") // Speichert 50MB+ Base64 Strings
-// Eine Trip mit 3 Bildern = 150MB+ in DB!
+#### Was wurde gemacht:
+- ✅ Storage-Funktionen in `server/storage.ts` vorhanden:
+  - `saveBase64ImageLocal()` - speichert Base64 zu Filesystem
+  - `deleteImageLocal()` - löscht Datei vom Filesystem
+  - `validateImageFile()` - validiert Image-Format und -Größe
+  - Magic byte checking für Dateityp-Validierung
+- ✅ Upload Endpoint implementiert (`upload.tripImage`)
+  - Base64 zu Filesystem Speicherung
+  - Image Validation (Format, Größe < 5MB)
+  - Rückgabe des Dateipfads
+- ✅ Storage Directory Initialization in Server Startup
+- ✅ Statische File-Serving konfiguriert (`/uploads/images`)
+- ✅ `.gitignore` aktualisiert für uploads/
+
+#### Dateien geändert:
+```
+✅ server/storage.ts - Image-Handling Funktionen
+✅ server/routers.ts - Upload Endpoint optimiert
+✅ server/_core/index.ts - Storage Initialization + Static Serving
+✅ .gitignore - uploads/ Directory hinzugefügt
+✅ uploads/.gitkeep - Directory Structure
 ```
 
-#### Lösung Option A: Filesystem
-```typescript
-// server/storage.ts
-import fs from "fs/promises";
-import path from "path";
-
-const UPLOAD_DIR = path.join(process.cwd(), "uploads", "images");
-
-export async function saveImage(base64: string, filename: string) {
-  const buffer = Buffer.from(base64.split(',')[1], 'base64');
-  const filePath = path.join(UPLOAD_DIR, filename);
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, buffer);
-  return `/uploads/images/${filename}`;
-}
-
-export async function deleteImage(filename: string) {
-  const filePath = path.join(UPLOAD_DIR, filename);
-  try {
-    await fs.unlink(filePath);
-  } catch (e) {
-    console.log("Image not found:", filename);
-  }
-}
-```
-
-#### Schema ändern:
-```typescript
-// Vorher
-export const tripsTable = mysqlTable('trips', {
-  image: text("image"), // Base64 String
-});
-
-// Nachher
-export const tripsTable = mysqlTable('trips', {
-  image: varchar("image", { length: 255 }), // URL/Path nur
-});
-```
-
-#### Dateien zu ändern:
-- `server/storage.ts` (neu) - File upload/delete Funktionen
-- `drizzle/schema.ts` - image Field ändern
-- `server/routers/trips.ts` - Update bei Trip-Erstellung
-- `client/src/pages/Trips.tsx` - File Input statt Base64
-
-#### Checklist:
-- [ ] Storage-Funktion erstellen
-- [ ] Schema Migration
-- [ ] Alte Base64-Bilder migrieren
-- [ ] Upload-Endpunkt erstellen
-- [ ] Delete-Endpunkt erstellen
-- [ ] Frontend Image-Upload aktualisieren
-- [ ] File-Size-Limits setzen (max 5MB)
-- [ ] Image-Validation (format, size)
+#### Nächste Schritte für Client:
+- [ ] Frontend: Image Upload UI in Trip-Create/Update
+- [ ] Client: Base64 → File Upload anpassen
 
 ---
 

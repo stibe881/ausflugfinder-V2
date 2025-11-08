@@ -105,6 +105,10 @@ jspm_packages/
 tmp/
 temp/
 
+# Uploaded files (user-generated content)
+uploads/
+!uploads/.gitkeep
+
 # Database
 *.db
 *.sqlite

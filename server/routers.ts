@@ -634,21 +634,33 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         try {
-          // For now, just return the base64 as-is
-          // In production, you might want to:
-          // 1. Save to file system
-          // 2. Save to cloud storage (S3, etc)
-          // 3. Compress the image
+          // OPTIMIZATION #8: Move images from Base64 to filesystem storage
+          const { saveBase64ImageLocal, validateImageFile } = await import("../storage");
 
-          // Since we're storing as data URL, just validate and return
-          if (!input.base64.startsWith('data:image/')) {
-            throw new Error("Invalid image format");
+          // Extract base64 data
+          const base64Data = input.base64.includes(",")
+            ? input.base64.split(",")[1]
+            : input.base64;
+
+          const buffer = Buffer.from(base64Data, "base64");
+
+          // Validate image file
+          const validation = validateImageFile(buffer);
+          if (!validation.valid) {
+            throw new Error(validation.error || "Invalid image file");
           }
 
-          return { url: input.base64 };
+          // Save to filesystem
+          const result = await saveBase64ImageLocal(input.base64, input.filename);
+
+          return {
+            url: result.path,
+            filename: result.filename,
+            success: true
+          };
         } catch (error) {
           console.error('Image upload error:', error);
-          throw new Error("Fehler beim Hochladen des Bildes");
+          throw new Error(error instanceof Error ? error.message : "Fehler beim Hochladen des Bildes");
         }
       }),
   }),
