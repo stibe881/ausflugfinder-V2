@@ -251,7 +251,7 @@ export default function Planner() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {dayPlans && dayPlans.length > 0 ? (
-                  dayPlans.map((plan) => (
+                  dayPlans?.map((plan) => (
                     <Link key={plan.id} href={`/planner/${plan.id}`}>
                       <div
                         className="p-3 rounded-lg cursor-pointer transition-all bg-gray-50 hover:bg-gray-100"
@@ -309,7 +309,7 @@ export default function Planner() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {planItems && planItems.length > 0 ? (
-                      planItems.map((item, index) => (
+                      planItems?.map((item, index) => (
                         <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                           <GripVertical className="w-5 h-5 text-gray-400" />
                           <div className="flex-1">
@@ -355,7 +355,7 @@ export default function Planner() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {trips && trips.length > 0 ? (
-                      trips.map((trip) => {
+                      trips?.map((trip) => {
                         const isInPlan = planItems?.some(item => item.tripId === trip.id);
                         return (
                           <div
