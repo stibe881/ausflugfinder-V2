@@ -19,7 +19,7 @@ export default function Friends() {
   const [newFriendEmail, setNewFriendEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Demo friends data
+  // Demo friends data - accepted friends
   const [friends, setFriends] = useState([
     {
       id: 1,
@@ -44,6 +44,17 @@ export default function Friends() {
       shared_trips: 1,
       shared_destinations: 2,
       avatar: "👨‍🦱"
+    }
+  ]);
+
+  // Pending friend requests
+  const [pendingRequests, setPendingRequests] = useState([
+    {
+      id: 101,
+      name: "Julia Keller",
+      email: "julia.keller@example.com",
+      avatar: "👩‍🦰",
+      requestedAt: "2024-11-06"
     }
   ]);
 
@@ -98,17 +109,16 @@ export default function Friends() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const newFriend = {
-        id: friends.length + 1,
+      const newRequest = {
+        id: Math.max(...pendingRequests.map(r => r.id), 0) + 1,
         name: newFriendEmail.split("@")[0],
         email: newFriendEmail,
-        shared_trips: 0,
-        shared_destinations: 0,
-        avatar: "👤"
+        avatar: "👤",
+        requestedAt: new Date().toISOString().split('T')[0]
       };
 
-      setFriends([...friends, newFriend]);
-      toast.success(t("friends.addSuccess"));
+      setPendingRequests([...pendingRequests, newRequest]);
+      toast.success(t("friends.requestSent"));
       setNewFriendEmail("");
       setIsAddOpen(false);
     } catch (error) {
@@ -126,6 +136,23 @@ export default function Friends() {
       }
       toast.success(t("friends.deleteSuccess"));
     }
+  };
+
+  const handleAcceptRequest = (requestId: number, requestData: any) => {
+    // Move from pending to accepted friends
+    const acceptedFriend = {
+      ...requestData,
+      shared_trips: 0,
+      shared_destinations: 0
+    };
+    setFriends([...friends, acceptedFriend]);
+    setPendingRequests(pendingRequests.filter(r => r.id !== requestId));
+    toast.success(t("friends.requestAccepted"));
+  };
+
+  const handleDeclineRequest = (requestId: number) => {
+    setPendingRequests(pendingRequests.filter(r => r.id !== requestId));
+    toast.success(t("friends.requestDeclined"));
   };
 
   const handleInviteViaEmail = (friendEmail: string) => {
@@ -248,6 +275,72 @@ export default function Friends() {
 
       {/* Main Content */}
       <main className="container py-12">
+        {/* Pending Requests Section */}
+        {pendingRequests.length > 0 && (
+          <div className="mb-8 p-6 bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-800 rounded-lg">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-amber-600" />
+              {t("friends.pendingRequests")} ({pendingRequests.length})
+            </h2>
+            <div className="space-y-3">
+              {pendingRequests.map((request) => (
+                <Card key={request.id} className="bg-white dark:bg-card border-amber-200 dark:border-amber-800">
+                  <CardContent className="pt-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="text-2xl">{request.avatar}</span>
+                        <div>
+                          <p className="font-semibold">{request.name}</p>
+                          <p className="text-xs text-muted-foreground">{request.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => handleInviteViaEmail(request.email)}
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          title="Send invitation via email"
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span className="hidden sm:inline">{t("friends.inviteEmail")}</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleInviteViaWhatsApp(request.email)}
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          title="Send invitation via WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="hidden sm:inline">{t("friends.inviteWhatsApp")}</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleAcceptRequest(request.id, request)}
+                          variant="default"
+                          size="sm"
+                          className="gap-1 bg-green-600 hover:bg-green-700"
+                        >
+                          <Plane className="w-4 h-4" />
+                          {t("friends.accept")}
+                        </Button>
+                        <Button
+                          onClick={() => handleDeclineRequest(request.id)}
+                          variant="destructive"
+                          size="sm"
+                          className="gap-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Friends List */}
           <div className="lg:col-span-1">
