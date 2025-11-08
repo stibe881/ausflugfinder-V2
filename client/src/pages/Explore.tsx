@@ -202,7 +202,7 @@ export default function Explore() {
   };
 
   // Filter trips by distance and attributes
-  const filteredTrips = (trips?.filter(trip => {
+  const filteredTrips = (trips?.data?.filter(trip => {
     // Distance filter
     if (nearbyOnly && userLocation) {
       if (!trip.latitude || !trip.longitude) return false;
@@ -499,16 +499,16 @@ export default function Explore() {
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <p className="mt-4 text-muted-foreground">Lade Ausflüge...</p>
             </div>
-          ) : trips && trips.length > 0 ? (
+          ) : trips?.data && trips.data.length > 0 ? (
             <>
-              <p className="text-muted-foreground mb-6">{trips.length} Ergebnisse gefunden</p>
+              <p className="text-muted-foreground mb-6">{trips.data.length} Ergebnisse gefunden</p>
               {viewMode === "map" ? (
                 <div className="h-[600px] w-full rounded-lg overflow-hidden border">
                   <MapView
                     onMapReady={(map) => {
                       const bounds = new window.google.maps.LatLngBounds();
 
-                      trips.forEach((trip) => {
+                      trips.data.forEach((trip) => {
                         if (trip.latitude && trip.longitude) {
                           const lat = parseFloat(trip.latitude);
                           const lng = parseFloat(trip.longitude);
