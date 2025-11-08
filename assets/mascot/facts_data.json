@@ -1,84 +1,248 @@
 {
   "facts": [
     {
-      "category": "natur",
-      "text": "Wusstest du, dass Murmeltiere bis zu 9 Monate im Winterschlaf verbringen? Sie senken dabei ihre Körpertemperatur auf nur 5 Grad Celsius!"
+      "text": "Murmeltiere halten 6-7 Monate Winterschlaf und verlieren dabei bis zu 50% ihres Körpergewichts!",
+      "category": "natur"
     },
     {
-      "category": "natur",
-      "text": "Der Edelweiss wächst nur auf Höhen zwischen 1800 und 3000 Metern. Die Schweizer nennen ihn liebevoll 'Königin der Alpenblumen'."
+      "text": "Murmeltiere pfeifen zur Warnung vor Gefahren - daher der Name 'Pfeiferli' in der Schweiz!",
+      "category": "natur"
     },
     {
-      "category": "natur",
-      "text": "In der Schweiz gibt es über 3000 Bergseen! Der tiefste ist der Lago Maggiore mit 372 Metern Tiefe."
+      "text": "Ein Murmeltier kann bis zu 200 Mal pro Minute atmen, wenn es aufgeregt ist!",
+      "category": "natur"
     },
     {
-      "category": "berge",
-      "text": "Die Schweiz hat 48 Viertausender! Der höchste Berg ist die Dufourspitze mit 4634 Metern."
+      "text": "Murmeltiere leben in Kolonien von bis zu 20 Tieren und haben ein komplexes Sozialsystem!",
+      "category": "natur"
     },
     {
-      "category": "berge",
-      "text": "Das Matterhorn ist einer der meistfotografierten Berge der Welt. Seine perfekte Pyramidenform macht es so einzigartig!"
+      "text": "Der Herzschlag eines Murmeltiers sinkt im Winterschlaf von 200 auf nur 5 Schläge pro Minute!",
+      "category": "natur"
     },
     {
-      "category": "berge",
-      "text": "Der Aletschgletscher ist mit 23 Kilometern Länge der längste Gletscher der Alpen. Er enthält etwa 11 Milliarden Tonnen Eis!"
+      "text": "Edelweiss wächst nur in Höhen über 1800 Metern und ist streng geschützt!",
+      "category": "natur"
     },
     {
-      "category": "tiere",
-      "text": "Steinböcke können an fast senkrechten Felswänden klettern! Ihre Hufe haben eine weiche Sohle, die wie Gummi haftet."
+      "text": "Die Alpen wachsen jedes Jahr um etwa 1 Millimeter - durch die Kollision der Kontinentalplatten!",
+      "category": "natur"
     },
     {
-      "category": "tiere",
-      "text": "Der Bartgeier hat eine Flügelspannweite von bis zu 2,9 Metern! Er ist der größte Vogel der Alpen."
+      "text": "In der Schweiz gibt es über 1500 Seen - das sind mehr als in jedem anderen europäischen Land!",
+      "category": "natur"
     },
     {
-      "category": "tiere",
-      "text": "Gämsen können bis zu 8 Meter weit und 2 Meter hoch springen! Sie sind wahre Kletterkünstler."
+      "text": "Ein Steinbock kann bis zu 3,5 Meter hoch springen - das ist höher als ein Elefant!",
+      "category": "natur"
     },
     {
-      "category": "geschichte",
-      "text": "Die Schweiz ist seit 1815 neutral. Das ist über 200 Jahre Frieden!"
+      "text": "Der Bartgeier ist der einzige Vogel, der sich hauptsächlich von Knochen ernährt!",
+      "category": "natur"
     },
     {
-      "category": "geschichte",
-      "text": "Wilhelm Tell ist die berühmteste Schweizer Legende. Der Apfelschuss soll im Jahr 1307 stattgefunden haben."
+      "text": "Alpenblumen können Temperaturen bis -40°C überleben!",
+      "category": "natur"
     },
     {
-      "category": "geschichte",
-      "text": "Die erste Zahnradbahn Europas wurde 1871 auf die Rigi gebaut. Sie fährt noch heute!"
+      "text": "Der Enzian blüht erst nach 10-60 Jahren zum ersten Mal!",
+      "category": "natur"
     },
     {
-      "category": "ausflüge",
-      "text": "Der Rheinfall bei Schaffhausen ist der größte Wasserfall Europas! Pro Sekunde stürzen bis zu 600.000 Liter Wasser in die Tiefe."
+      "text": "In den Schweizer Alpen leben über 30.000 verschiedene Tierarten!",
+      "category": "natur"
     },
     {
-      "category": "ausflüge",
-      "text": "Die Pilatus-Bahn ist die steilste Zahnradbahn der Welt mit einer Steigung von bis zu 48 Prozent!"
+      "text": "Gämsen können auf nur 5cm breiten Felsvorsprüngen stehen!",
+      "category": "natur"
     },
     {
-      "category": "ausflüge",
-      "text": "Im Verzasca-Tal gibt es einen türkisfarbenen Fluss mit kristallklarem Wasser. Man kann bis zu 15 Meter tief sehen!"
+      "text": "Der Alpensalamander ist lebendgebärend und bringt nur 2 Junge zur Welt!",
+      "category": "natur"
     },
     {
-      "category": "natur",
-      "text": "Die Schweiz hat über 65.000 Kilometer markierte Wanderwege. Das entspricht mehr als dem Erdumfang!"
+      "text": "Die Schweiz hat über 65'000 Kilometer markierte Wanderwege - das längste Wanderwegnetz der Welt!",
+      "category": "ausflug"
     },
     {
-      "category": "berge",
-      "text": "Der Jungfraujoch ist mit 3454 Metern die höchstgelegene Bahnstation Europas. Man nennt es das 'Top of Europe'!"
+      "text": "Der Aletschgletscher ist mit 23 Kilometern der längste Gletscher der Alpen!",
+      "category": "ausflug"
     },
     {
-      "category": "tiere",
-      "text": "Murmeltiere pfeifen zur Warnung vor Gefahr! Jeder Pfiff hat eine andere Bedeutung - je nach Art der Bedrohung."
+      "text": "Die Pilatus-Bahn ist mit 48% Steigung die steilste Zahnradbahn der Welt!",
+      "category": "ausflug"
     },
     {
-      "category": "natur",
-      "text": "Alpenrosen blühen nur auf kalkfreien Böden. Ihre leuchtend roten Blüten sind ein Symbol der Schweizer Alpen."
+      "text": "In der Schweiz gibt es über 200 Berggipfel, die höher als 3000 Meter sind!",
+      "category": "ausflug"
     },
     {
-      "category": "ausflüge",
-      "text": "Der Creux du Van ist ein natürliches Felsenamphitheater mit 160 Meter hohen Felswänden. Ein spektakuläres Naturwunder!"
+      "text": "Der Rheinfall bei Schaffhausen ist mit 150 Metern Breite der größte Wasserfall Europas!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Die Schweiz hat mehr als 7000 Bergseen - perfekt für Wanderungen und Picknicks!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Das Jungfraujoch auf 3454m ist die höchstgelegene Bahnstation Europas!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Die Schweiz hat über 1500 Berghütten - mehr als jedes andere Land!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Der Vierwaldstättersee hat eine maximale Tiefe von 214 Metern!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Die Schöllenenschlucht war früher so gefährlich, dass sie 'Teufelsbrücke' genannt wurde!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Der Creux du Van ist ein 160 Meter hoher Felskessel - ein natürliches Amphitheater!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Die Trümmelbachfälle sind die einzigen unterirdischen Gletscherwasserfälle Europas!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Der Oeschinensee wurde 2007 zum schönsten Bergsee der Schweiz gewählt!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Die Gornergratbahn fährt seit 1898 und ist die zweithöchste Bergbahn Europas!",
+      "category": "ausflug"
+    },
+    {
+      "text": "Die Schweiz ist seit 1815 neutral und hat seither an keinem Krieg teilgenommen!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Der Gotthard-Basistunnel ist mit 57 Kilometern der längste Eisenbahntunnel der Welt!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Wilhelm Tell ist eine Legende - es gibt keine historischen Beweise für seine Existenz!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Die Schweizer Garde beschützt den Papst seit 1506 - über 500 Jahre!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Das Schweizerische Rote Kreuz wurde 1863 von Henry Dunant gegründet!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Die erste Zahnradbahn Europas wurde 1871 auf die Rigi gebaut!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Die Schweiz hatte nie einen König - sie ist seit 1291 eine Eidgenossenschaft!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Der Rütlischwur von 1291 gilt als Gründungsdatum der Schweiz!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Die erste Postkutsche fuhr 1849 zwischen Bern und Genf!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Das Frauenstimmrecht wurde in der Schweiz erst 1971 eingeführt!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Der Simplontunnel war bei seiner Eröffnung 1906 der längste Tunnel der Welt!",
+      "category": "geschichte"
+    },
+    {
+      "text": "Die Schweizer Flagge ist neben der Vatikanflagge die einzige quadratische Nationalflagge!",
+      "category": "geschichte"
+    },
+    {
+      "text": "In der Schweiz werden vier Landessprachen gesprochen: Deutsch, Französisch, Italienisch und Rätoromanisch!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz hat mehr als 450 verschiedene Käsesorten - Käsefondue ist Nationalgericht!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Schweizer essen durchschnittlich 11 Kilogramm Schokolade pro Jahr - Weltrekord!",
+      "category": "schweiz"
+    },
+    {
+      "text": "In der Schweiz gibt es mehr Banken als Zahnärzte!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Das Matterhorn ist 4478 Meter hoch und einer der bekanntesten Berge der Welt!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz hat die höchste Dichte an Museen weltweit - über 1100 Museen!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Der Schweizer Taschenmesser-Hersteller Victorinox produziert täglich 45'000 Messer!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz recycelt 94% aller Glasflaschen - Weltmeister im Recycling!",
+      "category": "schweiz"
+    },
+    {
+      "text": "In Zürich gibt es mehr Brunnen als in Rom - über 1200 öffentliche Trinkbrunnen!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweizer Uhrenindustrie exportiert jährlich Uhren im Wert von über 20 Milliarden Franken!",
+      "category": "schweiz"
+    },
+    {
+      "text": "In der Schweiz gibt es mehr als 7000 registrierte Vereine - Vereinskultur ist riesig!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Schweizer trinken durchschnittlich 128 Liter Bier pro Jahr!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz hat 26 Kantone und jeder hat seine eigene Verfassung!",
+      "category": "schweiz"
+    },
+    {
+      "text": "In Appenzell Innerrhoden wird noch per Handaufheben abgestimmt - die Landsgemeinde!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz produziert jährlich über 200.000 Tonnen Käse!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Der längste Bahnhof der Schweiz ist Bern mit 490 Metern Länge!",
+      "category": "schweiz"
+    },
+    {
+      "text": "In der Schweiz werden pro Kopf und Jahr 9 Kilogramm Kaffee getrunken!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz hat die höchste Dichte an Seilbahnen weltweit - über 2000!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Schweizer Schokolade wurde 1875 von Daniel Peter erfunden - die erste Milchschokolade!",
+      "category": "schweiz"
+    },
+    {
+      "text": "Die Schweiz hat mehr als 100 verschiedene Brotsorten!",
+      "category": "schweiz"
     }
   ]
 }

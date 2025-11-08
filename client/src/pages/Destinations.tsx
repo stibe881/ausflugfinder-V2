@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/contexts/i18nContext";
 import { MapPin, Plus, Trash2, Edit, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Destinations() {
+  const { t } = useI18n();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -28,35 +30,35 @@ export default function Destinations() {
 
   const createMutation = trpc.destinations.create.useMutation({
     onSuccess: () => {
-      toast.success("Destination erfolgreich erstellt!");
+      toast.success(t("destinations.createSuccess"));
       refetch();
       setIsDialogOpen(false);
       resetForm();
     },
     onError: (error) => {
-      toast.error("Fehler beim Erstellen: " + error.message);
+      toast.error(t("destinations.createError") + error.message);
     },
   });
 
   const updateMutation = trpc.destinations.update.useMutation({
     onSuccess: () => {
-      toast.success("Destination erfolgreich aktualisiert!");
+      toast.success(t("destinations.updateSuccess"));
       refetch();
       setIsDialogOpen(false);
       resetForm();
     },
     onError: (error) => {
-      toast.error("Fehler beim Aktualisieren: " + error.message);
+      toast.error(t("destinations.updateError") + error.message);
     },
   });
 
   const deleteMutation = trpc.destinations.delete.useMutation({
     onSuccess: () => {
-      toast.success("Destination gelöscht!");
+      toast.success(t("destinations.deleteSuccess"));
       refetch();
     },
     onError: (error) => {
-      toast.error("Fehler beim Löschen: " + error.message);
+      toast.error(t("destinations.deleteError") + error.message);
     },
   });
 
@@ -86,7 +88,7 @@ export default function Destinations() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Möchten Sie diese Destination wirklich löschen?")) {
+    if (confirm(t("destinations.deleteConfirm"))) {
       deleteMutation.mutate({ id });
     }
   };
@@ -103,12 +105,12 @@ export default function Destinations() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <MapPin className="w-16 h-16 text-primary mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Destinationen</h1>
+        <h1 className="text-3xl font-bold mb-2">{t("destinations.loginRequired")}</h1>
         <p className="text-muted-foreground mb-6 text-center max-w-md">
-          Melden Sie sich an, um Ihre Lieblingsdestinationen zu speichern und zu verwalten
+          {t("destinations.loginDesc")}
         </p>
         <a href={getLoginUrl()}>
-          <Button size="lg">Jetzt anmelden</Button>
+          <Button size="lg">{t("destinations.loginBtn")}</Button>
         </a>
       </div>
     );
@@ -120,10 +122,10 @@ export default function Destinations() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
-              Meine Destinationen
+              {t("destinations.pageTitle")}
             </h1>
             <p className="text-muted-foreground">
-              Speichere deine Lieblingsorte für zukünftige Ausflüge
+              {t("destinations.pageSubtitle")}
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -133,57 +135,57 @@ export default function Destinations() {
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2">
                 <Plus className="w-5 h-5" />
-                Neue Destination
+                {t("destinations.newDestination")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
                   <DialogTitle>
-                    {editingId ? "Destination bearbeiten" : "Neue Destination"}
+                    {editingId ? t("destinations.editDestination") : t("destinations.createDestination")}
                   </DialogTitle>
                   <DialogDescription>
-                    Füge einen neuen Lieblingsort hinzu
+                    {t("destinations.addFavorite")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label htmlFor="name">Name *</Label>
+                    <Label htmlFor="name">{t("destinations.nameRequired")}</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
-                      placeholder="z.B. Schwarzwald"
+                      placeholder={t("destinations.namePlaceholder")}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="location">Ort *</Label>
+                    <Label htmlFor="location">{t("destinations.locationRequired")}</Label>
                     <Input
                       id="location"
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       required
-                      placeholder="z.B. Baden-Württemberg, Deutschland"
+                      placeholder={t("destinations.locationPlaceholder")}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="description">Beschreibung</Label>
+                    <Label htmlFor="description">{t("destinations.description")}</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Was macht diesen Ort besonders?"
+                      placeholder={t("destinations.descPlaceholder")}
                       rows={3}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="imageUrl">Bild-URL (optional)</Label>
+                    <Label htmlFor="imageUrl">{t("destinations.imageUrl")}</Label>
                     <Input
                       id="imageUrl"
                       value={formData.imageUrl}
                       onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                      placeholder="https://..."
+                      placeholder={t("destinations.imageUrlPlaceholder")}
                     />
                   </div>
                 </div>
@@ -193,13 +195,13 @@ export default function Destinations() {
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    Abbrechen
+                    {t("destinations.cancel")}
                   </Button>
                   <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                     {(createMutation.isPending || updateMutation.isPending) && (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     )}
-                    {editingId ? "Aktualisieren" : "Erstellen"}
+                    {editingId ? t("destinations.update") : t("destinations.create")}
                   </Button>
                 </DialogFooter>
               </form>
@@ -244,7 +246,7 @@ export default function Destinations() {
                     className="flex-1"
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Bearbeiten
+                    {t("common.edit")}
                   </Button>
                   <Button
                     variant="outline"
@@ -261,13 +263,13 @@ export default function Destinations() {
         ) : (
           <Card className="p-12 text-center">
             <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Noch keine Destinationen</h3>
+            <h3 className="text-xl font-semibold mb-2">{t("destinations.noDestinations")}</h3>
             <p className="text-muted-foreground mb-4">
-              Füge deine ersten Lieblingsorte hinzu
+              {t("destinations.noDestinationsDesc")}
             </p>
             <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Erste Destination erstellen
+              {t("destinations.createFirst")}
             </Button>
           </Card>
         )}

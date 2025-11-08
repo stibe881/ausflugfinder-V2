@@ -1,226 +1,183 @@
-/**
- * AusflugFinder Maskottchen Widget Styles
- * Standalone CSS für einfache Integration
- */
+/* Murmeltier-Maskottchen Widget Styles */
 
-.ausflugfinder-mascot-widget {
+#ausflugfinder-mascot {
   position: fixed;
+  bottom: 20px;
+  right: 20px;
   z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Positionierung */
-.mascot-position-bottom-right {
-  bottom: 24px;
-  right: 24px;
-}
-
-.mascot-position-bottom-left {
-  bottom: 24px;
-  left: 24px;
-  align-items: flex-start;
-}
-
-.mascot-position-top-right {
-  top: 24px;
-  right: 24px;
-}
-
-.mascot-position-top-left {
-  top: 24px;
-  left: 24px;
-  align-items: flex-start;
-}
-
-/* Fakten-Bubble */
-.mascot-fact-bubble {
-  max-width: 320px;
-  padding: 16px;
-  background: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  position: relative;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-}
-
-.mascot-fact-bubble.mascot-fact-show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.mascot-fact-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  line-height: 1;
-  color: #6b7280;
+  width: 180px;
+  height: 180px;
   cursor: pointer;
-  padding: 4px 8px;
-  transition: color 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
-.mascot-fact-close:hover {
-  color: #1f2937;
-}
-
-.mascot-fact-text {
-  margin: 0;
-  padding-right: 24px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #1f2937;
-}
-
-/* Maskottchen Container */
-.mascot-container {
+#ausflugfinder-mascot.mascot-small {
   width: 120px;
   height: 120px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
-.mascot-container:hover {
-  transform: scale(1.05);
+#ausflugfinder-mascot.mascot-large {
+  width: 240px;
+  height: 240px;
 }
 
-.mascot-container.mascot-animating {
-  /* Animation entfernt - Maskottchen bleibt am Boden */
+#ausflugfinder-mascot.mascot-bottom-left {
+  right: auto;
+  left: 20px;
+}
+
+#ausflugfinder-mascot.mascot-top-right {
+  bottom: auto;
+  top: 20px;
+}
+
+#ausflugfinder-mascot.mascot-top-left {
+  bottom: auto;
+  top: 20px;
+  right: auto;
+  left: 20px;
+}
+
+.mascot-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .mascot-image {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  transition: transform 0.3s ease;
 }
 
-/* Statistik-Anzeige */
-.mascot-stats {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 8px 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.mascot-image.mascot-animating {
+  transform: scale(1.1);
 }
 
-.stats-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
+.mascot-image:hover {
+  transform: scale(1.05);
 }
 
-.stats-icon {
+/* Hover-Effekt: Pulsierender Ring */
+.mascot-hover-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: rgba(251, 146, 60, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.mascot-container:hover .mascot-hover-ring {
+  opacity: 1;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Sprechblase */
+.mascot-speech-bubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  margin-bottom: 16px;
+  min-width: 250px;
+  max-width: 350px;
+  background-color: white;
+  border: 2px solid #1f2937;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.mascot-speech-bubble.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.mascot-speech-bubble.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+}
+
+.mascot-speech-text {
+  color: #1f2937;
   font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+  margin: 0;
 }
 
-.stats-value {
-  font-weight: 600;
-  color: #3b82f6;
-  min-width: 20px;
+/* Sprechblasen-Pfeil */
+.mascot-speech-arrow {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #1f2937;
 }
 
-.stats-label {
-  color: #6b7280;
-}
-
-/* Hinweis-Text */
-.mascot-hint {
-  font-size: 12px;
-  color: #6b7280;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 4px 8px;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  animation: mascot-pulse 2s ease infinite;
-  white-space: nowrap;
-}
-
-/* Animationen */
-@keyframes mascot-wiggle {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-5deg);
-  }
-  75% {
-    transform: rotate(5deg);
-  }
-}
-
-@keyframes mascot-scale-pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes mascot-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+.mascot-speech-arrow::after {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid white;
 }
 
 /* Responsive Anpassungen */
 @media (max-width: 768px) {
-  .ausflugfinder-mascot-widget {
-    bottom: 16px;
-    right: 16px;
+  #ausflugfinder-mascot {
+    width: 120px;
+    height: 120px;
+    bottom: 10px;
+    right: 10px;
   }
-
-  .mascot-position-bottom-left,
-  .mascot-position-top-left {
-    left: 16px;
-  }
-
-  .mascot-position-top-right,
-  .mascot-position-top-left {
-    top: 16px;
-  }
-
-  .mascot-container {
-    width: 100px;
-    height: 100px;
-  }
-
-  .mascot-fact-bubble {
+  
+  .mascot-speech-bubble {
+    min-width: 200px;
     max-width: 280px;
-    padding: 12px;
-  }
-
-  .mascot-fact-text {
     font-size: 13px;
+    padding: 12px;
   }
 }
 
 @media (max-width: 480px) {
-  .mascot-container {
-    width: 80px;
-    height: 80px;
+  #ausflugfinder-mascot {
+    width: 100px;
+    height: 100px;
   }
-
-  .mascot-fact-bubble {
-    max-width: calc(100vw - 32px);
+  
+  .mascot-speech-bubble {
+    min-width: 180px;
+    max-width: 250px;
+    font-size: 12px;
+    padding: 10px;
   }
 }

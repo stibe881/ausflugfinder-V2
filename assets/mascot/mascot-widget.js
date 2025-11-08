@@ -1,235 +1,206 @@
 /**
- * AusflugFinder Maskottchen Widget
- * Standalone JavaScript Widget für einfache Integration
+ * Murmeltier-Maskottchen Widget
+ * Standalone JavaScript Version für einfache Integration
  */
 
 (function() {
   'use strict';
 
-  const MASCOT_IMAGES = {
-    neutral: "mascot_neutral.png",
-    waving: "mascot_waving.png",
-    jumping: "mascot_jumping.png",
-    thinking: "mascot_thinking.png",
-    celebrating: "mascot_celebrating.png",
-    sleeping: "mascot_sleeping.png",
-    eating: "mascot_eating.png",
-    curious: "mascot_curious.png",
+  // Konfiguration
+  const CONFIG = {
+    position: 'bottom-right', // bottom-right, bottom-left, top-right, top-left
+    size: 'medium', // small, medium, large
+    basePath: '', // Pfad zu den Bildern (leer = gleiches Verzeichnis)
+    factsPath: 'facts_data.json', // Pfad zur Fakten-Datei
+    bubbleDisplayTime: 8000, // Zeit in ms, wie lange die Sprechblase angezeigt wird
   };
 
-  const TRICKS = ["waving", "jumping", "celebrating", "sleeping", "eating", "curious"];
+  // Globale Variablen
+  let facts = [];
+  let currentAnimation = 'waving';
+  let lastAnimation = 'waving';
+  let isAnimating = false;
+  let container, image, speechBubble, speechText;
 
-  class MascotWidget {
-    constructor(containerId, options = {}) {
-      this.container = document.getElementById(containerId);
-      if (!this.container) {
-        console.error(`Container with id "${containerId}" not found`);
-        return;
-      }
+  // Animations-Typen
+  const animations = ['jumping', 'dancing', 'surprised'];
 
-      this.options = {
-        basePath: options.basePath || '',
-        position: options.position || 'bottom-right',
-        ...options
-      };
-
-      this.currentImage = MASCOT_IMAGES.neutral;
-      this.showFact = false;
-      this.currentFact = "";
-      this.facts = [];
-      this.isAnimating = false;
-      this.factsViewed = 0;
-      this.tricksPerformed = 0;
-
-      this.init();
-    }
-
-    async init() {
-      await this.loadFacts();
-      this.render();
-      this.attachEventListeners();
-    }
-
-    async loadFacts() {
-      try {
-        const response = await fetch(this.options.basePath + 'facts_data.json');
-        const data = await response.json();
-        this.facts = data.facts;
-      } catch (err) {
-        console.error('Fehler beim Laden der Fakten:', err);
-      }
-    }
-
-    getImagePath(imageName) {
-      return this.options.basePath + imageName;
-    }
-
-    render() {
-      const positionClasses = {
-        'bottom-right': 'mascot-position-bottom-right',
-        'bottom-left': 'mascot-position-bottom-left',
-        'top-right': 'mascot-position-top-right',
-        'top-left': 'mascot-position-top-left',
-      };
-
-      const positionClass = positionClasses[this.options.position] || positionClasses['bottom-right'];
-
-      this.container.innerHTML = `
-        <div class="ausflugfinder-mascot-widget ${positionClass}">
-          <div class="mascot-fact-bubble" style="display: none;">
-            <button class="mascot-fact-close" aria-label="Schließen">×</button>
-            <p class="mascot-fact-text"></p>
-          </div>
-          <div class="mascot-container">
-            <img 
-              src="${this.getImagePath(this.currentImage)}" 
-              alt="Murmeltier Maskottchen" 
-              class="mascot-image"
-              draggable="false"
-            />
-          </div>
-          <div class="mascot-stats" style="display: none;">
-            <div class="stats-item">
-              <span class="stats-icon">📚</span>
-              <span class="stats-value" id="facts-count">0</span>
-              <span class="stats-label">Fakten</span>
-            </div>
-            <div class="stats-item">
-              <span class="stats-icon">🎭</span>
-              <span class="stats-value" id="tricks-count">0</span>
-              <span class="stats-label">Tricks</span>
-            </div>
-          </div>
-          <div class="mascot-hint">Klick mich! 👆</div>
-        </div>
-      `;
-
-      this.elements = {
-        widget: this.container.querySelector('.ausflugfinder-mascot-widget'),
-        factBubble: this.container.querySelector('.mascot-fact-bubble'),
-        factText: this.container.querySelector('.mascot-fact-text'),
-        factClose: this.container.querySelector('.mascot-fact-close'),
-        mascotContainer: this.container.querySelector('.mascot-container'),
-        mascotImage: this.container.querySelector('.mascot-image'),
-        hint: this.container.querySelector('.mascot-hint'),
-        stats: this.container.querySelector('.mascot-stats'),
-        factsCount: this.container.querySelector('#facts-count'),
-        tricksCount: this.container.querySelector('#tricks-count'),
-      };
-    }
-
-    attachEventListeners() {
-      this.elements.mascotContainer.addEventListener('click', () => this.handleMascotClick());
-      this.elements.factClose.addEventListener('click', () => this.closeFact());
-    }
-
-  performTrick(trick) {
-    this.isAnimating = true;
-    this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES[trick]);
-    this.tricksPerformed++;
-    this.updateStats();
+  // Saisonerkennung
+  function getCurrentSeason() {
+    const month = new Date().getMonth(); // 0-11
     
-    // Sound abspielen
-    if (window.MascotSounds) {
-      if (trick === 'celebrating' || trick === 'jumping') {
-        window.MascotSounds.playHappy();
-      } else {
-        window.MascotSounds.playWhistle();
-      }
+    if (month === 11 || month === 0 || month === 1) {
+      return 'winter';
+    } else if (month >= 2 && month <= 4) {
+      return 'spring';
+    } else if (month >= 5 && month <= 7) {
+      return 'summer';
+    } else {
+      return 'autumn';
     }
+  }
 
-    setTimeout(() => {
-      this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES.neutral);
-      this.isAnimating = false;
+  // Bildpfad generieren
+  function getImagePath(animationType) {
+    const season = getCurrentSeason();
+    const basePath = CONFIG.basePath ? CONFIG.basePath + '/' : '';
+    
+    if (animationType === 'waving') {
+      return basePath + 'marmot_' + season + '.png';
+    } else {
+      return basePath + 'marmot_family_' + animationType + '.png';
+    }
+  }
+
+  // Zufälligen Fakt auswählen
+  function getRandomFact() {
+    if (facts.length === 0) return { text: 'Willkommen!', category: 'info' };
+    const randomIndex = Math.floor(Math.random() * facts.length);
+    return facts[randomIndex];
+  }
+
+  // Zufällige Animation auswählen (ohne Wiederholung)
+  function getRandomAnimation() {
+    const availableAnimations = animations.filter(anim => anim !== lastAnimation);
+    
+    if (availableAnimations.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableAnimations.length);
+      return availableAnimations[randomIndex];
+    } else {
+      // Fallback
+      const randomIndex = Math.floor(Math.random() * animations.length);
+      return animations[randomIndex];
+    }
+  }
+
+  // Sprechblase anzeigen
+  function showSpeechBubble(text) {
+    speechText.textContent = text;
+    speechBubble.classList.remove('hidden');
+    speechBubble.classList.add('visible');
+
+    // Nach X Sekunden ausblenden
+    setTimeout(function() {
+      hideSpeechBubble();
+    }, CONFIG.bubbleDisplayTime);
+  }
+
+  // Sprechblase ausblenden
+  function hideSpeechBubble() {
+    speechBubble.classList.remove('visible');
+    speechBubble.classList.add('hidden');
+  }
+
+  // Animation zurücksetzen
+  function resetToWaving() {
+    setTimeout(function() {
+      if (!isAnimating) {
+        currentAnimation = 'waving';
+        image.src = getImagePath('waving');
+      }
     }, 2000);
   }
 
-    showRandomFact() {
-      if (this.facts.length === 0) return;
+  // Click-Handler
+  function handleClick() {
+    if (isAnimating) return;
 
-      this.isAnimating = true;
-      this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES.thinking);
-      
-      // Click Sound
-      if (window.MascotSounds) {
-        window.MascotSounds.playClick();
-      }
+    isAnimating = true;
+    image.classList.add('mascot-animating');
 
-      setTimeout(() => {
-        const randomFact = this.facts[Math.floor(Math.random() * this.facts.length)];
-        this.elements.factText.textContent = randomFact.text;
-        this.elements.factBubble.style.display = 'block';
-        this.elements.factBubble.classList.add('mascot-fact-show');
-        this.elements.hint.style.display = 'none';
-        this.elements.mascotImage.src = this.getImagePath(MASCOT_IMAGES.neutral);
-        this.isAnimating = false;
-        this.factsViewed++;
-        this.updateStats();
-        
-        // Pop Sound
-        if (window.MascotSounds) {
-          window.MascotSounds.playPop();
-        }
-      }, 800);
-    }
+    // Zufällige Animation auswählen
+    const randomAnimation = getRandomAnimation();
+    currentAnimation = randomAnimation;
+    lastAnimation = randomAnimation;
+    image.src = getImagePath(randomAnimation);
 
-    closeFact() {
-      this.elements.factBubble.classList.remove('mascot-fact-show');
-      setTimeout(() => {
-        this.elements.factBubble.style.display = 'none';
-      }, 300);
-    }
+    // Zufälligen Fakt anzeigen
+    const fact = getRandomFact();
+    showSpeechBubble(fact.text);
 
-    updateStats() {
-      if (this.factsViewed > 0 || this.tricksPerformed > 0) {
-        this.elements.stats.style.display = 'block';
-        this.elements.factsCount.textContent = this.factsViewed;
-        this.elements.tricksCount.textContent = this.tricksPerformed;
-      }
-    }
-
-    handleMascotClick() {
-      if (this.isAnimating) return;
-      
-      // Click Sound
-      if (window.MascotSounds) {
-        window.MascotSounds.playClick();
-      }
-
-      // 50% Chance für Kunststück oder Fakt
-      const showTrick = Math.random() > 0.5;
-
-      if (showTrick) {
-        const randomTrick = TRICKS[Math.floor(Math.random() * TRICKS.length)];
-        this.performTrick(randomTrick);
-      } else {
-        this.showRandomFact();
-      }
-    }
+    // Animation-Lock nach 2 Sekunden aufheben
+    setTimeout(function() {
+      isAnimating = false;
+      image.classList.remove('mascot-animating');
+      resetToWaving();
+    }, 2000);
   }
 
-  // Widget global verfügbar machen
-  window.AusflugFinderMascot = MascotWidget;
-
-  // Auto-Initialisierung wenn Container existiert
-  document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('ausflugfinder-mascot');
-    if (container) {
-      // Basis-Pfad aus dem Script-Tag auslesen oder leer lassen für gleichen Ordner
-      const scripts = document.getElementsByTagName('script');
-      let basePath = '';
-      for (let script of scripts) {
-        if (script.src && script.src.includes('mascot-widget.js')) {
-          const scriptUrl = script.src;
-          basePath = scriptUrl.substring(0, scriptUrl.lastIndexOf('/') + 1);
-          break;
+  // Fakten laden
+  function loadFacts() {
+    fetch(CONFIG.factsPath)
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Fakten konnten nicht geladen werden');
         }
-      }
-      // Wenn kein Pfad gefunden wurde, versuche relativen Pfad
-      if (!basePath) {
-        basePath = './';
-      }
-      new MascotWidget('ausflugfinder-mascot', { basePath });
+        return response.json();
+      })
+      .then(function(data) {
+        facts = data.facts || [];
+        console.log('Murmeltier-Maskottchen: ' + facts.length + ' Fakten geladen');
+      })
+      .catch(function(error) {
+        console.error('Murmeltier-Maskottchen Fehler:', error);
+        // Fallback-Fakten
+        facts = [
+          { text: 'Willkommen bei ausflugfinder.ch!', category: 'info' },
+          { text: 'Klicken Sie mich für mehr Informationen!', category: 'info' }
+        ];
+      });
+  }
+
+  // Widget initialisieren
+  function initWidget() {
+    const widget = document.getElementById('ausflugfinder-mascot');
+    if (!widget) {
+      console.error('Murmeltier-Maskottchen: Element #ausflugfinder-mascot nicht gefunden');
+      return;
     }
-  });
+
+    // Position und Größe setzen
+    widget.className = 'mascot-' + CONFIG.position + ' mascot-' + CONFIG.size;
+
+    // HTML-Struktur erstellen
+    widget.innerHTML = `
+      <div class="mascot-container">
+        <div class="mascot-speech-bubble hidden">
+          <p class="mascot-speech-text"></p>
+          <div class="mascot-speech-arrow"></div>
+        </div>
+        <img class="mascot-image" src="${getImagePath('waving')}" alt="Murmeltier-Familie" draggable="false">
+        <div class="mascot-hover-ring"></div>
+      </div>
+    `;
+
+    // Elemente referenzieren
+    container = widget.querySelector('.mascot-container');
+    image = widget.querySelector('.mascot-image');
+    speechBubble = widget.querySelector('.mascot-speech-bubble');
+    speechText = widget.querySelector('.mascot-speech-text');
+
+    // Event-Listener
+    widget.addEventListener('click', handleClick);
+
+    // Fakten laden
+    loadFacts();
+
+    console.log('Murmeltier-Maskottchen initialisiert (Saison: ' + getCurrentSeason() + ')');
+  }
+
+  // Konfiguration überschreiben (optional)
+  window.MarmotMascotConfig = function(options) {
+    if (options.position) CONFIG.position = options.position;
+    if (options.size) CONFIG.size = options.size;
+    if (options.basePath) CONFIG.basePath = options.basePath;
+    if (options.factsPath) CONFIG.factsPath = options.factsPath;
+    if (options.bubbleDisplayTime) CONFIG.bubbleDisplayTime = options.bubbleDisplayTime;
+  };
+
+  // Widget beim Laden der Seite initialisieren
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWidget);
+  } else {
+    initWidget();
+  }
+
 })();
