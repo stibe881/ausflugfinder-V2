@@ -39,7 +39,11 @@
       "Bash(npm run build:*)",
       "Bash(xcopy:*)",
       "WebFetch(domain:ausflugfinder.ch)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm run dev:*)",
+      "Bash(pnpm run dev)",
+      "Bash(timeout 10 bash:*)",
+      "Bash(pnpm run build:*)"
     ],
     "deny": [],
     "ask": []
