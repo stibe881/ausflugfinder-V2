@@ -8,15 +8,10 @@ services:
     container_name: ausflug-manager-app
     ports:
       - "3000:3000"
+    env_file:
+      - .env.docker
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=mysql://ausflugfinder:!LeliBist.1561!@185.178.193.60:3306/ausflugfinder_v2
-      - JWT_SECRET=aB3xY9mK2pQ8vL5nR7tW4sU6dF1gH0j9k2m5n8p0r3t5u7v9w1x3z5a7b9c1d3
-      - VITE_APP_ID=ausflug-manager
-      - VITE_APP_TITLE=Ausflug Manager
-      - VITE_APP_LOGO=https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=128
-      - VITE_ANALYTICS_ENDPOINT=
-      - VITE_ANALYTICS_WEBSITE_ID=
     restart: unless-stopped
     networks:
       - ausflug-network
