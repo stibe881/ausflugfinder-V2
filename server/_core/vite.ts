@@ -48,15 +48,20 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "../..", "dist", "public");
+  const distPath = path.resolve(process.cwd(), "dist", "public");
   if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
+    process.exit(1);
   }
 
   // Middleware to inject environment variables into index.html before serving
   const indexPath = path.resolve(distPath, "index.html");
+  if (!fs.existsSync(indexPath)) {
+    console.error(`Could not find index.html at: ${indexPath}`);
+    process.exit(1);
+  }
   let cachedHtml: string | null = null;
 
   app.use((req, res, next) => {
