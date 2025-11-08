@@ -1,5 +1,6 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
+import cors from "cors";
 
 /**
  * Security & Rate Limiting Middleware Configuration
@@ -87,7 +88,6 @@ export function applySecurity(app: Express) {
   app.use(securityHeaders);
 
   // CORS middleware
-  const cors = require("cors");
   app.use(cors(corsOptions));
 
   // General API rate limiting (apply to all /api routes)
