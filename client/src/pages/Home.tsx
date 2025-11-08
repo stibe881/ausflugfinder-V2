@@ -62,30 +62,47 @@ export default function Home() {
     };
   }, []);
 
-  // Load Mascot Widget
+  // Load Mascot Widget on Home page
   useEffect(() => {
-    const loadMascotWidget = async () => {
-      // Load CSS
+    const loadMascotWidget = () => {
+      // Check if mascot div exists
+      const mascotDiv = document.getElementById('ausflugfinder-mascot');
+      if (!mascotDiv) {
+        console.warn('Mascot container div not found');
+        return;
+      }
+
+      // Load CSS to document head
       const cssLink = document.createElement('link');
       cssLink.rel = 'stylesheet';
       cssLink.href = '/assets/mascot/mascot-widget.css';
       document.head.appendChild(cssLink);
+      console.log('Mascot CSS loaded');
 
-      // Set up configuration
+      // Set up configuration function on window
       (window as any).MarmotMascotConfig = function(config: any) {
         config.position = 'bottom-right';
         config.size = 'medium';
         config.basePath = '/assets/mascot';
         config.factsPath = '/assets/mascot/facts_data.json';
       };
+      console.log('Mascot config function set');
 
-      // Load mascot-widget.js
+      // Load mascot-widget.js script
       const widgetScript = document.createElement('script');
       widgetScript.src = '/assets/mascot/mascot-widget.js';
       widgetScript.async = true;
+      widgetScript.onload = () => {
+        console.log('Mascot widget script loaded successfully');
+      };
+      widgetScript.onerror = () => {
+        console.error('Failed to load mascot widget script');
+      };
       document.body.appendChild(widgetScript);
+      console.log('Mascot widget script loading started');
     };
 
+    // Load mascot widget when Home page mounts
     loadMascotWidget();
   }, []);
 
