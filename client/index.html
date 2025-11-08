@@ -15,7 +15,6 @@
     <link rel="apple-touch-icon" href="%VITE_APP_LOGO%" />
     <link rel="manifest" href="/manifest.json" />
     <title>%VITE_APP_TITLE%</title>
-    <link rel="stylesheet" href="/assets/mascot/mascot-widget.css">
     <!-- Add Google Fonts here, example:
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,7 +24,6 @@
 
   <body>
     <div id="root"></div>
-    <div id="ausflugfinder-mascot"></div>
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- Service Worker Registration for PWA -->
@@ -56,17 +54,6 @@
         }
       })();
     </script>
-
-    <!-- Mascot Widget -->
-    <script>
-      window.MarmotMascotConfig = function(config) {
-        config.position = 'bottom-right';
-        config.size = 'medium';
-        config.basePath = '/assets/mascot';
-        config.factsPath = '/assets/mascot/facts_data.json';
-      };
-    </script>
-    <script src="/assets/mascot/mascot-widget.js"></script>
   </body>
 
 </html>

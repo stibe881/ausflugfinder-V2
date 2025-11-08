@@ -40,7 +40,7 @@ export default function RouteMap({ planItems }: RouteMapProps) {
   };
 
   const handleMapReady = (map: google.maps.Map) => {
-    if (itemsWithCoords.length < 2) return;
+    if (!itemsWithCoords || itemsWithCoords.length < 2) return;
 
     const directionsService = new window.google.maps.DirectionsService();
     const directionsRenderer = new window.google.maps.DirectionsRenderer({
@@ -48,7 +48,7 @@ export default function RouteMap({ planItems }: RouteMapProps) {
       suppressMarkers: false,
     });
 
-    const waypoints = itemsWithCoords.slice(1, -1).map((item) => ({
+    const waypoints = itemsWithCoords?.slice(1, -1)?.map((item) => ({
       location: new window.google.maps.LatLng(
         Number(item.trip.latitude),
         Number(item.trip.longitude)

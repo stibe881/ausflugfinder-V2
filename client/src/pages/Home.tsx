@@ -71,11 +71,13 @@ export default function Home() {
       cssLink.href = '/assets/mascot/mascot-widget.css';
       document.head.appendChild(cssLink);
 
-      // Load sounds.js
-      const soundsScript = document.createElement('script');
-      soundsScript.src = '/assets/mascot/sounds.js';
-      soundsScript.async = true;
-      document.body.appendChild(soundsScript);
+      // Set up configuration
+      (window as any).MarmotMascotConfig = function(config: any) {
+        config.position = 'bottom-right';
+        config.size = 'medium';
+        config.basePath = '/assets/mascot';
+        config.factsPath = '/assets/mascot/facts_data.json';
+      };
 
       // Load mascot-widget.js
       const widgetScript = document.createElement('script');
