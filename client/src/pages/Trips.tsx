@@ -12,8 +12,10 @@ import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, Do
 import { Link } from "wouter";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useI18n } from "@/contexts/i18nContext";
 
 export default function Trips() {
+  const { t } = useI18n();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,20 +31,20 @@ export default function Trips() {
       // Reset form
       const form = document.querySelector('form');
       if (form) form.reset();
-      toast.success("Ausflug erfolgreich erstellt! 🎉");
+      toast.success(t("trips.createSuccess"));
     },
     onError: (error) => {
-      toast.error("Fehler beim Erstellen: " + error.message);
+      toast.error(t("trips.createError") + error.message);
     },
   });
 
   const deleteMutation = trpc.trips.delete.useMutation({
     onSuccess: () => {
       refetch();
-      toast.success("Ausflug gelöscht!");
+      toast.success(t("trips.deleteSuccess"));
     },
     onError: (error) => {
-      toast.error("Fehler beim Löschen: " + error.message);
+      toast.error(t("trips.deleteError") + error.message);
     },
   });
 
@@ -96,13 +98,13 @@ export default function Trips() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "planned":
-        return "Geplant";
+        return t("trips.statusPlanned");
       case "ongoing":
-        return "Laufend";
+        return t("trips.statusOngoing");
       case "completed":
-        return "Abgeschlossen";
+        return t("trips.statusCompleted");
       case "cancelled":
-        return "Abgesagt";
+        return t("trips.statusCancelled");
       default:
         return status;
     }
@@ -121,14 +123,14 @@ export default function Trips() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md w-full mx-4 border-2">
           <CardHeader>
-            <CardTitle>Anmeldung erforderlich</CardTitle>
+            <CardTitle>{t("trips.loginRequired")}</CardTitle>
             <CardDescription>
-              Du musst angemeldet sein, um deine Ausflüge zu verwalten.
+              {t("trips.loginRequiredDesc")}
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex gap-2">
             <Link href="/">
-              <Button variant="outline">Zurück</Button>
+              <Button variant="outline">{t("trips.back")}</Button>
             </Link>
           </CardFooter>
         </Card>
@@ -146,13 +148,13 @@ export default function Trips() {
               <Link href="/">
                 <Button variant="ghost" size="sm" className="gap-2 hover:bg-primary/10">
                   <ArrowLeft className="w-4 h-4" />
-                  Zurück
+                  {t("trips.back")}
                 </Button>
               </Link>
               <div className="flex items-center gap-2">
                 <Mountain className="w-6 h-6 text-primary" />
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Meine Ausflüge
+                  {t("trips.myTrips")}
                 </h1>
               </div>
             </div>
@@ -160,47 +162,47 @@ export default function Trips() {
               <DialogTrigger asChild>
                 <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
                   <Plus className="w-4 h-4" />
-                  Neue Planung
+                  {t("trips.newPlan")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-card border-2 border-border max-w-3xl max-h-[90vh] overflow-y-auto">
                 <form onSubmit={handleSubmit}>
                   <DialogHeader>
-                    <DialogTitle className="text-card-foreground text-2xl">Neuen Ausflug erstellen</DialogTitle>
+                    <DialogTitle className="text-card-foreground text-2xl">{t("trips.createNew")}</DialogTitle>
                     <DialogDescription>
-                      Fülle die Details für deinen neuen Ausflug aus. Mit * gekennzeichnete Felder sind erforderlich.
+                      {t("trips.createNewDesc")}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     {/* Basic Information */}
                     <div className="border-b border-border pb-4">
-                      <h3 className="font-semibold text-sm mb-3">Grundinformationen</h3>
+                      <h3 className="font-semibold text-sm mb-3">{t("trips.basicInfo")}</h3>
                       <div className="grid gap-2">
-                        <Label htmlFor="title">Titel *</Label>
+                        <Label htmlFor="title">{t("trips.title")} *</Label>
                         <Input
                           id="title"
                           name="title"
-                          placeholder="z.B. Wanderung in den Alpen"
+                          placeholder={t("trips.titlePlaceholder")}
                           required
                           className="bg-background border-input"
                         />
                       </div>
                       <div className="grid gap-2 mt-3">
-                        <Label htmlFor="destination">Ziel *</Label>
+                        <Label htmlFor="destination">{t("trips.destination")} *</Label>
                         <Input
                           id="destination"
                           name="destination"
-                          placeholder="z.B. Garmisch-Partenkirchen"
+                          placeholder={t("trips.destinationPlaceholder")}
                           required
                           className="bg-background border-input"
                         />
                       </div>
                       <div className="grid gap-2 mt-3">
-                        <Label htmlFor="description">Beschreibung</Label>
+                        <Label htmlFor="description">{t("trips.description")}</Label>
                         <Textarea
                           id="description"
                           name="description"
-                          placeholder="Beschreibe deinen Ausflug..."
+                          placeholder={t("trips.descriptionPlaceholder")}
                           rows={3}
                           className="bg-background border-input"
                         />
@@ -209,10 +211,10 @@ export default function Trips() {
 
                     {/* Date & Participants */}
                     <div className="border-b border-border pb-4">
-                      <h3 className="font-semibold text-sm mb-3">Zeitplanung & Teilnehmer</h3>
+                      <h3 className="font-semibold text-sm mb-3">{t("trips.timePlanParticipants")}</h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="startDate">Startdatum *</Label>
+                          <Label htmlFor="startDate">{t("trips.startDate")} *</Label>
                           <Input
                             id="startDate"
                             name="startDate"
@@ -222,7 +224,7 @@ export default function Trips() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="endDate">Enddatum *</Label>
+                          <Label htmlFor="endDate">{t("trips.endDate")} *</Label>
                           <Input
                             id="endDate"
                             name="endDate"
@@ -234,7 +236,7 @@ export default function Trips() {
                       </div>
                       <div className="grid grid-cols-2 gap-4 mt-3">
                         <div className="grid gap-2">
-                          <Label htmlFor="participants">Teilnehmer *</Label>
+                          <Label htmlFor="participants">{t("trips.participants")} *</Label>
                           <Input
                             id="participants"
                             name="participants"
@@ -246,16 +248,16 @@ export default function Trips() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="status">Status</Label>
+                          <Label htmlFor="status">{t("trips.status")}</Label>
                           <Select name="status" defaultValue="planned">
                             <SelectTrigger className="bg-background border-input">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="planned">Geplant</SelectItem>
-                              <SelectItem value="ongoing">Laufend</SelectItem>
-                              <SelectItem value="completed">Abgeschlossen</SelectItem>
-                              <SelectItem value="cancelled">Abgesagt</SelectItem>
+                              <SelectItem value="planned">{t("trips.statusPlanned")}</SelectItem>
+                              <SelectItem value="ongoing">{t("trips.statusOngoing")}</SelectItem>
+                              <SelectItem value="completed">{t("trips.statusCompleted")}</SelectItem>
+                              <SelectItem value="cancelled">{t("trips.statusCancelled")}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -264,7 +266,7 @@ export default function Trips() {
 
                     {/* Additional Options */}
                     <div>
-                      <h3 className="font-semibold text-sm mb-3">Zusätzliche Optionen</h3>
+                      <h3 className="font-semibold text-sm mb-3">{t("trips.additionalOptions")}</h3>
                       <div className="grid gap-3">
                         <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                           <input
@@ -275,7 +277,7 @@ export default function Trips() {
                           />
                           <Label htmlFor="isFavorite" className="cursor-pointer flex-1 mb-0">
                             <Flame className="w-4 h-4 inline mr-2 text-yellow-500" />
-                            <span>Als Favorit markieren</span>
+                            <span>{t("trips.markFavorite")}</span>
                           </Label>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
@@ -287,7 +289,7 @@ export default function Trips() {
                           />
                           <Label htmlFor="isPublic" className="cursor-pointer flex-1 mb-0">
                             <Share2 className="w-4 h-4 inline mr-2 text-blue-500" />
-                            <span>Öffentlich teilen</span>
+                            <span>{t("trips.sharePublic")}</span>
                           </Label>
                         </div>
                       </div>
@@ -300,16 +302,16 @@ export default function Trips() {
                       onClick={() => setIsCreateOpen(false)}
                       disabled={isSubmitting}
                     >
-                      Abbrechen
+                      {t("trips.cancel")}
                     </Button>
                     <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
                       {isSubmitting ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Erstellen...
+                          {t("trips.creating")}
                         </>
                       ) : (
-                        "Erstellen"
+                        t("trips.create")
                       )}
                     </Button>
                   </DialogFooter>
@@ -396,7 +398,7 @@ export default function Trips() {
                   {/* Trip Duration */}
                   <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1.5">
                     <span className="font-medium">
-                      {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} Tage
+                      {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} {t("trips.days")}
                     </span>
                   </div>
 
@@ -405,13 +407,13 @@ export default function Trips() {
                     {trip.isFavorite && (
                       <Badge variant="outline" className="text-xs">
                         <Flame className="w-3 h-3 mr-1" />
-                        Favorit
+                        {t("trips.favorite")}
                       </Badge>
                     )}
                     {trip.isPublic && (
                       <Badge variant="outline" className="text-xs">
                         <Share2 className="w-3 h-3 mr-1" />
-                        Öffentlich
+                        {t("trips.public")}
                       </Badge>
                     )}
                   </div>
@@ -421,18 +423,18 @@ export default function Trips() {
                   <Link href={`/trips/${trip.id}`} className="flex-1">
                     <Button variant="default" size="sm" className="w-full">
                       <Eye className="w-4 h-4 mr-2" />
-                      Öffnen
+                      {t("trips.open")}
                     </Button>
                   </Link>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => {
-                      if (confirm("Möchtest du diesen Ausflug wirklich löschen?")) {
+                      if (confirm(t("trips.confirmDelete"))) {
                         deleteMutation.mutate({ id: trip.id });
                       }
                     }}
-                    title="Löschen"
+                    title={t("trips.delete")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -445,17 +447,17 @@ export default function Trips() {
             <CardContent className="py-12 text-center">
               <Mountain className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground text-lg mb-2">
-                Du hast noch keine Ausflüge erstellt
+                {t("trips.noTrips")}
               </p>
               <p className="text-muted-foreground mb-4">
-                Starte jetzt und plane dein erstes Abenteuer!
+                {t("trips.noTripsDesc")}
               </p>
               <Button
                 onClick={() => setIsCreateOpen(true)}
                 className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Ersten Ausflug erstellen
+                {t("trips.createFirst")}
               </Button>
             </CardContent>
           </Card>

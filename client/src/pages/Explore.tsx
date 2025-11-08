@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useI18n } from "@/contexts/i18nContext";
 
 const CATEGORIES = [
   "Aktion & Sport",
@@ -75,6 +76,7 @@ const COST_LABELS: Record<string, string> = {
 };
 
 export default function Explore() {
+  const { t } = useI18n();
   const [location] = useLocation();
   const [keyword, setKeyword] = useState("");
   const [region, setRegion] = useState<string>("");
@@ -118,10 +120,10 @@ export default function Explore() {
   // Toggle favorite mutation
   const toggleFavoriteMutation = trpc.trips.toggleFavorite.useMutation({
     onSuccess: () => {
-      toast.success("Favorit aktualisiert!");
+      toast.success(t("explore.favoriteUpdated"));
     },
     onError: (error) => {
-      toast.error("Fehler beim Aktualisieren des Favorits");
+      toast.error(t("explore.favoriteError"));
     },
   });
 
@@ -149,7 +151,7 @@ export default function Explore() {
   const handleDestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Stub implementation
-    toast.success(editingDestId ? "Destination aktualisiert!" : "Destination erstellt!");
+    toast.success(editingDestId ? t("explore.destUpdated") : t("explore.destCreated"));
     setIsDialogOpen(false);
     resetDestForm();
   };
@@ -166,8 +168,8 @@ export default function Explore() {
   };
 
   const handleDeleteDest = (id: number) => {
-    if (confirm("Möchtest du diese Destination wirklich löschen?")) {
-      toast.success("Destination gelöscht!");
+    if (confirm(t("explore.destDeleteConfirm"))) {
+      toast.success(t("explore.destDeleted"));
     }
   };
 
@@ -252,14 +254,14 @@ export default function Explore() {
             <Link href="/">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
-                Zurück
+                {t("explore.back")}
               </Button>
             </Link>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              {APP_TITLE}
+              {t("explore.header")}
             </h1>
             <Link href="/trips">
-              <Button variant="outline">Meine Ausflüge</Button>
+              <Button variant="outline">{t("explore.myTrips")}</Button>
             </Link>
           </div>
         </div>
@@ -269,10 +271,10 @@ export default function Explore() {
       <section className="py-12 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10">
         <div className="container">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-            Ausflüge entdecken
+            {t("explore.title")}
           </h2>
           <p className="text-center text-muted-foreground text-lg mb-8">
-            Finde das perfekte Abenteuer und inspiriere dich für deine nächste Reise
+            {t("explore.subtitle")}
           </p>
 
           {/* Statistics */}
@@ -284,7 +286,7 @@ export default function Explore() {
               >
                 <CardContent className="pt-6 text-center">
                   <div className="text-3xl font-bold text-primary">{stats.totalActivities}</div>
-                  <div className="text-sm text-muted-foreground">Aktivitäten</div>
+                  <div className="text-sm text-muted-foreground">{t("explore.activities")}</div>
                 </CardContent>
               </Card>
               <Card
@@ -302,13 +304,13 @@ export default function Explore() {
               >
                 <CardContent className="pt-6 text-center">
                   <div className="text-3xl font-bold text-secondary">{stats.freeActivities}</div>
-                  <div className="text-sm text-muted-foreground">Kostenlos</div>
+                  <div className="text-sm text-muted-foreground">{t("explore.freeActivities")}</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <div className="text-3xl font-bold text-accent">{stats.totalCategories}</div>
-                  <div className="text-sm text-muted-foreground">Kategorien</div>
+                  <div className="text-sm text-muted-foreground">{t("explore.categories")}</div>
                 </CardContent>
               </Card>
             </div>
@@ -327,7 +329,7 @@ export default function Explore() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            Ausflüge
+            {t("explore.tabTrips")}
           </button>
           <button
             onClick={() => setActiveTab("destinations")}
@@ -337,7 +339,7 @@ export default function Explore() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            Destinationen
+            {t("explore.tabDestinations")}
           </button>
         </div>
       </div>
@@ -352,7 +354,7 @@ export default function Explore() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Suche nach Ausflügen..."
+                  placeholder={t("explore.search")}
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   className="pl-10"
@@ -363,7 +365,7 @@ export default function Explore() {
             {/* Region Filter */}
             <Select value={region} onValueChange={setRegion}>
               <SelectTrigger>
-                <SelectValue placeholder="Alle Regionen" />
+                <SelectValue placeholder={t("explore.allRegions")} />
               </SelectTrigger>
               <SelectContent>
                 {REGIONS.map((r) => (
@@ -377,7 +379,7 @@ export default function Explore() {
             {/* Category Filter */}
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Alle Kategorien" />
+                <SelectValue placeholder={t("explore.allCategories")} />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((c) => (
@@ -391,10 +393,10 @@ export default function Explore() {
             {/* Cost Filter */}
             <Select value={cost} onValueChange={setCost}>
               <SelectTrigger>
-                <SelectValue placeholder="Alle Kosten" />
+                <SelectValue placeholder={t("explore.allCosts")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="free">Kostenlos</SelectItem>
+                <SelectItem value="free">{t("explore.costFree")}</SelectItem>
                 <SelectItem value="low">€</SelectItem>
                 <SelectItem value="medium">€€</SelectItem>
                 <SelectItem value="high">€€€</SelectItem>
@@ -414,7 +416,7 @@ export default function Explore() {
                 className="w-4 h-4 rounded border-gray-300"
               />
               <label htmlFor="nearby" className="text-sm font-medium">
-                Nur Ausflüge in der Nähe ({maxDistance} km)
+                {t("explore.nearbyOnly")} ({maxDistance} km)
               </label>
             </div>
             {nearbyOnly && (
@@ -437,26 +439,26 @@ export default function Explore() {
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleReset}>
                 <Filter className="w-4 h-4 mr-2" />
-                Filter zurücksetzen
+                {t("explore.resetFilters")}
               </Button>
-              
+
               {/* Sort Options */}
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date" | "cost")}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sortieren nach" />
+                  <SelectValue placeholder={t("explore.sortBy")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="date">Datum</SelectItem>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="cost">Kosten</SelectItem>
+                  <SelectItem value="date">{t("explore.sortDate")}</SelectItem>
+                  <SelectItem value="name">{t("explore.sortName")}</SelectItem>
+                  <SelectItem value="cost">{t("explore.sortCost")}</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                title={sortOrder === "asc" ? "Aufsteigend" : "Absteigend"}
+                title={sortOrder === "asc" ? t("explore.sortAsc") : t("explore.sortDesc")}
               >
                 {sortOrder === "asc" ? "↑" : "↓"}
               </Button>
@@ -497,11 +499,11 @@ export default function Explore() {
           {isLoading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-4 text-muted-foreground">Lade Ausflüge...</p>
+              <p className="mt-4 text-muted-foreground">{t("explore.loading")}</p>
             </div>
           ) : trips?.data && trips.data.length > 0 ? (
             <>
-              <p className="text-muted-foreground mb-6">{trips.data.length} Ergebnisse gefunden</p>
+              <p className="text-muted-foreground mb-6">{trips.data.length} {t("explore.resultsFound")}</p>
               {viewMode === "map" ? (
                 <div className="h-[600px] w-full rounded-lg overflow-hidden border">
                   <MapView
@@ -626,7 +628,7 @@ export default function Explore() {
                           {trip.isDone === 1 && (
                             <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
                               <CheckCircle2 className="w-3 h-3" />
-                              Besucht
+                              {t("explore.visited")}
                             </Badge>
                           )}
                         </div>
@@ -708,7 +710,7 @@ export default function Explore() {
                             {trip.isDone === 1 && (
                               <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
                                 <CheckCircle2 className="w-3 h-3" />
-                                Besucht
+                                {t("explore.visited")}
                               </Badge>
                             )}
                           </div>
@@ -722,7 +724,7 @@ export default function Explore() {
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Keine Ausflüge gefunden. Versuche andere Filter!</p>
+              <p className="text-muted-foreground">{t("explore.noResults")}</p>
             </div>
           )}
         </div>
@@ -735,9 +737,9 @@ export default function Explore() {
         <div className="container">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold mb-2">Meine Destinationen</h2>
+              <h2 className="text-3xl font-bold mb-2">{t("explore.destTitle")}</h2>
               <p className="text-muted-foreground">
-                Speichere deine Lieblingsorte für zukünftige Ausflüge
+                {t("explore.destSubtitle")}
               </p>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -747,57 +749,57 @@ export default function Explore() {
               <DialogTrigger asChild>
                 <Button size="lg" className="gap-2">
                   <Plus className="w-5 h-5" />
-                  Neue Destination
+                  {t("explore.destNew")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <form onSubmit={handleDestSubmit}>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingDestId ? "Destination bearbeiten" : "Neue Destination"}
+                      {editingDestId ? t("explore.destEdit") : t("explore.destCreate")}
                     </DialogTitle>
                     <DialogDescription>
-                      Füge einen neuen Lieblingsort hinzu
+                      {t("destinations.addFavorite")}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div>
-                      <Label htmlFor="name">Name *</Label>
+                      <Label htmlFor="name">{t("explore.destNameLabel")}</Label>
                       <Input
                         id="name"
                         value={destFormData.name}
                         onChange={(e) => setDestFormData({ ...destFormData, name: e.target.value })}
                         required
-                        placeholder="z.B. Schwarzwald"
+                        placeholder={t("explore.destNamePlaceholder")}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="location">Ort *</Label>
+                      <Label htmlFor="location">{t("explore.destLocationLabel")}</Label>
                       <Input
                         id="location"
                         value={destFormData.location}
                         onChange={(e) => setDestFormData({ ...destFormData, location: e.target.value })}
                         required
-                        placeholder="z.B. Baden-Württemberg, Deutschland"
+                        placeholder={t("explore.destLocationPlaceholder")}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="description">Beschreibung</Label>
+                      <Label htmlFor="description">{t("explore.destDescLabel")}</Label>
                       <Textarea
                         id="description"
                         value={destFormData.description}
                         onChange={(e) => setDestFormData({ ...destFormData, description: e.target.value })}
-                        placeholder="Was macht diesen Ort besonders?"
+                        placeholder={t("explore.destDescPlaceholder")}
                         rows={3}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="imageUrl">Bild-URL (optional)</Label>
+                      <Label htmlFor="imageUrl">{t("explore.destImageLabel")}</Label>
                       <Input
                         id="imageUrl"
                         value={destFormData.imageUrl}
                         onChange={(e) => setDestFormData({ ...destFormData, imageUrl: e.target.value })}
-                        placeholder="https://..."
+                        placeholder={t("explore.destImagePlaceholder")}
                       />
                     </div>
                   </div>
@@ -807,13 +809,13 @@ export default function Explore() {
                       variant="outline"
                       onClick={() => setIsDialogOpen(false)}
                     >
-                      Abbrechen
+                      {t("explore.destCancel")}
                     </Button>
                     <Button type="submit" disabled={createDestMutation.isPending || updateDestMutation.isPending}>
                       {(createDestMutation.isPending || updateDestMutation.isPending) && (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       )}
-                      {editingDestId ? "Aktualisieren" : "Erstellen"}
+                      {editingDestId ? t("explore.destUpdate") : t("explore.destCreateBtn")}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -858,7 +860,7 @@ export default function Explore() {
                       className="flex-1"
                     >
                       <Edit className="w-4 h-4 mr-2" />
-                      Bearbeiten
+                      {t("destinations.edit")}
                     </Button>
                     <Button
                       variant="destructive"
@@ -874,7 +876,7 @@ export default function Explore() {
           ) : (
             <div className="text-center py-12">
               <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-6">Keine Destinationen vorhanden. Erstelle deine erste Destination!</p>
+              <p className="text-muted-foreground mb-6">{t("explore.destNone")}</p>
               <Dialog open={isDialogOpen} onOpenChange={(open) => {
                 setIsDialogOpen(open);
                 if (!open) resetDestForm();
@@ -882,7 +884,7 @@ export default function Explore() {
                 <DialogTrigger asChild>
                   <Button className="gap-2">
                     <Plus className="w-5 h-5" />
-                    Erste Destination erstellen
+                    {t("explore.destFirstBtn")}
                   </Button>
                 </DialogTrigger>
               </Dialog>

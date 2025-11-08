@@ -7,10 +7,12 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Mountain, Sun, Compass } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/contexts/i18nContext";
 
 type AuthMode = "login" | "register";
 
 export default function Login() {
+  const { t } = useI18n();
   const [mode, setMode] = useState<AuthMode>("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -26,12 +28,12 @@ export default function Login() {
     if (e) e.stopPropagation?.();
 
     if (!username || !password) {
-      toast.error("Benutzername und Passwort sind erforderlich");
+      toast.error(t("auth.errorRequired"));
       return;
     }
 
     if (mode === "register" && !name) {
-      toast.error("Name ist erforderlich");
+      toast.error(t("auth.nameRequired"));
       return;
     }
 
@@ -56,16 +58,16 @@ export default function Login() {
       console.log("Response:", response.status, data);
 
       if (!response.ok) {
-        toast.error(data.error || "Authentifizierung fehlgeschlagen");
+        toast.error(data.error || t("auth.error"));
         return;
       }
 
       if (mode === "register") {
-        toast.success("Registrierung erfolgreich! Bitte melden Sie sich an.");
+        toast.success(t("auth.signUpSuccess"));
         setMode("login");
         setPassword("");
       } else {
-        toast.success("Anmeldung erfolgreich!");
+        toast.success(t("auth.signInSuccess"));
         // Invalidate the auth cache to force a refetch
         await utils.auth.me.invalidate();
         // Refresh the auth state to get the new session
@@ -77,7 +79,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Auth error:", error);
-      toast.error("Ein Fehler ist aufgetreten");
+      toast.error(t("auth.error"));
     } finally {
       setLoading(false);
     }
@@ -101,10 +103,10 @@ export default function Login() {
             <Compass className="w-8 h-8 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-2">
-            AusflugFinder
+            {t("login.title")}
           </h1>
           <p className="text-muted-foreground">
-            {mode === "login" ? "Melden Sie sich an" : "Erstellen Sie ein Konto"}
+            {mode === "login" ? t("login.signInMode") : t("login.registerMode")}
           </p>
         </div>
 
@@ -113,11 +115,11 @@ export default function Login() {
           <div className="space-y-4">
             {mode === "register" && (
               <div>
-                <label className="block text-sm font-medium mb-2">Name</label>
+                <label className="block text-sm font-medium mb-2">{t("login.name")}</label>
                 <Input
                   type="text"
                   name="name"
-                  placeholder="Ihr vollständiger Name"
+                  placeholder={t("login.namePlaceholder")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
@@ -128,11 +130,11 @@ export default function Login() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-2">Benutzername</label>
+              <label className="block text-sm font-medium mb-2">{t("login.username")}</label>
               <Input
                 type="text"
                 name="username"
-                placeholder="Benutzername"
+                placeholder={t("login.usernamePlaceholder")}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
@@ -142,11 +144,11 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Passwort</label>
+              <label className="block text-sm font-medium mb-2">{t("login.password")}</label>
               <Input
                 type="password"
                 name="password"
-                placeholder="Passwort"
+                placeholder={t("login.passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
@@ -157,11 +159,11 @@ export default function Login() {
 
             {mode === "register" && (
               <div>
-                <label className="block text-sm font-medium mb-2">E-Mail (optional)</label>
+                <label className="block text-sm font-medium mb-2">{t("login.email")}</label>
                 <Input
                   type="email"
                   name="email"
-                  placeholder="E-Mail-Adresse"
+                  placeholder={t("login.emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -175,7 +177,7 @@ export default function Login() {
               onClick={handleSubmit as any}
               className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
             >
-              {loading ? "Wird verarbeitet..." : (mode === "login" ? "Anmelden" : "Registrieren")}
+              {loading ? t("login.processing") : (mode === "login" ? t("login.signInBtn") : t("login.registerBtn"))}
             </Button>
           </div>
 
@@ -183,7 +185,7 @@ export default function Login() {
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {mode === "login" ? (
               <>
-                Kein Konto?{" "}
+                {t("login.noAccount")}{" "}
                 <button
                   onClick={() => {
                     setMode("register");
@@ -191,12 +193,12 @@ export default function Login() {
                   }}
                   className="text-primary hover:underline font-semibold"
                 >
-                  Registrieren
+                  {t("login.registerLink")}
                 </button>
               </>
             ) : (
               <>
-                Haben Sie bereits ein Konto?{" "}
+                {t("login.haveAccount")}{" "}
                 <button
                   onClick={() => {
                     setMode("login");
@@ -205,7 +207,7 @@ export default function Login() {
                   }}
                   className="text-primary hover:underline font-semibold"
                 >
-                  Anmelden
+                  {t("login.signInLink")}
                 </button>
               </>
             )}
@@ -214,7 +216,7 @@ export default function Login() {
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Mit der Registrierung akzeptieren Sie unsere Datenschutzrichtlinie
+          {t("login.privacyNotice")}
         </p>
       </div>
     </div>

@@ -13,8 +13,10 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/contexts/i18nContext";
 
 export default function TripDetail() {
+  const { t } = useI18n();
   const params = useParams();
   const tripId = params.id ? parseInt(params.id) : 0;
   const [isFavorite, setIsFavorite] = useState(false);
@@ -26,20 +28,20 @@ export default function TripDetail() {
   const { data: trip, isLoading: tripLoading } = trpc.trips.getById.useQuery({ id: tripId });
   const updateTripMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
-      toast.success("Ausflug aktualisiert!");
+      toast.success(t("tripDetail.updateSuccess"));
       setEditDialog(false);
     },
     onError: (error) => {
-      toast.error(error.message || "Fehler beim Aktualisieren des Ausflugs");
+      toast.error(error.message || t("tripDetail.updateError"));
     },
   });
   const deleteTripMutation = trpc.trips.delete.useMutation({
     onSuccess: () => {
-      toast.success("Ausflug gelöscht!");
+      toast.success(t("tripDetail.deleteSuccess"));
       navigate("/explore");
     },
     onError: (error) => {
-      toast.error(error.message || "Fehler beim Löschen des Ausflugs");
+      toast.error(error.message || t("tripDetail.deleteError"));
     },
   });
 
@@ -57,7 +59,7 @@ export default function TripDetail() {
   const canEdit = user && trip && (user.id === trip.userId || user.role === "admin");
 
   const COST_LABELS: Record<string, string> = {
-    free: "Kostenlos",
+    free: t("tripDetail.costFree"),
     low: "€",
     medium: "€€",
     high: "€€€",
@@ -109,7 +111,7 @@ export default function TripDetail() {
 
   const handleDeleteTrip = () => {
     if (!trip) return;
-    if (confirm("Möchten Sie diesen Ausflug wirklich löschen? Dies kann nicht rückgängig gemacht werden.")) {
+    if (confirm(t("tripDetail.confirmDelete"))) {
       deleteTripMutation.mutate({ id: trip.id });
     }
   };
@@ -125,9 +127,9 @@ export default function TripDetail() {
   if (!trip) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-bold mb-4">Ausflug nicht gefunden</h1>
+        <h1 className="text-2xl font-bold mb-4">{t("tripDetail.notFound")}</h1>
         <Link href="/explore">
-          <Button>Zurück zur Übersicht</Button>
+          <Button>{t("tripDetail.backToOverview")}</Button>
         </Link>
       </div>
     );
@@ -145,7 +147,7 @@ export default function TripDetail() {
           <Link href="/explore">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              Zurück
+              {t("tripDetail.back")}
             </Button>
           </Link>
         </div>
@@ -161,7 +163,7 @@ export default function TripDetail() {
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-secondary/20 to-accent/20 flex items-center justify-center">
-            <span className="text-muted-foreground text-lg">Kein Bild vorhanden</span>
+            <span className="text-muted-foreground text-lg">{t("tripDetail.noImage")}</span>
           </div>
         )}
 
@@ -187,7 +189,7 @@ export default function TripDetail() {
             className="gap-2"
           >
             <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
-            Favorit
+            {t("tripDetail.favorite")}
           </Button>
           <Button
             variant="outline"
@@ -196,7 +198,7 @@ export default function TripDetail() {
             className="gap-2"
           >
             <Share2 className="w-4 h-4" />
-            Teilen
+            {t("tripDetail.share")}
           </Button>
           <Button
             variant="outline"
@@ -205,7 +207,7 @@ export default function TripDetail() {
             className="gap-2"
           >
             <FileText className="w-4 h-4" />
-            Drucken
+            {t("tripDetail.print")}
           </Button>
           {canEdit && (
             <>
@@ -216,7 +218,7 @@ export default function TripDetail() {
                 className="gap-2"
               >
                 <Edit className="w-4 h-4" />
-                Bearbeiten
+                {t("tripDetail.edit")}
               </Button>
               <Button
                 variant="outline"
@@ -225,7 +227,7 @@ export default function TripDetail() {
                 className="gap-2 text-destructive hover:text-destructive"
               >
                 <Trash2 className="w-4 h-4" />
-                Löschen
+                {t("tripDetail.delete")}
               </Button>
             </>
           )}
@@ -240,7 +242,7 @@ export default function TripDetail() {
             {/* Description */}
             <Card>
               <CardHeader>
-                <h2 className="text-2xl font-bold">Beschreibung</h2>
+                <h2 className="text-2xl font-bold">{t("tripDetail.description")}</h2>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
@@ -253,7 +255,7 @@ export default function TripDetail() {
             {trip.category || trip.region ? (
               <Card>
                 <CardHeader>
-                  <h2 className="text-xl font-bold">Wissenswert</h2>
+                  <h2 className="text-xl font-bold">{t("tripDetail.worthKnowing")}</h2>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -274,24 +276,24 @@ export default function TripDetail() {
             {/* Information Card */}
             <Card>
               <CardHeader>
-                <h3 className="font-bold text-lg">Informationen</h3>
+                <h3 className="font-bold text-lg">{t("tripDetail.information")}</h3>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Cost */}
                 <div className="flex items-center justify-between pb-4 border-b">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Euro className="w-5 h-5" />
-                    <span className="text-sm">Kosten</span>
+                    <span className="text-sm">{t("tripDetail.cost")}</span>
                   </div>
                   <Badge variant="default" className="bg-primary">
-                    {COST_LABELS[trip.cost] || "K.A."}
+                    {COST_LABELS[trip.cost] || t("tripDetail.costNA")}
                   </Badge>
                 </div>
 
                 {/* Category */}
                 {trip.category && (
                   <div className="pb-4 border-b">
-                    <div className="text-sm text-muted-foreground mb-1">Kategorie</div>
+                    <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.category")}</div>
                     <div className="font-medium">{trip.category}</div>
                   </div>
                 )}
@@ -299,7 +301,7 @@ export default function TripDetail() {
                 {/* Region */}
                 {trip.region && (
                   <div className="pb-4 border-b">
-                    <div className="text-sm text-muted-foreground mb-1">Region</div>
+                    <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.region")}</div>
                     <div className="font-medium">{trip.region}</div>
                   </div>
                 )}
@@ -307,7 +309,7 @@ export default function TripDetail() {
                 {/* Destination */}
                 {trip.destination && (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Zielort</div>
+                    <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.destination")}</div>
                     <div className="font-medium">{trip.destination}</div>
                   </div>
                 )}
@@ -317,31 +319,31 @@ export default function TripDetail() {
             {/* Contact Card */}
             <Card>
               <CardHeader>
-                <h3 className="font-bold text-lg">Kontakt</h3>
+                <h3 className="font-bold text-lg">{t("tripDetail.contact")}</h3>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
                   variant="outline"
                   className="w-full justify-start gap-2"
                   onClick={() => {
-                    const subject = `Anfrage zu: ${trip?.title}`;
-                    const body = `Hallo,\n\nIch habe eine Anfrage zum Ausflug "${trip?.title}":\n\n`;
+                    const subject = `${t("tripDetail.requestFor")}: ${trip?.title}`;
+                    const body = `${t("tripDetail.requestBody1")}${trip?.title}":\n\n`;
                     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                   }}
                 >
                   <Mail className="w-4 h-4" />
-                  E-Mail
+                  {t("tripDetail.email")}
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full justify-start gap-2"
                   onClick={() => {
-                    const text = `Ich interessiere mich für: ${trip?.title}`;
+                    const text = `${t("tripDetail.interestedIn")}: ${trip?.title}`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                   }}
                 >
                   <MessageCircle className="w-4 h-4" />
-                  WhatsApp
+                  {t("tripDetail.whatsapp")}
                 </Button>
               </CardContent>
             </Card>
@@ -353,9 +355,9 @@ export default function TripDetail() {
       <Dialog open={shareDialog} onOpenChange={setShareDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Ausflug teilen</DialogTitle>
+            <DialogTitle>{t("tripDetail.shareTrip")}</DialogTitle>
             <DialogDescription>
-              Teile diesen Ausflug mit Freunden und Familie
+              {t("tripDetail.shareTripDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -364,27 +366,27 @@ export default function TripDetail() {
               className="w-full justify-start gap-3"
               onClick={() => {
                 const url = window.location.href;
-                const text = `Schau dir diesen Ausflug an: ${trip?.title}`;
+                const text = `${t("tripDetail.checkOutTrip")}: ${trip?.title}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
               }}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
               </svg>
-              WhatsApp
+              {t("tripDetail.whatsapp")}
             </Button>
             <Button
               variant="outline"
               className="w-full justify-start gap-3"
               onClick={() => {
                 const url = window.location.href;
-                const subject = `Ausflug: ${trip?.title}`;
-                const body = `Hallo,\n\nschau dir diesen Ausflug an:\n\n${trip?.title}\n${trip?.description}\n\n${url}`;
+                const subject = `${t("tripDetail.tripLabel")}: ${trip?.title}`;
+                const body = `${t("tripDetail.emailBody1")}\n\n${t("tripDetail.emailBody2")}:\n\n${trip?.title}\n${trip?.description}\n\n${url}`;
                 window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
               }}
             >
               <Mail className="w-5 h-5" />
-              E-Mail
+              {t("tripDetail.email")}
             </Button>
             <div className="flex gap-2">
               <Input
@@ -396,7 +398,7 @@ export default function TripDetail() {
                 variant="outline"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
-                  toast.success("Link kopiert!");
+                  toast.success(t("tripDetail.linkCopied"));
                 }}
               >
                 <Copy className="w-4 h-4" />
@@ -410,54 +412,54 @@ export default function TripDetail() {
       <Dialog open={editDialog} onOpenChange={setEditDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Ausflug bearbeiten</DialogTitle>
+            <DialogTitle>{t("tripDetail.editTrip")}</DialogTitle>
             <DialogDescription>
-              Aktualisiere die Details dieses Ausflugs
+              {t("tripDetail.editTripDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Titel</label>
+              <label className="block text-sm font-medium mb-1">{t("tripDetail.title")}</label>
               <Input
                 value={editForm.title}
                 onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                placeholder="Ausflugstitel"
+                placeholder={t("tripDetail.titlePlaceholder")}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Zielort</label>
+              <label className="block text-sm font-medium mb-1">{t("tripDetail.destination")}</label>
               <Input
                 value={editForm.destination}
                 onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
-                placeholder="Zielort"
+                placeholder={t("tripDetail.destinationPlaceholder")}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Region</label>
+                <label className="block text-sm font-medium mb-1">{t("tripDetail.region")}</label>
                 <Input
                   value={editForm.region}
                   onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
-                  placeholder="Region"
+                  placeholder={t("tripDetail.regionPlaceholder")}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Kategorie</label>
+                <label className="block text-sm font-medium mb-1">{t("tripDetail.category")}</label>
                 <Input
                   value={editForm.category}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                  placeholder="Kategorie"
+                  placeholder={t("tripDetail.categoryPlaceholder")}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Kosten</label>
+              <label className="block text-sm font-medium mb-1">{t("tripDetail.cost")}</label>
               <Select value={editForm.cost} onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="free">Kostenlos</SelectItem>
+                  <SelectItem value="free">{t("tripDetail.costFree")}</SelectItem>
                   <SelectItem value="low">€</SelectItem>
                   <SelectItem value="medium">€€</SelectItem>
                   <SelectItem value="high">€€€</SelectItem>
@@ -466,16 +468,16 @@ export default function TripDetail() {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Beschreibung</label>
+              <label className="block text-sm font-medium mb-1">{t("tripDetail.description")}</label>
               <Textarea
                 value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                placeholder="Beschreibung des Ausflugs"
+                placeholder={t("tripDetail.descriptionPlaceholder")}
                 rows={4}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Titelbild hochladen</label>
+              <label className="block text-sm font-medium mb-2">{t("tripDetail.uploadImage")}</label>
               <input
                 type="file"
                 accept="image/*"
@@ -483,14 +485,14 @@ export default function TripDetail() {
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Unterstützte Formate: JPG, PNG, WebP (max. ~5 MB empfohlen)
+                {t("tripDetail.imageFormats")}
               </p>
               {imagePreview && (
                 <div className="mt-3">
-                  <p className="text-xs text-muted-foreground mb-2">Vorschau:</p>
+                  <p className="text-xs text-muted-foreground mb-2">{t("tripDetail.preview")}:</p>
                   <img
                     src={imagePreview}
-                    alt="Titelbild Vorschau"
+                    alt={t("tripDetail.imagePreview")}
                     className="w-full h-32 object-cover rounded-md border"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
@@ -502,13 +504,13 @@ export default function TripDetail() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialog(false)}>
-              Abbrechen
+              {t("tripDetail.cancel")}
             </Button>
             <Button
               onClick={handleEditSave}
               disabled={updateTripMutation.isPending}
             >
-              {updateTripMutation.isPending ? "Speichern..." : "Speichern"}
+              {updateTripMutation.isPending ? t("tripDetail.saving") : t("tripDetail.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
