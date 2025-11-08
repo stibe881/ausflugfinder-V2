@@ -373,7 +373,7 @@ export const appRouter = router({
           isPublic: z.boolean().optional(),
           userId: z.number().optional(),
           page: z.number().min(1).default(1).optional(),
-          limit: z.number().min(1).max(100).default(20).optional(),
+          limit: z.number().min(1).max(100).default(50).optional(),
         })
       )
       .query(async ({ input }) => {
@@ -388,7 +388,7 @@ export const appRouter = router({
     publicTrips: publicProcedure
       .input(z.object({
         page: z.number().min(1).default(1).optional(),
-        limit: z.number().min(1).max(100).default(20).optional(),
+        limit: z.number().min(1).max(100).default(50).optional(),
       }).optional())
       .query(async ({ input }) => {
         try {

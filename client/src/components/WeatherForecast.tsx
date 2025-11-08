@@ -84,7 +84,7 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
   }
 
   // Filter hourly forecasts to only show hours for days with trips
-  const filteredHourlyForecasts = hourlyWeather?.hourly.filter((hourly) => {
+  const filteredHourlyForecasts = hourlyWeather?.hourly?.filter((hourly) => {
     const hourDate = new Date(hourly.time).toISOString().split('T')[0];
     return tripsWithDates.has(hourDate);
   }) || [];
@@ -105,15 +105,31 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
     );
   }
 
-  // Group hourly forecasts by date
+  // Group hourly forecasts by date and filter to key hours (6, 12, 18 o'clock) for better readability
   const forecastsByDate = new Map<string, typeof filteredHourlyForecasts>();
   filteredHourlyForecasts.forEach((forecast) => {
     const dateStr = new Date(forecast.time).toISOString().split('T')[0];
-    if (!forecastsByDate.has(dateStr)) {
-      forecastsByDate.set(dateStr, []);
+    const hour = new Date(forecast.time).getHours();
+
+    // Only include forecasts at 6, 12, and 18 o'clock to avoid too many tiles
+    if ([6, 12, 18].includes(hour)) {
+      if (!forecastsByDate.has(dateStr)) {
+        forecastsByDate.set(dateStr, []);
+      }
+      forecastsByDate.get(dateStr)!.push(forecast);
     }
-    forecastsByDate.get(dateStr)!.push(forecast);
   });
+
+  // If no key hours found, fall back to showing all forecasts
+  if (forecastsByDate.size === 0) {
+    filteredHourlyForecasts.forEach((forecast) => {
+      const dateStr = new Date(forecast.time).toISOString().split('T')[0];
+      if (!forecastsByDate.has(dateStr)) {
+        forecastsByDate.set(dateStr, []);
+      }
+      forecastsByDate.get(dateStr)!.push(forecast);
+    });
+  }
 
   return (
     <Card>
