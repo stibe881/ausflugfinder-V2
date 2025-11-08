@@ -3,6 +3,15 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
+import {
+  AppError, ValidationError, NotFoundError, UnauthorizedError, ForbiddenError,
+  toTRPCError, handleError, trpcHandler
+} from "./_core/errors";
+import {
+  createTripSchema, updateTripSchema, searchTripsSchema,
+  createDestinationSchema, updateDestinationSchema,
+  createDayPlanSchema, updateDayPlanSchema
+} from "./_core/validation";
 import { getWeatherForecast, getHourlyWeatherForecast } from "./_core/weather";
 import { generateICalendar, generatePDFContent } from "./_core/export";
 import {
@@ -184,11 +193,19 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        await createTrip({
-          userId: ctx.user.id,
-          ...input,
-        });
-        return { success: true };
+        try {
+          if (input.endDate <= input.startDate) {
+            throw new ValidationError("End date must be after start date");
+          }
+          await createTrip({
+            userId: ctx.user.id,
+            ...input,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "trips.create");
+          throw toTRPCError(appError);
+        }
       }),
     update: protectedProcedure
       .input(
@@ -218,27 +235,37 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const { id, ...data } = input;
-        // Allow owner or admin to update
-        const trip = await getTripById(id);
-        if (!trip) throw new Error("Trip not found");
-        if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
-          throw new Error("Not authorized to update this trip");
+        try {
+          const { id, ...data } = input;
+          // Allow owner or admin to update
+          const trip = await getTripById(id);
+          if (!trip) throw new NotFoundError("Trip", id);
+          if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+            throw new ForbiddenError("You are not authorized to update this trip");
+          }
+          await updateTrip(id, trip.userId, data);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "trips.update");
+          throw toTRPCError(appError);
         }
-        await updateTrip(id, trip.userId, data);
-        return { success: true };
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        // Allow owner or admin to delete
-        const trip = await getTripById(input.id);
-        if (!trip) throw new Error("Trip not found");
-        if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
-          throw new Error("Not authorized to delete this trip");
+        try {
+          // Allow owner or admin to delete
+          const trip = await getTripById(input.id);
+          if (!trip) throw new NotFoundError("Trip", input.id);
+          if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+            throw new ForbiddenError("You are not authorized to delete this trip");
+          }
+          await deleteTrip(input.id, trip.userId);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "trips.delete");
+          throw toTRPCError(appError);
         }
-        await deleteTrip(input.id, trip.userId);
-        return { success: true };
       }),
     search: publicProcedure
       .input(
