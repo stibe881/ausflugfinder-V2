@@ -58,7 +58,14 @@
     </script>
 
     <!-- Mascot Widget -->
-    <script src="/assets/mascot/sounds.js"></script>
+    <script>
+      window.MarmotMascotConfig = function(config) {
+        config.position = 'bottom-right';
+        config.size = 'medium';
+        config.basePath = '/assets/mascot';
+        config.factsPath = '/assets/mascot/facts_data.json';
+      };
+    </script>
     <script src="/assets/mascot/mascot-widget.js"></script>
   </body>
 
