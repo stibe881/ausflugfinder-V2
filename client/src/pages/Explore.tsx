@@ -593,7 +593,7 @@ export default function Explore() {
                       </div>
 
                       {/* Content */}
-                      <CardHeader className="pb-3 pt-4">
+                      <CardHeader className="pb-3 pt-0">
                         <div className="space-y-2">
                           <CardTitle className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
                             {trip.title}
