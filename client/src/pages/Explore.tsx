@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Calendar, Users, Heart, CheckCircle2, Euro, Filter, Grid, List, Map as MapIcon, ArrowLeft, Edit, Trash2, Plus, Loader2 } from "lucide-react";
+import { Search, MapPin, Calendar, Users, Heart, CheckCircle2, Filter, Grid, List, Map as MapIcon, ArrowLeft, Edit, Trash2, Plus, Loader2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { APP_TITLE } from "@/const";
 import { MapView } from "@/components/Map";
@@ -69,10 +69,10 @@ const REGIONS = [
 
 const COST_LABELS: Record<string, string> = {
   free: "Kostenlos",
-  low: "€",
-  medium: "€€",
-  high: "€€€",
-  very_high: "€€€€",
+  low: "CHF •",
+  medium: "CHF ••",
+  high: "CHF •••",
+  very_high: "CHF ••••",
 };
 
 export default function Explore() {
@@ -397,10 +397,10 @@ export default function Explore() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="free">{t("explore.costFree")}</SelectItem>
-                <SelectItem value="low">€</SelectItem>
-                <SelectItem value="medium">€€</SelectItem>
-                <SelectItem value="high">€€€</SelectItem>
-                <SelectItem value="very_high">€€€€</SelectItem>
+                <SelectItem value="low">CHF •</SelectItem>
+                <SelectItem value="medium">CHF ••</SelectItem>
+                <SelectItem value="high">CHF •••</SelectItem>
+                <SelectItem value="very_high">CHF ••••</SelectItem>
               </SelectContent>
             </Select>
           </div>

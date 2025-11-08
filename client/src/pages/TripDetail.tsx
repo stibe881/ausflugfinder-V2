@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Heart, Share2, Copy, Mail, Phone, MessageCircle, FileText, Loader2, MapPin, Euro, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Heart, Share2, Copy, Mail, Phone, MessageCircle, FileText, Loader2, MapPin, DollarSign, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams, useLocation } from "wouter";
 import { toast } from "sonner";
@@ -60,10 +60,10 @@ export default function TripDetail() {
 
   const COST_LABELS: Record<string, string> = {
     free: t("tripDetail.costFree"),
-    low: "€",
-    medium: "€€",
-    high: "€€€",
-    very_high: "€€€€",
+    low: "CHF •",
+    medium: "CHF ••",
+    high: "CHF •••",
+    very_high: "CHF ••••",
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -282,7 +282,7 @@ export default function TripDetail() {
                 {/* Cost */}
                 <div className="flex items-center justify-between pb-4 border-b">
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Euro className="w-5 h-5" />
+                    <DollarSign className="w-5 h-5" />
                     <span className="text-sm">{t("tripDetail.cost")}</span>
                   </div>
                   <Badge variant="default" className="bg-primary">
@@ -460,10 +460,10 @@ export default function TripDetail() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="free">{t("tripDetail.costFree")}</SelectItem>
-                  <SelectItem value="low">€</SelectItem>
-                  <SelectItem value="medium">€€</SelectItem>
-                  <SelectItem value="high">€€€</SelectItem>
-                  <SelectItem value="very_high">€€€€</SelectItem>
+                  <SelectItem value="low">CHF •</SelectItem>
+                  <SelectItem value="medium">CHF ••</SelectItem>
+                  <SelectItem value="high">CHF •••</SelectItem>
+                  <SelectItem value="very_high">CHF ••••</SelectItem>
                 </SelectContent>
               </Select>
             </div>
