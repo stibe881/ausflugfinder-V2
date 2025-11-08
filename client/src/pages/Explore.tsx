@@ -473,19 +473,19 @@ export default function Explore() {
                   <MapView
                     onMapReady={(map) => {
                       const bounds = new window.google.maps.LatLngBounds();
-                      
+
                       trips.forEach((trip) => {
                         if (trip.latitude && trip.longitude) {
                           const lat = parseFloat(trip.latitude);
                           const lng = parseFloat(trip.longitude);
                           const position = { lat, lng };
-                          
+
                           const marker = new window.google.maps.Marker({
                             position,
                             map,
                             title: trip.title,
                           });
-                          
+
                           const infoWindow = new window.google.maps.InfoWindow({
                             content: `
                               <div style="padding: 8px; max-width: 250px;">
@@ -498,15 +498,15 @@ export default function Explore() {
                               </div>
                             `,
                           });
-                          
+
                           marker.addListener("click", () => {
                             infoWindow.open(map, marker);
                           });
-                          
+
                           bounds.extend(position);
                         }
                       });
-                      
+
                       if (!bounds.isEmpty()) {
                         map.fitBounds(bounds);
                       }
@@ -517,63 +517,98 @@ export default function Explore() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredTrips.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
-                    <Card className="overflow-hidden cursor-pointer h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-lg border border-border/50">
-                      {/* Image Container */}
-                      {trip.image && (
-                        <div className="relative w-full h-48 bg-muted overflow-hidden">
-                          <img
-                            src={trip.image}
-                            alt={trip.title}
-                            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                          />
+                    <Card className="overflow-hidden cursor-pointer h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group">
+                      {/* Image Container with Overlay */}
+                      <div className="relative w-full h-56 bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
+                        {trip.image ? (
+                          <>
+                            <img
+                              src={trip.image}
+                              alt={trip.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                            <MapPin className="w-12 h-12 text-muted-foreground/40" />
+                          </div>
+                        )}
+
+                        {/* Cost Badge - Top Right */}
+                        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
+                          <span className="text-sm font-bold text-primary">{COST_LABELS[trip.cost]}</span>
                         </div>
-                      )}
+
+                        {/* Favorite Badge - Top Left */}
+                        {trip.isFavorite === 1 && (
+                          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+                            <Heart className="w-5 h-5 fill-red-500 text-red-500" />
+                          </div>
+                        )}
+
+                        {/* Category Badge - Bottom Left */}
+                        {trip.category && (
+                          <div className="absolute bottom-3 left-3">
+                            <Badge className="bg-primary/90 hover:bg-primary text-white text-xs font-medium">
+                              {trip.category}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
 
                       {/* Content */}
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start gap-2 mb-1">
-                          <CardTitle className="text-lg font-bold line-clamp-2">{trip.title}</CardTitle>
-                          {trip.isFavorite === 1 && (
-                            <Heart className="w-5 h-5 fill-red-500 text-red-500 flex-shrink-0" />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
-                          <span className="line-clamp-1">{trip.destination}</span>
+                      <CardHeader className="pb-3 pt-4">
+                        <div className="space-y-2">
+                          <CardTitle className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
+                            {trip.title}
+                          </CardTitle>
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <MapPin className="w-4 h-4 flex-shrink-0 text-primary/70" />
+                            <span className="line-clamp-1">{trip.destination}</span>
+                          </div>
                         </div>
                       </CardHeader>
 
-                      <CardContent className="flex-grow pb-3">
+                      <CardContent className="flex-grow pb-3 space-y-3">
                         {trip.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                             {trip.description}
                           </p>
                         )}
 
-                        {/* Badges */}
-                        <div className="flex flex-wrap gap-2">
+                        {/* Badges Row */}
+                        <div className="flex flex-wrap gap-2 pt-2">
                           {trip.region && (
-                            <Badge variant="outline" className="text-xs">{trip.region}</Badge>
+                            <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
+                              {trip.region}
+                            </Badge>
                           )}
-                          {trip.category && (
-                            <Badge variant="secondary" className="text-xs">{trip.category}</Badge>
+                          {trip.ageRecommendation && (
+                            <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
+                              {trip.ageRecommendation}
+                            </Badge>
                           )}
                           {trip.isDone === 1 && (
-                            <Badge className="bg-green-500 text-white text-xs gap-1">
+                            <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
                               <CheckCircle2 className="w-3 h-3" />
-                              Erledigt
+                              Besucht
                             </Badge>
                           )}
                         </div>
                       </CardContent>
 
                       {/* Footer */}
-                      <CardFooter className="pt-3 border-t">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Euro className="w-4 h-4 text-primary" />
-                          <span className="font-medium">{COST_LABELS[trip.cost]}</span>
+                      <div className="mt-auto px-4 py-3 border-t border-border/30 bg-muted/30 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>Öffnen</span>
                         </div>
-                      </CardFooter>
+                        <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                          <span className="text-xs text-primary">→</span>
+                        </div>
+                      </div>
                     </Card>
                   </Link>
                 ))}
@@ -583,62 +618,89 @@ export default function Explore() {
               <div className="space-y-4">
                 {filteredTrips.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
-                    <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-lg border border-border/50">
-                      <div className="flex gap-4">
+                    <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group">
+                      <div className="flex gap-0 h-auto">
                         {/* Image - Left Side */}
-                        {trip.image && (
-                          <div className="relative w-40 h-40 flex-shrink-0 bg-muted overflow-hidden hidden sm:block">
-                            <img
-                              src={trip.image}
-                              alt={trip.title}
-                              className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                            />
-                          </div>
-                        )}
+                        <div className="relative w-0 sm:w-48 flex-shrink-0 bg-gradient-to-br from-muted to-muted/50 overflow-hidden hidden sm:block">
+                          {trip.image ? (
+                            <>
+                              <img
+                                src={trip.image}
+                                alt={trip.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </>
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                              <MapPin className="w-8 h-8 text-muted-foreground/40" />
+                            </div>
+                          )}
+                        </div>
 
                         {/* Content - Right Side */}
-                        <div className="flex-grow p-4 flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start gap-2 mb-2">
-                              <div>
-                                <h3 className="font-bold text-lg line-clamp-2">{trip.title}</h3>
-                                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                                  <MapPin className="w-4 h-4 flex-shrink-0" />
-                                  <span>{trip.destination}</span>
+                        <div className="flex-grow p-5 flex flex-col justify-between gap-4">
+                          {/* Header */}
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-start gap-3">
+                              <div className="flex-1">
+                                <h3 className="font-bold text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                                  {trip.title}
+                                </h3>
+                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1.5">
+                                  <MapPin className="w-4 h-4 flex-shrink-0 text-primary/70" />
+                                  <span className="line-clamp-1">{trip.destination}</span>
                                 </div>
                               </div>
                               {trip.isFavorite === 1 && (
-                                <Heart className="w-5 h-5 fill-red-500 text-red-500 flex-shrink-0" />
+                                <Heart className="w-6 h-6 fill-red-500 text-red-500 flex-shrink-0 mt-0.5" />
                               )}
                             </div>
 
                             {trip.description && (
-                              <p className="text-sm text-muted-foreground line-clamp-2 my-2">
+                              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                                 {trip.description}
                               </p>
                             )}
+                          </div>
 
+                          {/* Info Row */}
+                          <div className="flex flex-wrap gap-3 items-center justify-between pt-3 border-t border-border/30">
                             {/* Badges */}
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              {trip.region && (
-                                <Badge variant="outline" className="text-xs">{trip.region}</Badge>
-                              )}
+                            <div className="flex flex-wrap gap-2">
                               {trip.category && (
-                                <Badge variant="secondary" className="text-xs">{trip.category}</Badge>
+                                <Badge className="bg-primary/90 hover:bg-primary text-white text-xs font-medium">
+                                  {trip.category}
+                                </Badge>
+                              )}
+                              {trip.region && (
+                                <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
+                                  {trip.region}
+                                </Badge>
+                              )}
+                              {trip.ageRecommendation && (
+                                <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
+                                  {trip.ageRecommendation}
+                                </Badge>
                               )}
                               {trip.isDone === 1 && (
-                                <Badge className="bg-green-500 text-white text-xs gap-1">
+                                <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
                                   <CheckCircle2 className="w-3 h-3" />
-                                  Erledigt
+                                  Besucht
                                 </Badge>
                               )}
                             </div>
-                          </div>
 
-                          {/* Footer Info */}
-                          <div className="flex items-center gap-2 text-sm mt-3 pt-3 border-t">
-                            <Euro className="w-4 h-4 text-primary" />
-                            <span className="font-medium">{COST_LABELS[trip.cost]}</span>
+                            {/* Cost and Action */}
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg">
+                                <Euro className="w-4 h-4 text-primary font-bold" />
+                                <span className="text-sm font-semibold text-primary">{COST_LABELS[trip.cost]}</span>
+                              </div>
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                <span className="text-sm text-primary font-bold">→</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
