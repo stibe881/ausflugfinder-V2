@@ -599,16 +599,6 @@ export default function Explore() {
                         </div>
                       </CardContent>
 
-                      {/* Footer */}
-                      <div className="mt-auto px-4 py-3 border-t border-border/30 bg-muted/30 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>Öffnen</span>
-                        </div>
-                        <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                          <span className="text-xs text-primary">→</span>
-                        </div>
-                      </div>
                     </Card>
                   </Link>
                 ))}
@@ -621,7 +611,7 @@ export default function Explore() {
                     <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group">
                       <div className="flex gap-0 h-auto">
                         {/* Image - Left Side */}
-                        <div className="relative w-0 sm:w-48 flex-shrink-0 bg-gradient-to-br from-muted to-muted/50 overflow-hidden hidden sm:block">
+                        <div className="relative w-0 sm:w-48 flex-shrink-0 bg-gradient-to-br from-muted to-muted/50 overflow-hidden hidden sm:block rounded-xl m-4 sm:m-0">
                           {trip.image ? (
                             <>
                               <img
@@ -664,43 +654,29 @@ export default function Explore() {
                             )}
                           </div>
 
-                          {/* Info Row */}
-                          <div className="flex flex-wrap gap-3 items-center justify-between pt-3 border-t border-border/30">
-                            {/* Badges */}
-                            <div className="flex flex-wrap gap-2">
-                              {trip.category && (
-                                <Badge className="bg-primary/90 hover:bg-primary text-white text-xs font-medium">
-                                  {trip.category}
-                                </Badge>
-                              )}
-                              {trip.region && (
-                                <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
-                                  {trip.region}
-                                </Badge>
-                              )}
-                              {trip.ageRecommendation && (
-                                <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
-                                  {trip.ageRecommendation}
-                                </Badge>
-                              )}
-                              {trip.isDone === 1 && (
-                                <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
-                                  <CheckCircle2 className="w-3 h-3" />
-                                  Besucht
-                                </Badge>
-                              )}
-                            </div>
-
-                            {/* Cost and Action */}
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg">
-                                <Euro className="w-4 h-4 text-primary font-bold" />
-                                <span className="text-sm font-semibold text-primary">{COST_LABELS[trip.cost]}</span>
-                              </div>
-                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                <span className="text-sm text-primary font-bold">→</span>
-                              </div>
-                            </div>
+                          {/* Badges */}
+                          <div className="flex flex-wrap gap-2">
+                            {trip.category && (
+                              <Badge className="bg-primary/90 hover:bg-primary text-white text-xs font-medium">
+                                {trip.category}
+                              </Badge>
+                            )}
+                            {trip.region && (
+                              <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
+                                {trip.region}
+                              </Badge>
+                            )}
+                            {trip.ageRecommendation && (
+                              <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
+                                {trip.ageRecommendation}
+                              </Badge>
+                            )}
+                            {trip.isDone === 1 && (
+                              <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Besucht
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
