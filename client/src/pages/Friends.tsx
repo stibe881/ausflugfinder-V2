@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/contexts/i18nContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -6,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Users, Plus, Trash2, ArrowLeft, Loader2, UserPlus, MapPin, Plane } from "lucide-react";
+import { Users, Plus, Trash2, ArrowLeft, Loader2, UserPlus, MapPin, Plane, Mail, MessageCircle } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 
 export default function Friends() {
+  const { t } = useI18n();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
@@ -87,7 +89,7 @@ export default function Friends() {
   const handleAddFriend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFriendEmail.trim()) {
-      toast.error("Bitte geben Sie eine E-Mail-Adresse ein");
+      toast.error(t("friends.emailRequired"));
       return;
     }
 
@@ -106,24 +108,35 @@ export default function Friends() {
       };
 
       setFriends([...friends, newFriend]);
-      toast.success("Freund hinzugefügt!");
+      toast.success(t("friends.addSuccess"));
       setNewFriendEmail("");
       setIsAddOpen(false);
     } catch (error) {
-      toast.error("Fehler beim Hinzufügen");
+      toast.error(t("friends.addError"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteFriend = (id: number) => {
-    if (confirm("Möchtest du diesen Freund wirklich löschen?")) {
+    if (confirm(t("friends.deleteConfirm"))) {
       setFriends(friends.filter(f => f.id !== id));
       if (selectedFriend?.id === id) {
         setSelectedFriend(null);
       }
-      toast.success("Freund gelöscht!");
+      toast.success(t("friends.deleteSuccess"));
     }
+  };
+
+  const handleInviteViaEmail = (friendEmail: string) => {
+    const subject = encodeURIComponent(t("friends.emailSubject"));
+    const body = encodeURIComponent(t("friends.emailBody"));
+    window.location.href = `mailto:${friendEmail}?subject=${subject}&body=${body}`;
+  };
+
+  const handleInviteViaWhatsApp = (friendEmail: string) => {
+    const message = encodeURIComponent(t("friends.whatsappMessage"));
+    window.open(`https://wa.me/?text=${message}`, "_blank");
   };
 
   if (authLoading) {
@@ -139,14 +152,14 @@ export default function Friends() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md w-full mx-4 border-2">
           <CardHeader>
-            <CardTitle>Anmeldung erforderlich</CardTitle>
+            <CardTitle>{t("friends.loginRequired")}</CardTitle>
             <CardDescription>
-              Du musst angemeldet sein, um deine Freunde zu verwalten.
+              {t("friends.loginDesc")}
             </CardDescription>
           </CardHeader>
           <CardFooter>
             <Link href="/">
-              <Button variant="outline">Zurück</Button>
+              <Button variant="outline">{t("friends.back")}</Button>
             </Link>
           </CardFooter>
         </Card>
@@ -164,13 +177,13 @@ export default function Friends() {
               <Link href="/">
                 <Button variant="ghost" size="sm" className="gap-2 hover:bg-primary/10">
                   <ArrowLeft className="w-4 h-4" />
-                  Zurück
+                  {t("friends.back")}
                 </Button>
               </Link>
               <div className="flex items-center gap-2">
                 <Users className="w-6 h-6 text-primary" />
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Meine Freunde
+                  {t("friends.pageTitle")}
                 </h1>
               </div>
             </div>
@@ -178,24 +191,24 @@ export default function Friends() {
               <DialogTrigger asChild>
                 <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
                   <Plus className="w-4 h-4" />
-                  Freund hinzufügen
+                  {t("friends.addFriendBtn")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-card border-2 border-border">
                 <form onSubmit={handleAddFriend}>
                   <DialogHeader>
-                    <DialogTitle className="text-card-foreground">Freund hinzufügen</DialogTitle>
+                    <DialogTitle className="text-card-foreground">{t("friends.addFriendTitle")}</DialogTitle>
                     <DialogDescription>
-                      Geben Sie die E-Mail-Adresse eines Freundes ein
+                      {t("friends.addFriendDesc")}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="email">E-Mail-Adresse</Label>
+                      <Label htmlFor="email">{t("friends.emailLabel")}</Label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder="freund@example.com"
+                        placeholder={t("friends.emailPlaceholder")}
                         value={newFriendEmail}
                         onChange={(e) => setNewFriendEmail(e.target.value)}
                         required
@@ -210,18 +223,18 @@ export default function Friends() {
                       onClick={() => setIsAddOpen(false)}
                       disabled={isSubmitting}
                     >
-                      Abbrechen
+                      {t("friends.cancel")}
                     </Button>
                     <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
                       {isSubmitting ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Hinzufügen...
+                          {t("friends.adding")}
                         </>
                       ) : (
                         <>
                           <UserPlus className="w-4 h-4 mr-2" />
-                          Hinzufügen
+                          {t("friends.add")}
                         </>
                       )}
                     </Button>
@@ -238,7 +251,7 @@ export default function Friends() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Friends List */}
           <div className="lg:col-span-1">
-            <h2 className="text-lg font-semibold mb-4">Freundesliste ({friends.length})</h2>
+            <h2 className="text-lg font-semibold mb-4">{t("friends.friendsList")} ({friends.length})</h2>
             <div className="space-y-2">
               {friends.length > 0 ? (
                 friends.map((friend) => (
@@ -279,7 +292,7 @@ export default function Friends() {
                 <Card className="bg-muted/50 border-dashed border-2">
                   <CardContent className="pt-6 text-center">
                     <Users className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                    <p className="text-muted-foreground text-sm">Keine Freunde hinzugefügt</p>
+                    <p className="text-muted-foreground text-sm">{t("friends.noFriends")}</p>
                   </CardContent>
                 </Card>
               )}
@@ -302,19 +315,37 @@ export default function Friends() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="bg-background/50 rounded-lg p-3">
-                        <p className="text-sm text-muted-foreground">Gemeinsame Ausflüge</p>
+                        <p className="text-sm text-muted-foreground">{t("friends.sharedTrips")}</p>
                         <p className="text-2xl font-bold text-primary">
                           {friendDetails[selectedFriend.id]?.trips?.length || 0}
                         </p>
                       </div>
                       <div className="bg-background/50 rounded-lg p-3">
-                        <p className="text-sm text-muted-foreground">Gemeinsame Destinationen</p>
+                        <p className="text-sm text-muted-foreground">{t("friends.sharedDestinations")}</p>
                         <p className="text-2xl font-bold text-secondary">
                           {friendDetails[selectedFriend.id]?.destinations?.length || 0}
                         </p>
                       </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleInviteViaEmail(selectedFriend.email)}
+                        variant="outline"
+                        className="flex-1 gap-2"
+                      >
+                        <Mail className="w-4 h-4" />
+                        {t("friends.inviteEmail")}
+                      </Button>
+                      <Button
+                        onClick={() => handleInviteViaWhatsApp(selectedFriend.email)}
+                        variant="outline"
+                        className="flex-1 gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        {t("friends.inviteWhatsApp")}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -323,7 +354,7 @@ export default function Friends() {
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Plane className="w-5 h-5 text-primary" />
-                    Gemeinsame Ausflüge ({friendDetails[selectedFriend.id]?.trips?.length || 0})
+                    {t("friends.sharedTripsTitle")} ({friendDetails[selectedFriend.id]?.trips?.length || 0})
                   </h3>
                   <div className="space-y-2">
                     {friendDetails[selectedFriend.id]?.trips?.length ? (
@@ -345,7 +376,7 @@ export default function Friends() {
                     ) : (
                       <Card className="bg-muted/50 border-dashed border-2">
                         <CardContent className="pt-6 text-center">
-                          <p className="text-muted-foreground text-sm">Noch keine gemeinsamen Ausflüge</p>
+                          <p className="text-muted-foreground text-sm">{t("friends.noSharedTrips")}</p>
                         </CardContent>
                       </Card>
                     )}
@@ -356,7 +387,7 @@ export default function Friends() {
                 <div>
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-accent" />
-                    Gemeinsame Destinationen ({friendDetails[selectedFriend.id]?.destinations?.length || 0})
+                    {t("friends.sharedDestinationsTitle")} ({friendDetails[selectedFriend.id]?.destinations?.length || 0})
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {friendDetails[selectedFriend.id]?.destinations?.length ? (
@@ -369,7 +400,7 @@ export default function Friends() {
                         </Badge>
                       ))
                     ) : (
-                      <p className="text-muted-foreground text-sm col-span-2">Noch keine gemeinsamen Destinationen</p>
+                      <p className="text-muted-foreground text-sm col-span-2">{t("friends.noSharedDestinations")}</p>
                     )}
                   </div>
                 </div>
@@ -378,7 +409,7 @@ export default function Friends() {
               <Card className="bg-muted/50 border-dashed border-2 h-96 flex items-center justify-center">
                 <CardContent className="text-center">
                   <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-muted-foreground">Wähle einen Freund aus, um Details zu sehen</p>
+                  <p className="text-muted-foreground">{t("friends.selectFriend")}</p>
                 </CardContent>
               </Card>
             )}
