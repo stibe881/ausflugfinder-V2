@@ -14,7 +14,7 @@ import {
   addTripAttribute, getTripAttributes, deleteTripAttribute,
   searchTrips, toggleFavorite, toggleDone, getPublicTrips, getStatistics,
   createDayPlan, getDayPlansByUser, getDayPlanById, updateDayPlan, deleteDayPlan,
-  addTripToDayPlan, getDayPlanItems, getDayPlanItemsWithTrips, removeTripFromDayPlan, updateDayPlanItem,
+  addTripToDayPlan, getDayPlanItems, getDayPlanItemsWithTrips, getDayPlanWithItems, removeTripFromDayPlan, updateDayPlanItem,
   addPackingListItem, getPackingListItems, updatePackingListItem, updatePackingListItemFull, deletePackingListItem,
   addBudgetItem, getBudgetItems, updateBudgetItem, deleteBudgetItem,
   addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem,
@@ -155,9 +155,14 @@ export const appRouter = router({
     list: publicProcedure.query(async () => {
       return await getAllTrips();
     }),
-    myTrips: protectedProcedure.query(async ({ ctx }) => {
-      return await getUserTrips(ctx.user.id);
-    }),
+    myTrips: protectedProcedure
+      .input(z.object({
+        page: z.number().min(1).default(1).optional(),
+        limit: z.number().min(1).max(100).default(20).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        return await getUserTrips(ctx.user.id, input);
+      }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
@@ -245,14 +250,22 @@ export const appRouter = router({
           attributes: z.array(z.string()).optional(),
           isPublic: z.boolean().optional(),
           userId: z.number().optional(),
+          page: z.number().min(1).default(1).optional(),
+          limit: z.number().min(1).max(100).default(20).optional(),
         })
       )
       .query(async ({ input }) => {
-        return await searchTrips(input);
+        const { page, limit, ...filters } = input;
+        return await searchTrips(filters, { page, limit });
       }),
-    publicTrips: publicProcedure.query(async () => {
-      return await getPublicTrips();
-    }),
+    publicTrips: publicProcedure
+      .input(z.object({
+        page: z.number().min(1).default(1).optional(),
+        limit: z.number().min(1).max(100).default(20).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await getPublicTrips(input);
+      }),
     toggleFavorite: protectedProcedure
       .input(z.object({ tripId: z.number() }))
       .mutation(async ({ ctx, input }) => {
@@ -645,17 +658,14 @@ export const appRouter = router({
       .input(z.object({ planId: z.number() }))
       .query(async ({ input }) => {
         try {
-          const plan = await getDayPlanById(input.planId);
-          const items = await getDayPlanItemsWithTrips(input.planId);
+          // OPTIMIZATION #5: Single combined query instead of separate fetches
+          const data = await getDayPlanWithItems(input.planId);
+          if (!data) throw new Error("Plan not found");
 
-          if (!plan) throw new Error("Plan not found");
+          const { plan, items } = data;
 
-          const icalContent = generateICalendar({
-          title: plan.title,
-          description: plan.description || undefined,
-          startDate: plan.startDate,
-          endDate: plan.endDate,
-          items: items.map(item => ({
+          // Extract and format trip data from items
+          const formattedItems = items.map(item => ({
             trip: {
               title: item.trip?.title || "",
               description: item.trip?.description || undefined,
@@ -667,8 +677,15 @@ export const appRouter = router({
             startTime: item.startTime || undefined,
             endTime: item.endTime || undefined,
             notes: item.notes || undefined,
-          })),
-        });
+          }));
+
+          const icalContent = generateICalendar({
+            title: plan.title,
+            description: plan.description || undefined,
+            startDate: plan.startDate,
+            endDate: plan.endDate,
+            items: formattedItems,
+          });
 
           return { content: icalContent };
         } catch (error) {
@@ -680,17 +697,14 @@ export const appRouter = router({
       .input(z.object({ planId: z.number() }))
       .query(async ({ input }) => {
         try {
-          const plan = await getDayPlanById(input.planId);
-          const items = await getDayPlanItemsWithTrips(input.planId);
+          // OPTIMIZATION #5: Single combined query instead of separate fetches
+          const data = await getDayPlanWithItems(input.planId);
+          if (!data) throw new Error("Plan not found");
 
-          if (!plan) throw new Error("Plan not found");
+          const { plan, items } = data;
 
-          const pdfBuffer = await generatePDFContent({
-          title: plan.title,
-          description: plan.description || undefined,
-          startDate: plan.startDate,
-          endDate: plan.endDate,
-          items: items.map(item => ({
+          // Extract and format trip data from items
+          const formattedItems = items.map(item => ({
             trip: {
               title: item.trip?.title || "",
               description: item.trip?.description || undefined,
@@ -702,8 +716,15 @@ export const appRouter = router({
             startTime: item.startTime || undefined,
             endTime: item.endTime || undefined,
             notes: item.notes || undefined,
-          })),
-        });
+          }));
+
+          const pdfBuffer = await generatePDFContent({
+            title: plan.title,
+            description: plan.description || undefined,
+            startDate: plan.startDate,
+            endDate: plan.endDate,
+            items: formattedItems,
+          });
 
           return { content: pdfBuffer.toString('base64') };
         } catch (error) {

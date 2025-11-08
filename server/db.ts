@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql, or, ilike, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem,
@@ -102,12 +102,40 @@ export async function createTrip(trip: InsertTrip) {
   return result;
 }
 
-export async function getUserTrips(userId: number) {
+export async function getUserTrips(userId: number, pagination?: { page?: number; limit?: number }) {
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
   }
-  return await db.select().from(trips).where(eq(trips.userId, userId)).orderBy(trips.createdAt);
+
+  // OPTIMIZATION #6: Pagination support for user trips
+  const page = pagination?.page || 1;
+  const limit = Math.min(pagination?.limit || 20, 100);
+  const offset = (page - 1) * limit;
+
+  const [data, countResult] = await Promise.all([
+    db.select()
+      .from(trips)
+      .where(eq(trips.userId, userId))
+      .orderBy(trips.createdAt)
+      .limit(limit)
+      .offset(offset),
+    db.select({ value: count() })
+      .from(trips)
+      .where(eq(trips.userId, userId))
+  ]);
+
+  const total = countResult[0]?.value || 0;
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 }
 
 export async function getAllTrips() {
@@ -304,40 +332,90 @@ export async function deleteTripAttribute(id: number) {
   return await db.delete(tripAttributes).where(eq(tripAttributes.id, id));
 }
 
-// Advanced search and filter queries
-export async function searchTrips(filters: {
-  keyword?: string;
-  region?: string;
-  category?: string;
-  cost?: string;
-  attributes?: string[];
-  isPublic?: boolean;
-  userId?: number;
-}) {
+// Advanced search and filter queries with pagination
+export async function searchTrips(
+  filters: {
+    keyword?: string;
+    region?: string;
+    category?: string;
+    cost?: string;
+    attributes?: string[];
+    isPublic?: boolean;
+    userId?: number;
+  },
+  pagination?: { page?: number; limit?: number }
+) {
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
   }
-  
-  let query = db.select().from(trips);
-  
-  // Apply filters (simplified - in production, use proper query builder)
-  // This is a basic implementation
-  const results = await query;
-  
-  return results.filter(trip => {
-    if (filters.isPublic !== undefined && trip.isPublic !== (filters.isPublic ? 1 : 0)) return false;
-    if (filters.userId && trip.userId !== filters.userId) return false;
-    if (filters.region && trip.region !== filters.region) return false;
-    if (filters.category && trip.category !== filters.category) return false;
-    if (filters.cost && trip.cost !== filters.cost) return false;
-    if (filters.keyword) {
-      const keyword = filters.keyword.toLowerCase();
-      const searchText = `${trip.title} ${trip.description} ${trip.destination}`.toLowerCase();
-      if (!searchText.includes(keyword)) return false;
+
+  // OPTIMIZATION #6: Pagination support
+  const page = pagination?.page || 1;
+  const limit = Math.min(pagination?.limit || 20, 100); // Cap at 100 for security
+  const offset = (page - 1) * limit;
+
+  // Build WHERE conditions
+  const conditions: any[] = [];
+
+  if (filters.isPublic !== undefined) {
+    conditions.push(eq(trips.isPublic, filters.isPublic ? 1 : 0));
+  }
+
+  if (filters.userId) {
+    conditions.push(eq(trips.userId, filters.userId));
+  }
+
+  if (filters.region) {
+    conditions.push(eq(trips.region, filters.region));
+  }
+
+  if (filters.category) {
+    conditions.push(eq(trips.category, filters.category));
+  }
+
+  if (filters.cost) {
+    conditions.push(eq(trips.cost, filters.cost));
+  }
+
+  if (filters.keyword) {
+    // Search in title, description, and destination
+    conditions.push(
+      or(
+        ilike(trips.title, `%${filters.keyword}%`),
+        ilike(trips.description, `%${filters.keyword}%`),
+        ilike(trips.destination, `%${filters.keyword}%`)
+      )
+    );
+  }
+
+  // Combine all conditions
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  // Fetch data and total count in parallel
+  const [data, countResult] = await Promise.all([
+    db.select()
+      .from(trips)
+      .where(whereClause)
+      .orderBy(trips.createdAt)
+      .limit(limit)
+      .offset(offset),
+    db.select({ value: count() })
+      .from(trips)
+      .where(whereClause)
+  ]);
+
+  const total = countResult[0]?.value || 0;
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
     }
-    return true;
-  });
+  };
 }
 
 // Toggle favorite status
@@ -346,12 +424,14 @@ export async function toggleFavorite(tripId: number, userId: number) {
   if (!db) {
     throw new Error("Database not available");
   }
-  const trip = await getTripById(tripId);
-  if (!trip) {
-    throw new Error("Trip not found");
-  }
-  const newStatus = trip.isFavorite === 1 ? 0 : 1;
-  return await db.update(trips).set({ isFavorite: newStatus }).where(eq(trips.id, tripId));
+
+  // OPTIMIZATION #5: Use SQL CASE statement instead of reading then writing
+  // Before: 1 read query + 1 write query = 2 queries
+  // After: 1 write query = 50% reduction
+  return await db
+    .update(trips)
+    .set({ isFavorite: sql`CASE WHEN isFavorite = 1 THEN 0 ELSE 1 END` })
+    .where(eq(trips.id, tripId));
 }
 
 // Toggle done status
@@ -360,21 +440,51 @@ export async function toggleDone(tripId: number, userId: number) {
   if (!db) {
     throw new Error("Database not available");
   }
-  const trip = await getTripById(tripId);
-  if (!trip) {
-    throw new Error("Trip not found");
-  }
-  const newStatus = trip.isDone === 1 ? 0 : 1;
-  return await db.update(trips).set({ isDone: newStatus }).where(eq(trips.id, tripId));
+
+  // OPTIMIZATION #5: Use SQL CASE statement instead of reading then writing
+  // Before: 1 read query + 1 write query = 2 queries
+  // After: 1 write query = 50% reduction
+  return await db
+    .update(trips)
+    .set({ isDone: sql`CASE WHEN isDone = 1 THEN 0 ELSE 1 END` })
+    .where(eq(trips.id, tripId));
 }
 
-// Get public trips for explore page
-export async function getPublicTrips() {
+// Get public trips for explore page with pagination
+export async function getPublicTrips(pagination?: { page?: number; limit?: number }) {
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
   }
-  return await db.select().from(trips).where(eq(trips.isPublic, 1)).orderBy(trips.createdAt);
+
+  // OPTIMIZATION #6: Pagination support for explore page
+  const page = pagination?.page || 1;
+  const limit = Math.min(pagination?.limit || 20, 100);
+  const offset = (page - 1) * limit;
+
+  const [data, countResult] = await Promise.all([
+    db.select()
+      .from(trips)
+      .where(eq(trips.isPublic, 1))
+      .orderBy(trips.createdAt)
+      .limit(limit)
+      .offset(offset),
+    db.select({ value: count() })
+      .from(trips)
+      .where(eq(trips.isPublic, 1))
+  ]);
+
+  const total = countResult[0]?.value || 0;
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 }
 
 // Get statistics
@@ -457,17 +567,75 @@ export async function getDayPlanItems(dayPlanId: number) {
 export async function getDayPlanItemsWithTrips(dayPlanId: number) {
   const db = await getDb();
   if (!db) return [];
-  
-  const items = await db.select().from(dayPlanItems).where(eq(dayPlanItems.dayPlanId, dayPlanId));
-  
-  const itemsWithTrips = await Promise.all(
-    items.map(async (item) => {
-      const trip = await getTripById(item.tripId);
-      return { ...item, trip };
+
+  // OPTIMIZATION #5: Single JOIN query instead of N+1 pattern
+  // Before: 1 query for items + N queries for trips = N+1 total
+  // After: 1 query with LEFT JOIN = massive performance improvement
+  const results = await db
+    .select({
+      // Day plan item fields
+      id: dayPlanItems.id,
+      dayPlanId: dayPlanItems.dayPlanId,
+      tripId: dayPlanItems.tripId,
+      dayNumber: dayPlanItems.dayNumber,
+      orderIndex: dayPlanItems.orderIndex,
+      startTime: dayPlanItems.startTime,
+      endTime: dayPlanItems.endTime,
+      notes: dayPlanItems.notes,
+      dateAssigned: dayPlanItems.dateAssigned,
+      createdAt: dayPlanItems.createdAt,
+      // Trip fields (nested object)
+      trip: {
+        id: trips.id,
+        userId: trips.userId,
+        title: trips.title,
+        description: trips.description,
+        destination: trips.destination,
+        startDate: trips.startDate,
+        endDate: trips.endDate,
+        participants: trips.participants,
+        status: trips.status,
+        cost: trips.cost,
+        ageRecommendation: trips.ageRecommendation,
+        routeType: trips.routeType,
+        category: trips.category,
+        region: trips.region,
+        address: trips.address,
+        websiteUrl: trips.websiteUrl,
+        contactEmail: trips.contactEmail,
+        contactPhone: trips.contactPhone,
+        latitude: trips.latitude,
+        longitude: trips.longitude,
+        image: trips.image,
+        isFavorite: trips.isFavorite,
+        isDone: trips.isDone,
+        isPublic: trips.isPublic,
+        createdAt: trips.createdAt,
+        updatedAt: trips.updatedAt,
+      }
     })
-  );
-  
-  return itemsWithTrips;
+    .from(dayPlanItems)
+    .leftJoin(trips, eq(dayPlanItems.tripId, trips.id))
+    .where(eq(dayPlanItems.dayPlanId, dayPlanId));
+
+  return results;
+}
+
+/**
+ * OPTIMIZATION #5: Consolidate day plan fetching
+ * Combines getDayPlanById and getDayPlanItemsWithTrips into single operation
+ * Used by export functions to avoid duplicate data fetches
+ */
+export async function getDayPlanWithItems(dayPlanId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const plan = await getDayPlanById(dayPlanId);
+  if (!plan) return null;
+
+  const items = await getDayPlanItemsWithTrips(dayPlanId);
+
+  return { plan, items };
 }
 
 export async function removeTripFromDayPlan(id: number) {

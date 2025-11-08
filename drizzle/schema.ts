@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -61,7 +61,17 @@ export const trips = mysqlTable("trips", {
   isPublic: int("isPublic").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Database indexes for query performance
+  userIdIdx: index("trips_user_id_idx").on(table.userId),
+  isPublicIdx: index("trips_is_public_idx").on(table.isPublic),
+  createdAtIdx: index("trips_created_at_idx").on(table.createdAt),
+  regionIdx: index("trips_region_idx").on(table.region),
+  categoryIdx: index("trips_category_idx").on(table.category),
+  costIdx: index("trips_cost_idx").on(table.cost),
+  // Composite index for search queries (region + category + cost)
+  searchIdx: index("trips_search_idx").on(table.region, table.category, table.cost),
+}));
 
 export type Trip = typeof trips.$inferSelect;
 export type InsertTrip = typeof trips.$inferInsert;
@@ -79,7 +89,11 @@ export const destinations = mysqlTable("destinations", {
   imageUrl: varchar("imageUrl", { length: 512 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for user destinations
+  userIdIdx: index("destinations_user_id_idx").on(table.userId),
+  createdAtIdx: index("destinations_created_at_idx").on(table.createdAt),
+}));
 
 export type Destination = typeof destinations.$inferSelect;
 export type InsertDestination = typeof destinations.$inferInsert;
@@ -96,7 +110,11 @@ export const tripParticipants = mysqlTable("tripParticipants", {
   email: varchar("email", { length: 320 }),
   status: mysqlEnum("status", ["confirmed", "pending", "declined"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for trip participants lookup
+  tripIdIdx: index("trip_participants_trip_id_idx").on(table.tripId),
+  userIdIdx: index("trip_participants_user_id_idx").on(table.userId),
+}));
 
 export type TripParticipant = typeof tripParticipants.$inferSelect;
 export type InsertTripParticipant = typeof tripParticipants.$inferInsert;
@@ -112,7 +130,11 @@ export const tripComments = mysqlTable("tripComments", {
   content: text("content").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for comment lookups
+  tripIdIdx: index("trip_comments_trip_id_idx").on(table.tripId),
+  createdAtIdx: index("trip_comments_created_at_idx").on(table.createdAt),
+}));
 
 export type TripComment = typeof tripComments.$inferSelect;
 export type InsertTripComment = typeof tripComments.$inferInsert;
@@ -128,7 +150,11 @@ export const tripPhotos = mysqlTable("tripPhotos", {
   caption: text("caption"),
   isPrimary: int("isPrimary").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for photo lookups
+  tripIdIdx: index("trip_photos_trip_id_idx").on(table.tripId),
+  createdAtIdx: index("trip_photos_created_at_idx").on(table.createdAt),
+}));
 
 export type TripPhoto = typeof tripPhotos.$inferSelect;
 export type InsertTripPhoto = typeof tripPhotos.$inferInsert;
@@ -161,7 +187,11 @@ export const dayPlans = mysqlTable("dayPlans", {
   isDraft: int("isDraft").default(1).notNull(), // 1 = draft, 0 = published
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for day plan lookups
+  userIdIdx: index("day_plans_user_id_idx").on(table.userId),
+  createdAtIdx: index("day_plans_created_at_idx").on(table.createdAt),
+}));
 
 export type DayPlan = typeof dayPlans.$inferSelect;
 export type InsertDayPlan = typeof dayPlans.$inferInsert;
@@ -181,7 +211,11 @@ export const dayPlanItems = mysqlTable("dayPlanItems", {
   notes: text("notes"),
   dateAssigned: timestamp("dateAssigned"), // The specific date this trip is assigned to
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for day plan items
+  dayPlanIdIdx: index("day_plan_items_day_plan_id_idx").on(table.dayPlanId),
+  tripIdIdx: index("day_plan_items_trip_id_idx").on(table.tripId),
+}));
 
 export type DayPlanItem = typeof dayPlanItems.$inferSelect;
 export type InsertDayPlanItem = typeof dayPlanItems.$inferInsert;
