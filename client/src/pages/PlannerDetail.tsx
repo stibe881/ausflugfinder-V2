@@ -619,7 +619,7 @@ export default function PlannerDetail() {
                                   <SelectValue placeholder="Ausflug wählen..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {allTrips?.map((trip) => (
+                                  {allTrips?.data?.map((trip) => (
                                     <SelectItem key={trip.id} value={trip.id.toString()}>
                                       {trip.title} - {trip.destination}
                                     </SelectItem>
