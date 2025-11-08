@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/contexts/i18nContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
 
 export default function Planner() {
+  const { t } = useI18n();
   const { user, loading, isAuthenticated } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -38,7 +40,7 @@ export default function Planner() {
 
   const deletePlan = trpc.dayPlans.delete.useMutation({
     onSuccess: () => {
-      toast.success("Tagesplan gelöscht!");
+      toast.success("Plan deleted");
       setSelectedPlan(null);
       refetchPlans();
     },
@@ -46,14 +48,14 @@ export default function Planner() {
 
   const addTripToPlan = trpc.dayPlans.addTrip.useMutation({
     onSuccess: () => {
-      toast.success("Ausflug hinzugefügt!");
+      toast.success("Trip added");
       refetchItems();
     },
   });
 
   const removeTripFromPlan = trpc.dayPlans.removeTrip.useMutation({
     onSuccess: () => {
-      toast.success("Ausflug entfernt!");
+      toast.success("Trip removed");
       refetchItems();
     },
   });
@@ -92,7 +94,7 @@ export default function Planner() {
 
   const handleCreatePlan = async () => {
     if (!newPlanTitle || !newPlanStartDate || !newPlanEndDate) {
-      toast.error("Bitte füllen Sie alle Pflichtfelder aus");
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -120,7 +122,7 @@ export default function Planner() {
       }
     } catch (error) {
       console.error("Error creating plan:", error);
-      toast.error("Fehler beim Erstellen des Plans");
+      toast.error("Error creating plan");
     }
   };
 
