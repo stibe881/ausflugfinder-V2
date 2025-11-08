@@ -73,17 +73,17 @@ export default function Planner() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-orange-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Anmeldung erforderlich</CardTitle>
-            <CardDescription>Bitte melden Sie sich an, um Tagespläne zu erstellen</CardDescription>
+            <CardTitle className="text-2xl">{t("planner.loginRequired")}</CardTitle>
+            <CardDescription>{t("planner.loginDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button asChild className="w-full">
-              <a href={getLoginUrl()}>Jetzt anmelden</a>
+              <a href={getLoginUrl()}>{t("planner.loginBtn")}</a>
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link href="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Zurück zur Startseite
+                {t("planner.backHome")}
               </Link>
             </Button>
           </CardContent>
@@ -151,60 +151,60 @@ export default function Planner() {
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Zurück
+                {t("planner.back")}
               </Button>
             </Link>
-            <h1 className="text-xl font-bold text-gray-800">Tagesplanung</h1>
+            <h1 className="text-xl font-bold text-gray-800">{t("planner.pageTitle")}</h1>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  Neue Planung
+                  {t("planner.newPlan")}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Neue Planung erstellen</DialogTitle>
+                  <DialogTitle>{t("planner.createTitle")}</DialogTitle>
                   <DialogDescription>
-                    {planType === "single" 
-                      ? "Erstellen Sie einen Tagesausflug mit mehreren Aktivitäten"
-                      : "Erstellen Sie einen mehrtägigen Ausflug mit verschiedenen Stationen"}
+                    {planType === "single"
+                      ? t("planner.singleDay")
+                      : t("planner.multiDay")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="planType">Planungstyp *</Label>
+                    <Label htmlFor="planType">{t("planner.planType")}</Label>
                     <Select value={planType} onValueChange={(v: "single" | "multi") => setPlanType(v)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="single">Tagesausflug</SelectItem>
-                        <SelectItem value="multi">Mehrtägiger Ausflug</SelectItem>
+                        <SelectItem value="single">{t("planner.singleDayOption")}</SelectItem>
+                        <SelectItem value="multi">{t("planner.multiDayOption")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="title">Titel *</Label>
+                    <Label htmlFor="title">{t("planner.titleLabel")}</Label>
                     <Input
                       id="title"
                       value={newPlanTitle}
                       onChange={(e) => setNewPlanTitle(e.target.value)}
-                      placeholder="z.B. Wochenendausflug Bern"
+                      placeholder={t("planner.titlePlaceholder")}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="description">Beschreibung</Label>
+                    <Label htmlFor="description">{t("planner.descLabel")}</Label>
                     <Textarea
                       id="description"
                       value={newPlanDescription}
                       onChange={(e) => setNewPlanDescription(e.target.value)}
-                      placeholder="Optionale Beschreibung..."
+                      placeholder={t("planner.descPlaceholder")}
                     />
                   </div>
                   <div className={planType === "single" ? "" : "grid grid-cols-2 gap-4"}>
                     <div>
-                      <Label htmlFor="startDate">{planType === "single" ? "Datum *" : "Startdatum *"}</Label>
+                      <Label htmlFor="startDate">{planType === "single" ? t("planner.dateLabel") : t("planner.startDateLabel")}</Label>
                       <Input
                         id="startDate"
                         type="date"
@@ -219,7 +219,7 @@ export default function Planner() {
                     </div>
                     {planType === "multi" && (
                       <div>
-                        <Label htmlFor="endDate">Enddatum *</Label>
+                        <Label htmlFor="endDate">{t("planner.endDateLabel")}</Label>
                         <Input
                           id="endDate"
                           type="date"
@@ -231,7 +231,7 @@ export default function Planner() {
                     )}
                   </div>
                   <Button onClick={handleCreatePlan} className="w-full" disabled={createPlan.isPending}>
-                    {createPlan.isPending ? "Erstelle..." : "Plan erstellen"}
+                    {createPlan.isPending ? t("planner.creating") : t("planner.createBtn")}
                   </Button>
                 </div>
               </DialogContent>
@@ -246,8 +246,8 @@ export default function Planner() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Meine Pläne</CardTitle>
-                <CardDescription>{dayPlans?.length || 0} Plan{dayPlans?.length !== 1 ? "e" : ""}</CardDescription>
+                <CardTitle>{t("planner.myPlans")}</CardTitle>
+                <CardDescription>{dayPlans?.length || 0} {dayPlans?.length !== 1 ? t("planner.planCountPlural") : t("planner.planCount")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {dayPlans && dayPlans.length > 0 ? (
@@ -258,14 +258,14 @@ export default function Planner() {
                       >
                         <h4 className="font-medium">{plan.title}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(plan.startDate).toLocaleDateString("de-DE")} - {new Date(plan.endDate).toLocaleDateString("de-DE")}
+                          {new Date(plan.startDate).toLocaleDateString()} - {new Date(plan.endDate).toLocaleDateString()}
                         </p>
                       </div>
                     </Link>
                   ))
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
-                    Noch keine Pläne vorhanden. Erstellen Sie Ihren ersten Plan!
+                    {t("planner.noPlans")}
                   </p>
                 )}
               </CardContent>
@@ -304,8 +304,8 @@ export default function Planner() {
                 {/* Plan Items */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Ausflüge im Plan</CardTitle>
-                    <CardDescription>{planItems?.length || 0} Ausflug{planItems?.length !== 1 ? "e" : ""}</CardDescription>
+                    <CardTitle>{t("planner.tripsInPlan")}</CardTitle>
+                    <CardDescription>{planItems?.length || 0} {planItems?.length !== 1 ? t("planner.tripCountPlural") : t("planner.tripCount")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {planItems && planItems.length > 0 ? (
@@ -341,7 +341,7 @@ export default function Planner() {
                       ))
                     ) : (
                       <p className="text-center text-muted-foreground py-8">
-                        Noch keine Ausflüge im Plan. Fügen Sie Ausflüge hinzu!
+                        {t("planner.noTripsInPlan")}
                       </p>
                     )}
                   </CardContent>
@@ -350,8 +350,8 @@ export default function Planner() {
                 {/* Available Trips */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Verfügbare Ausflüge</CardTitle>
-                    <CardDescription>Klicken Sie auf einen Ausflug, um ihn hinzuzufügen</CardDescription>
+                    <CardTitle>{t("planner.availableTrips")}</CardTitle>
+                    <CardDescription>{t("planner.clickToAdd")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {trips && trips.length > 0 ? (
@@ -372,14 +372,14 @@ export default function Planner() {
                                 <h4 className="font-medium">{trip.title}</h4>
                                 <p className="text-sm text-muted-foreground">{trip.destination}</p>
                               </div>
-                              {isInPlan && <Badge variant="secondary">Im Plan</Badge>}
+                              {isInPlan && <Badge variant="secondary">{t("planner.inPlan")}</Badge>}
                             </div>
                           </div>
                         );
                       })
                     ) : (
                       <p className="text-center text-muted-foreground py-8">
-                        Keine Ausflüge vorhanden. Erstellen Sie zuerst Ausflüge!
+                        {t("planner.noTripsAvailable")}
                       </p>
                     )}
                   </CardContent>
@@ -390,7 +390,7 @@ export default function Planner() {
                 <CardContent className="py-12">
                   <div className="text-center text-muted-foreground">
                     <Calendar className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p>Wählen Sie einen Plan aus oder erstellen Sie einen neuen</p>
+                    <p>{t("planner.selectOrCreate")}</p>
                   </div>
                 </CardContent>
               </Card>
