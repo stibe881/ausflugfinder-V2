@@ -65,11 +65,16 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        await createDestination({
-          userId: ctx.user.id,
-          ...input,
-        });
-        return { success: true };
+        try {
+          await createDestination({
+            userId: ctx.user.id,
+            ...input,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "destinations.create");
+          throw toTRPCError(appError);
+        }
       }),
     update: protectedProcedure
       .input(
@@ -82,15 +87,25 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const { id, ...data } = input;
-        await updateDestination(id, ctx.user.id, data);
-        return { success: true };
+        try {
+          const { id, ...data } = input;
+          await updateDestination(id, ctx.user.id, data);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "destinations.update");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await deleteDestination(input.id, ctx.user.id);
-        return { success: true };
+        try {
+          await deleteDestination(input.id, ctx.user.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "destinations.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
@@ -392,14 +407,22 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const result = await createDayPlan({
-          userId: ctx.user.id,
-          ...input,
-        });
-        // Get the newly created plan to return its ID
-        const plans = await getDayPlansByUser(ctx.user.id);
-        const newPlan = plans[plans.length - 1];
-        return { success: true, id: newPlan?.id };
+        try {
+          if (input.endDate <= input.startDate) {
+            throw new ValidationError("End date must be after start date");
+          }
+          const result = await createDayPlan({
+            userId: ctx.user.id,
+            ...input,
+          });
+          // Get the newly created plan to return its ID
+          const plans = await getDayPlansByUser(ctx.user.id);
+          const newPlan = plans[plans.length - 1];
+          return { success: true, id: newPlan?.id };
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.create");
+          throw toTRPCError(appError);
+        }
       }),
     update: protectedProcedure
       .input(
@@ -414,15 +437,25 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        await updateDayPlan(id, data);
-        return { success: true };
+        try {
+          const { id, ...data } = input;
+          await updateDayPlan(id, data);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.update");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deleteDayPlan(input.id);
-        return { success: true };
+        try {
+          await deleteDayPlan(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.delete");
+          throw toTRPCError(appError);
+        }
       }),
     getItems: publicProcedure
       .input(z.object({ dayPlanId: z.number() }))
