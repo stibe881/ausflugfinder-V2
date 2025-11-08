@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/contexts/i18nContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
 
 export default function Profile() {
+  const { t } = useI18n();
   const { user, loading, isAuthenticated, logout } = useAuth();
   const { data: trips } = trpc.trips.list.useQuery(undefined, { enabled: isAuthenticated });
   const { data: dayPlans } = trpc.dayPlans.list.useQuery(undefined, { enabled: isAuthenticated });
@@ -31,17 +33,17 @@ export default function Profile() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-orange-50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Anmeldung erforderlich</CardTitle>
-            <CardDescription>Bitte melden Sie sich an, um Ihr Profil zu sehen</CardDescription>
+            <CardTitle className="text-2xl">{t("profile.loginRequired")}</CardTitle>
+            <CardDescription>{t("profile.loginDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button asChild className="w-full">
-              <a href={getLoginUrl()}>Jetzt anmelden</a>
+              <a href={getLoginUrl()}>{t("profile.loginBtn")}</a>
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link href="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Zurück zur Startseite
+                {t("profile.backHome")}
               </Link>
             </Button>
           </CardContent>
@@ -56,7 +58,7 @@ export default function Profile() {
 
   const handleLogout = () => {
     logout();
-    toast.success("Erfolgreich abgemeldet");
+    toast.success(t("profile.logoutSuccess"));
   };
 
   return (
@@ -68,13 +70,13 @@ export default function Profile() {
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Zurück
+                {t("profile.back")}
               </Button>
             </Link>
             <h1 className="text-xl font-bold text-gray-800">{APP_TITLE}</h1>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
-              Abmelden
+              {t("profile.logout")}
             </Button>
           </div>
         </div>
@@ -93,15 +95,15 @@ export default function Profile() {
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                <CardTitle className="text-2xl">{user.name || "Benutzer"}</CardTitle>
+                <CardTitle className="text-2xl">{user.name || t("common.loading")}</CardTitle>
                 <CardDescription>{user.email}</CardDescription>
                 <Badge variant="secondary" className="mt-2">
-                  {user.role === "admin" ? "Administrator" : "Benutzer"}
+                  {user.role === "admin" ? t("profile.admin") : t("profile.user")}
                 </Badge>
                 {user.role === "admin" && (
                   <Link href="/admin">
                     <Button variant="default" size="sm" className="mt-4">
-                      Admin Portal
+                      {t("profile.adminPortal")}
                     </Button>
                   </Link>
                 )}
@@ -110,15 +112,15 @@ export default function Profile() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="w-4 h-4" />
-                    <span>{user.email || "Keine E-Mail"}</span>
+                    <span>{user.email || t("profile.noEmail")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" />
-                    <span>Mitglied seit {new Date(user.createdAt).toLocaleDateString("de-DE")}</span>
+                    <span>{t("profile.memberSince")} {new Date(user.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <User className="w-4 h-4" />
-                    <span>Login: {user.loginMethod || "Standard"}</span>
+                    <span>{t("profile.loginMethod")} {user.loginMethod || t("profile.loginDefault")}</span>
                   </div>
                 </div>
               </CardContent>
@@ -128,11 +130,11 @@ export default function Profile() {
           {/* Statistics */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <h2 className="text-2xl font-bold mb-4">Meine Statistiken</h2>
+              <h2 className="text-2xl font-bold mb-4">{t("profile.statistics")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardDescription>Ausflüge</CardDescription>
+                    <CardDescription>{t("profile.trips")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2">
@@ -144,7 +146,7 @@ export default function Profile() {
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardDescription>Favoriten</CardDescription>
+                    <CardDescription>{t("profile.favorites")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2">
@@ -156,7 +158,7 @@ export default function Profile() {
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardDescription>Erledigt</CardDescription>
+                    <CardDescription>{t("profile.completed")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2">
@@ -168,7 +170,7 @@ export default function Profile() {
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardDescription>Destinationen</CardDescription>
+                    <CardDescription>{t("profile.destinationsCount")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2">
@@ -183,8 +185,8 @@ export default function Profile() {
             {/* Recent Activity */}
             <Card>
               <CardHeader>
-                <CardTitle>Letzte Aktivitäten</CardTitle>
-                <CardDescription>Ihre neuesten Ausflüge und Pläne</CardDescription>
+                <CardTitle>{t("profile.recentActivity")}</CardTitle>
+                <CardDescription>{t("profile.recentDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -206,7 +208,7 @@ export default function Profile() {
                     ))
                   ) : (
                     <p className="text-center text-muted-foreground py-8">
-                      Noch keine Ausflüge vorhanden. Erstellen Sie Ihren ersten Ausflug!
+                      {t("profile.noTrips")}
                     </p>
                   )}
                 </div>
@@ -217,8 +219,8 @@ export default function Profile() {
             {dayPlans && dayPlans.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Meine Tagespläne</CardTitle>
-                  <CardDescription>{dayPlans.length} Plan{dayPlans.length !== 1 ? "e" : ""}</CardDescription>
+                  <CardTitle>{t("profile.dayPlansTitle")}</CardTitle>
+                  <CardDescription>{dayPlans.length} {dayPlans.length !== 1 ? t("profile.dayPlansCountPlural") : t("profile.dayPlansCount")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -227,11 +229,11 @@ export default function Profile() {
                         <div>
                           <h4 className="font-medium">{plan.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(plan.startDate).toLocaleDateString("de-DE")} - {new Date(plan.endDate).toLocaleDateString("de-DE")}
+                            {new Date(plan.startDate).toLocaleDateString()} - {new Date(plan.endDate).toLocaleDateString()}
                           </p>
                         </div>
                         <Button variant="outline" size="sm" asChild>
-                          <Link href="/planner">Ansehen</Link>
+                          <Link href="/planner">{t("profile.view")}</Link>
                         </Button>
                       </div>
                     ))}
