@@ -71,7 +71,7 @@ export default function Home() {
           // Check if mascot div exists
           const mascotDiv = document.getElementById('ausflugfinder-mascot');
           if (!mascotDiv) {
-            console.warn('Mascot container div not found');
+            console.warn('✗ Mascot container div not found');
             return;
           }
 
@@ -82,43 +82,56 @@ export default function Home() {
             cssLink.rel = 'stylesheet';
             cssLink.href = '/assets/mascot/mascot-widget.css';
             cssLink.onload = () => {
-              console.log('✓ Mascot CSS loaded successfully');
+              console.log('✓ Mascot CSS loaded');
             };
             cssLink.onerror = () => {
-              console.error('✗ Failed to load mascot CSS from /assets/mascot/mascot-widget.css');
+              console.error('✗ Failed to load mascot CSS');
             };
             document.head.appendChild(cssLink);
+          } else {
+            console.log('✓ Mascot CSS already loaded');
           }
-
-          // Set up configuration object with callback
-          (window as any).MarmotMascotConfig = {
-            position: 'bottom-right',
-            size: 'medium',
-            basePath: '/assets/mascot',
-            factsPath: '/assets/mascot/facts_data.json',
-            onInit: () => {
-              console.log('✓ Mascot widget initialized');
-            },
-            onError: (error: any) => {
-              console.error('✗ Mascot widget error:', error);
-            }
-          };
-          console.log('✓ Mascot config object set');
 
           // Load mascot-widget.js script
           const existingScript = document.querySelector('script[src="/assets/mascot/mascot-widget.js"]');
           if (!existingScript) {
             const widgetScript = document.createElement('script');
             widgetScript.src = '/assets/mascot/mascot-widget.js';
-            widgetScript.async = false; // Load synchronously to ensure config is ready
+            widgetScript.async = false; // Load synchronously
             widgetScript.onload = () => {
-              console.log('✓ Mascot widget script loaded successfully');
+              console.log('✓ Mascot widget script loaded');
+              // Manually initialize since DOMContentLoaded already fired
+              if ((window as any).AusflugFinderMascot) {
+                try {
+                  const mascot = new (window as any).AusflugFinderMascot('ausflugfinder-mascot', {
+                    basePath: '/assets/mascot/'
+                  });
+                  console.log('✓ Mascot widget initialized');
+                } catch (initError) {
+                  console.error('✗ Error initializing mascot:', initError);
+                }
+              } else {
+                console.error('✗ AusflugFinderMascot class not found');
+              }
             };
             widgetScript.onerror = () => {
-              console.error('✗ Failed to load mascot widget script from /assets/mascot/mascot-widget.js');
+              console.error('✗ Failed to load mascot widget script');
             };
             document.body.appendChild(widgetScript);
-            console.log('→ Mascot widget script loading...');
+            console.log('→ Loading mascot widget script...');
+          } else {
+            console.log('✓ Mascot script already loaded');
+            // If script was already loaded, try to initialize if not already done
+            if ((window as any).AusflugFinderMascot && mascotDiv.innerHTML.trim() === '') {
+              try {
+                new (window as any).AusflugFinderMascot('ausflugfinder-mascot', {
+                  basePath: '/assets/mascot/'
+                });
+                console.log('✓ Mascot widget initialized (already loaded script)');
+              } catch (initError) {
+                console.error('✗ Error initializing mascot:', initError);
+              }
+            }
           }
         } catch (error) {
           console.error('✗ Error loading mascot widget:', error);
