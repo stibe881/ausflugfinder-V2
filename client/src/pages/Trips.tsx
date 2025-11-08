@@ -343,7 +343,7 @@ export default function Trips() {
           </div>
         ) : trips && trips.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trips.map((trip) => (
+            {trips?.map((trip) => (
               <Card
                 key={trip.id}
                 className="bg-card border-2 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl group overflow-hidden"

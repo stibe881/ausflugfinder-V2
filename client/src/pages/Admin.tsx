@@ -147,7 +147,7 @@ export default function Admin() {
             <h2 className="text-3xl font-bold mb-6">{t("admin.tripsManagement")}</h2>
             {allTrips && allTrips.length > 0 ? (
               <div className="space-y-4">
-                {allTrips.map((trip) => (
+                {allTrips?.map((trip) => (
                   <Card key={trip.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">

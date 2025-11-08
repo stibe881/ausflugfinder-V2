@@ -551,7 +551,7 @@ export default function Explore() {
                 </div>
               ) : viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTrips.map((trip) => (
+                {filteredTrips?.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
                     <Card className="overflow-hidden cursor-pointer h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group" style={{ padding: 0 }}>
                       {/* Image Container - NO PADDING, FULL BLEED */}
@@ -642,7 +642,7 @@ export default function Explore() {
               ) : (
               /* List View */
               <div className="space-y-4">
-                {filteredTrips.map((trip) => (
+                {filteredTrips?.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
                     <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group">
                       <div className="flex gap-0 h-auto">
@@ -829,7 +829,7 @@ export default function Explore() {
             </div>
           ) : allDestinations && allDestinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allDestinations.map((destination) => (
+              {allDestinations?.map((destination) => (
                 <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
                   {destination.imageUrl && (
                     <div className="h-48 bg-muted overflow-hidden">

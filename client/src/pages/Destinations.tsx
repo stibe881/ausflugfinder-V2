@@ -215,7 +215,7 @@ export default function Destinations() {
           </div>
         ) : destinations && destinations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {destinations.map((destination) => (
+            {destinations?.map((destination) => (
               <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 {destination.imageUrl && (
                   <div className="h-48 bg-muted overflow-hidden">

@@ -54,7 +54,7 @@ export default function Profile() {
 
   const favoriteTrips = trips?.filter(t => t.isFavorite === 1) || [];
   const completedTrips = trips?.filter(t => t.isDone === 1) || [];
-  const initials = user.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
+  const initials = user.name?.split(" ")?.map(n => n[0])?.join("")?.toUpperCase() || "U";
 
   const handleLogout = () => {
     logout();
@@ -191,7 +191,7 @@ export default function Profile() {
               <CardContent>
                 <div className="space-y-4">
                   {trips && trips.length > 0 ? (
-                    trips.slice(0, 5).map((trip) => (
+                    trips?.slice(0, 5)?.map((trip) => (
                       <Link key={trip.id} href={`/trips/${trip.id}`}>
                         <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                           <div className="flex-1">
@@ -224,7 +224,7 @@ export default function Profile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {dayPlans.slice(0, 5).map((plan) => (
+                    {dayPlans?.slice(0, 5)?.map((plan) => (
                       <div key={plan.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                         <div>
                           <h4 className="font-medium">{plan.title}</h4>

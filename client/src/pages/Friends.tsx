@@ -254,7 +254,7 @@ export default function Friends() {
             <h2 className="text-lg font-semibold mb-4">{t("friends.friendsList")} ({friends.length})</h2>
             <div className="space-y-2">
               {friends.length > 0 ? (
-                friends.map((friend) => (
+                friends?.map((friend) => (
                   <Card
                     key={friend.id}
                     className={`cursor-pointer border-2 transition-all ${
@@ -358,7 +358,7 @@ export default function Friends() {
                   </h3>
                   <div className="space-y-2">
                     {friendDetails[selectedFriend.id]?.trips?.length ? (
-                      friendDetails[selectedFriend.id].trips.map((trip) => (
+                      friendDetails[selectedFriend.id]?.trips?.map((trip) => (
                         <Card key={trip.id} className="border-border hover:border-primary/50">
                           <CardContent className="pt-4">
                             <div className="flex items-center justify-between">
@@ -391,7 +391,7 @@ export default function Friends() {
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {friendDetails[selectedFriend.id]?.destinations?.length ? (
-                      friendDetails[selectedFriend.id].destinations.map((dest) => (
+                      friendDetails[selectedFriend.id]?.destinations?.map((dest) => (
                         <Badge key={dest.id} variant="outline" className="justify-center py-2 text-sm">
                           <span className="block text-center w-full">
                             {dest.name}<br/>
