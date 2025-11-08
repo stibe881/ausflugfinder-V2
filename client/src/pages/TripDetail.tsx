@@ -60,10 +60,10 @@ export default function TripDetail() {
 
   const COST_LABELS: Record<string, string> = {
     free: t("tripDetail.costFree"),
-    low: "CHF •",
-    medium: "CHF ••",
-    high: "CHF •••",
-    very_high: "CHF ••••",
+    low: "CHF 🪙",
+    medium: "CHF 🪙🪙",
+    high: "CHF 🪙🪙🪙",
+    very_high: "CHF 🪙🪙🪙🪙",
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -47,7 +47,7 @@ export default function Friends() {
     }
   ]);
 
-  // Pending friend requests
+  // Pending friend requests RECEIVED (from other users)
   const [pendingRequests, setPendingRequests] = useState([
     {
       id: 101,
@@ -57,6 +57,9 @@ export default function Friends() {
       requestedAt: "2024-11-06"
     }
   ]);
+
+  // Pending friend invitations SENT (to other users)
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
 
   // Demo friend details
   const friendDetails: Record<number, { trips: any[]; destinations: any[] }> = {
@@ -109,15 +112,15 @@ export default function Friends() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const newRequest = {
-        id: Math.max(...pendingRequests.map(r => r.id), 0) + 1,
+      const newInvitation = {
+        id: Math.max(...pendingInvitations.map(i => i.id), 200) + 1,
         name: newFriendEmail.split("@")[0],
         email: newFriendEmail,
         avatar: "👤",
-        requestedAt: new Date().toISOString().split('T')[0]
+        sentAt: new Date().toISOString().split('T')[0]
       };
 
-      setPendingRequests([...pendingRequests, newRequest]);
+      setPendingInvitations([...pendingInvitations, newInvitation]);
       toast.success(t("friends.requestSent"));
       setNewFriendEmail("");
       setIsAddOpen(false);
@@ -164,6 +167,18 @@ export default function Friends() {
   const handleInviteViaWhatsApp = (friendEmail: string) => {
     const message = encodeURIComponent(t("friends.whatsappMessage"));
     window.open(`https://wa.me/?text=${message}`, "_blank");
+  };
+
+  const handleDeleteInvitation = (invitationId: number) => {
+    if (confirm(t("friends.deleteInviteConfirm") || "Are you sure?")) {
+      setPendingInvitations(pendingInvitations.filter(i => i.id !== invitationId));
+      toast.success(t("friends.invitationDeleted") || "Invitation removed");
+    }
+  };
+
+  const handleRemindInvitation = (email: string) => {
+    handleInviteViaEmail(email);
+    toast.success(t("friends.reminderSent") || "Reminder sent!");
   };
 
   if (authLoading) {
@@ -275,60 +290,110 @@ export default function Friends() {
 
       {/* Main Content */}
       <main className="container py-12">
-        {/* Pending Requests Section */}
+        {/* Sent Invitations Section */}
+        {pendingInvitations.length > 0 && (
+          <div className="mb-8 p-4 md:p-6 bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg">
+            <h2 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-blue-600" />
+              {t("friends.sentInvitations") || "Gesendete Einladungen"} ({pendingInvitations.length})
+            </h2>
+            <div className="space-y-3">
+              {pendingInvitations.map((invitation) => (
+                <Card key={invitation.id} className="bg-white dark:bg-card border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 w-full">
+                        <span className="text-2xl flex-shrink-0">{invitation.avatar}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm md:text-base truncate">{invitation.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{invitation.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-start sm:justify-end">
+                        <Button
+                          onClick={() => handleRemindInvitation(invitation.email)}
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-xs md:text-sm"
+                          title="Send reminder"
+                        >
+                          <Mail className="w-4 h-4 flex-shrink-0" />
+                          <span className="hidden md:inline">{t("friends.remind") || "Erinnern"}</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteInvitation(invitation.id)}
+                          variant="destructive"
+                          size="sm"
+                          className="gap-1 text-xs md:text-sm"
+                          title="Delete invitation"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span className="hidden md:inline">{t("friends.delete") || "Löschen"}</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Pending Requests Section (RECEIVED) */}
         {pendingRequests.length > 0 && (
-          <div className="mb-8 p-6 bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-800 rounded-lg">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="mb-8 p-4 md:p-6 bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-800 rounded-lg">
+            <h2 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
               <UserPlus className="w-5 h-5 text-amber-600" />
               {t("friends.pendingRequests")} ({pendingRequests.length})
             </h2>
             <div className="space-y-3">
               {pendingRequests.map((request) => (
                 <Card key={request.id} className="bg-white dark:bg-card border-amber-200 dark:border-amber-800">
-                  <CardContent className="pt-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className="text-2xl">{request.avatar}</span>
-                        <div>
-                          <p className="font-semibold">{request.name}</p>
-                          <p className="text-xs text-muted-foreground">{request.email}</p>
+                  <CardContent className="p-3 md:p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 w-full">
+                        <span className="text-2xl flex-shrink-0">{request.avatar}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-sm md:text-base truncate">{request.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{request.email}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-start sm:justify-end">
                         <Button
                           onClick={() => handleInviteViaEmail(request.email)}
                           variant="outline"
                           size="sm"
-                          className="gap-1"
+                          className="gap-1 text-xs md:text-sm"
                           title="Send invitation via email"
                         >
-                          <Mail className="w-4 h-4" />
-                          <span className="hidden sm:inline">{t("friends.inviteEmail")}</span>
+                          <Mail className="w-4 h-4 flex-shrink-0" />
+                          <span className="hidden md:inline">{t("friends.inviteEmail")}</span>
                         </Button>
                         <Button
                           onClick={() => handleInviteViaWhatsApp(request.email)}
                           variant="outline"
                           size="sm"
-                          className="gap-1"
+                          className="gap-1 text-xs md:text-sm"
                           title="Send invitation via WhatsApp"
                         >
-                          <MessageCircle className="w-4 h-4" />
-                          <span className="hidden sm:inline">{t("friends.inviteWhatsApp")}</span>
+                          <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                          <span className="hidden md:inline">{t("friends.inviteWhatsApp")}</span>
                         </Button>
                         <Button
                           onClick={() => handleAcceptRequest(request.id, request)}
                           variant="default"
                           size="sm"
-                          className="gap-1 bg-green-600 hover:bg-green-700"
+                          className="gap-1 text-xs md:text-sm bg-green-600 hover:bg-green-700"
                         >
                           <Plane className="w-4 h-4" />
-                          {t("friends.accept")}
+                          <span className="hidden md:inline">{t("friends.accept")}</span>
                         </Button>
                         <Button
                           onClick={() => handleDeclineRequest(request.id)}
                           variant="destructive"
                           size="sm"
-                          className="gap-1"
+                          className="gap-1 text-xs md:text-sm"
+                          title="Decline"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

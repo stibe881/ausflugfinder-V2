@@ -69,10 +69,10 @@ const REGIONS = [
 
 const COST_LABELS: Record<string, string> = {
   free: "Kostenlos",
-  low: "CHF •",
-  medium: "CHF ••",
-  high: "CHF •••",
-  very_high: "CHF ••••",
+  low: "CHF 🪙",
+  medium: "CHF 🪙🪙",
+  high: "CHF 🪙🪙🪙",
+  very_high: "CHF 🪙🪙🪙🪙",
 };
 
 export default function Explore() {

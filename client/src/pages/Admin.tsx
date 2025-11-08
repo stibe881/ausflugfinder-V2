@@ -191,9 +191,9 @@ export default function Admin() {
                           <span className="text-muted-foreground">{t("admin.cost")}</span>
                           <p className="font-medium">
                             {trip.cost === 'free' ? t("admin.costFree") :
-                             trip.cost === 'low' ? 'CHF •' :
-                             trip.cost === 'medium' ? 'CHF ••' :
-                             trip.cost === 'high' ? 'CHF •••' : 'CHF ••••'}
+                             trip.cost === 'low' ? 'CHF 🪙' :
+                             trip.cost === 'medium' ? 'CHF 🪙🪙' :
+                             trip.cost === 'high' ? 'CHF 🪙🪙🪙' : 'CHF 🪙🪙🪙🪙'}
                           </p>
                         </div>
                       </div>
