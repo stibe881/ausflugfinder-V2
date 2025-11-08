@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 
 export type Language = "de" | "fr" | "it" | "en";
 
@@ -268,6 +268,7 @@ export function I18nProvider({
   defaultLanguage = "de",
 }: I18nProviderProps) {
   const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window === "undefined") return defaultLanguage;
     const stored = localStorage.getItem("language");
     if (stored && ["de", "fr", "it", "en"].includes(stored)) {
       return stored as Language;
@@ -278,14 +279,17 @@ export function I18nProvider({
   useEffect(() => {
     localStorage.setItem("language", language);
     document.documentElement.lang = language;
+    document.documentElement.setAttribute("lang", language);
   }, [language]);
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     return translations[language][key as keyof typeof translations[Language]] || key;
-  };
+  }, [language]);
+
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
+    <I18nContext.Provider value={value}>
       {children}
     </I18nContext.Provider>
   );
