@@ -1,260 +1,370 @@
-# AusflugFinder - Projekt Fortschritt
+# Ausflug-Manager: Projekt Fortschritt & Roadmap
 
-## ✅ Abgeschlossene Features
-
-### Authentication & Core
-- [x] Benutzerverwaltung mit lokalem Benutzername/Passwort-Login
-- [x] JWT Session Token Management
-- [x] bcryptjs Password Hashing (statt Argon2 für Alpine Docker Kompatibilität)
-- [x] Auth Cache Invalidation nach erfolgreichem Login
-- [x] Login/Register Page mit responsive Design
-
-### Datenbankstruktur
-- [x] 12 Drizzle ORM Tabellen
-  - [x] users - Benutzerverwaltung
-  - [x] trips - Ausflugdetails
-  - [x] destinations - Zielzuweisung
-  - [x] tripParticipants - Teilnehmerverwaltung
-  - [x] tripComments - Kommentare & Notizen
-  - [x] tripPhotos - Fotogalerie
-  - [x] tripAttributes - Ausflugkategorien & Eigenschaften
-  - [x] dayPlans - Tagesplanung
-  - [x] dayPlanItems - Aktivitäten im Tagesplan
-  - [x] packingListItems - Packlistelemente
-  - [x] budgetItems - Budgetierung
-  - [x] checklistItems - Checklisten
-
-### Trip Management
-- [x] Trips Page mit erweiterten Trip-Karten
-  - [x] Trip-Dauer Berechnung (Tage)
-  - [x] Favorit-Markierungen
-  - [x] Öffentlicher Sharing-Status
-  - [x] Status-Badges (Geplant, Laufend, Abgeschlossen, Abgesagt)
-  - [x] Trip-Beschreibung und Zielort-Anzeige
-  - [x] Teilnehmerzahl-Display
-- [x] Trip-Erstellung mit erweiterten Optionen
-  - [x] Grundinformationen (Titel, Ziel, Beschreibung)
-  - [x] Zeitplanung (Start/Enddatum)
-  - [x] Teilnehmerverwaltung
-  - [x] Status-Auswahl
-  - [x] Favorit & Öffentlich-Optionen
-- [x] Trip-Löschen mit Bestätigung
-
-### Destinations Management
-- [x] Destinations Page mit vollständigem CRUD
-  - [x] Destinationen auflisten
-  - [x] Neue Destination erstellen
-  - [x] Destination bearbeiten
-  - [x] Destination löschen
-  - [x] Bild-URLs für Destinationen
-  - [x] Ortsangabe und Beschreibung
-
-### Trip Planning (PlannerDetail Page)
-- [x] Timeline/Day Planning
-  - [x] Aktivitäten mit Zeitslots
-  - [x] Aktivitäten-Anordnung (Drag & Drop vorbereitet)
-  - [x] Notizen zu Aktivitäten
-- [x] Route/Map Tab
-  - [x] RouteMap-Komponente integriert
-  - [x] Geografische Daten
-- [x] Weather Forecast Tab
-  - [x] WeatherForecast-Komponente integriert
-  - [x] Wettervorhersage für Trip-Dauer
-- [x] Packing List Tab
-  - [x] Kategorisierte Packliste
-  - [x] Checkboxen für erledigte Items
-  - [x] Item-Management
-- [x] Budget Tab
-  - [x] Geschätzter vs. Aktueller Kosten-Vergleich
-  - [x] CHF Währung
-  - [x] Budget-Items Verwaltung
-- [x] Checklist Tab
-  - [x] Prioritäten-Support
-  - [x] Erledigungs-Status
-- [x] Export Funktionalität
-  - [x] iCalendar (.ics) Export
-  - [x] PDF Export
-- [x] Draft/Publish Status Management
-
-### UI/UX Verbesserungen
-- [x] Responsive Design für alle Pages
-- [x] Hover-Effekte und Transitions
-- [x] Loading States mit Skeleton Screens
-- [x] Error Handling & Toast Notifications
-- [x] Empty States für leere Listen
-- [x] Gradient-Backgrounds und Animationen
-- [x] Mobile-First Ansatz
-
-### Infrastruktur
-- [x] Docker Setup mit Node 20 Alpine
-  - [x] Multi-Stage Build Optimierung
-  - [x] Cache Bust Mechanismus
-  - [x] Proper Port Exposure (3000)
-- [x] Environment Variable Replacement im HTML
-  - [x] Middleware für %VITE_*% Platzhalter
-  - [x] Fallback zu Defaults
-- [x] Build Process
-  - [x] Vite Frontend Build
-  - [x] esbuild Server Bundle
-  - [x] Turbo Cache Management
-- [x] Database Migration
-  - [x] Drizzle ORM Setup
-  - [x] Migration Scripts
+**Version:** 1.0.0
+**Last Updated:** 2025-11-08
+**Status:** Phase 2 ✅ Abgeschlossen | Phase 3 🚀 In Entwicklung
 
 ---
 
-## 🚀 Neu Implementierte Features (Diese Session)
+## 📊 PHASE ÜBERSICHT
 
-### Multilingual Support (i18n)
-- [x] i18n Context mit 4 Sprachen:
-  - [x] Deutsch (DE)
-  - [x] English (EN)
-  - [x] Français (FR)
-  - [x] Italiano (IT)
-- [x] Translation Strings für alle UI-Elemente
-- [x] LocalStorage für Sprachspeicherung
-- [x] useI18n Hook für Komponenten
-- [x] Language Selector im UI
-
-### Dark/Light Theme Toggle
-- [x] Theme Context (bereits vorhanden, jetzt aktiviert)
-- [x] switchable Flag auf true gesetzt
-- [x] Theme-Speicherung in LocalStorage
-- [x] useTheme Hook verfügbar
-- [x] Theme Toggle Button im Header
-
-### Progressive Web App (PWA)
-- [x] Service Worker (public/sw.js)
-  - [x] Cache-First Strategie für Assets
-  - [x] Network-First Strategie für APIs
-  - [x] Offline Fallback Support
-  - [x] Background Sync Vorbereitung
-  - [x] Push Notifications Support
-- [x] Web App Manifest (public/manifest.json)
-  - [x] App Icons (verschiedene Größen)
-  - [x] App Name & Beschreibung
-  - [x] Start URL & Theme Color
-  - [x] Standalone Display Mode
-  - [x] App Shortcuts
-  - [x] Share Target Integration
-- [x] HTML Meta Tags für PWA
-  - [x] Viewport Configuration mit viewport-fit
-  - [x] Theme Color
-  - [x] Apple Mobile Web App Support
-  - [x] Manifest Link
-- [x] Service Worker Registration Script
-
-### Theme & Language Toggle Component
-- [x] ThemeLanguageToggle.tsx erstellt
-  - [x] Sun/Moon Icon Toggle für Theme
-  - [x] Globe Icon mit Language Dropdown
-  - [x] Responsive Styling
-  - [x] Accessibility Support
-
-### App Improvements
-- [x] Enhanced Trips Page Display
-  - [x] Gradient Header für Trip-Karten
-  - [x] Verbesserte Metadaten-Anzeige
-  - [x] Better Visual Hierarchy
-  - [x] Trip Duration Calculation
-- [x] I18nProvider in App.tsx
-- [x] Theme Provider switchable Activation
+| Phase | Name | Status | Items | Progress |
+|-------|------|--------|-------|----------|
+| **Phase 1** | Security | ✅ DONE | #1-4 | 4/4 |
+| **Phase 2** | Performance | ✅ DONE | #5-7 | 3/3 |
+| **Phase 3** | Code Quality | 🚀 IN PROGRESS | #8-12 | 2/5 |
+| **Phase 4** | Features | ⏳ TODO | #13-15 | 0/3 |
 
 ---
 
-## 📋 Pending Features
+## ✅ PHASE 1: SICHERHEIT (Abgeschlossen)
 
-### Weitere Verbesserungen
-- [ ] PWA Icons generieren (192x192, 512x512, maskable versions)
-- [ ] PWA Screenshots für App Store
-- [ ] Service Worker in Docker korrekt exposieren
-- [ ] Browser Kompatibilität testen
-- [ ] Offline-First Datenbank (IndexedDB)
-- [ ] Offline Synchronization Implementation
-- [ ] Push Notifications Backend Integration
+### #1: Datenbankzugangsinfos sichern ✅
+- [x] DATABASE_URL aus Docker-Compose entfernt
+- [x] Zur Umgebungsvariable bewegt
+- [x] `.env.docker.example` Template erstellt
+- [x] DEPLOYMENT.md Anleitung
 
-### Zusätzliche Features (Backlog)
-- [ ] Trip Sharing & Permissions System
-- [ ] Collaborative Trip Planning
-- [ ] Advanced Weather Integration (Hourly Forecast)
-- [ ] GPS/Location Tracking
-- [ ] Photo Upload & Storage (S3)
-- [ ] Trip Template Library
-- [ ] Budget Analytics & Reports
-- [ ] Trip Timeline Visualization
-- [ ] Mobile App (React Native)
-- [ ] Email Notifications
-- [ ] SMS Reminders
-- [ ] Integration mit Kalender-Apps
+### #2: JWT Secret sichern ✅
+- [x] JWT_SECRET aus Docker-Compose entfernt
+- [x] Via Umgebungsvariable gesetzt
+- [x] Nicht in Versionskontrolle
 
-### Performance Optimizations
-- [ ] Code Splitting Implementation
-- [ ] Image Optimization
-- [ ] Bundle Size Reduction
-- [ ] Lazy Loading für Komponenten
-- [ ] Dynamic Imports für Routes
+### #3: Rate Limiting ✅
+- [x] `express-rate-limit` Package installiert
+- [x] General API Limiter: 100 req/15min
+- [x] Auth Limiter: 5 attempts/15min
+- [x] `server/_core/middleware.ts` erstellt
+- [x] In Server integriert
 
-### Testing
-- [ ] Unit Tests (Vitest)
-- [ ] Integration Tests
-- [ ] E2E Tests (Playwright/Cypress)
-- [ ] Performance Testing
-- [ ] Accessibility Testing (a11y)
-
-### Documentation
-- [ ] User Guide (DE/EN/FR/IT)
-- [ ] Admin Guide
-- [ ] API Documentation
-- [ ] Installation Instructions
-- [ ] Deployment Guide
+### #4: CORS konfigurieren ✅
+- [x] `cors` Package installiert
+- [x] Whitelist für allowed origins
+- [x] Environment-variable Support
+- [x] Credentials enabled
+- [x] Security Headers implementiert
 
 ---
 
-## 🔄 Nächste Schritte
+## ✅ PHASE 2: PERFORMANCE (Abgeschlossen)
 
-1. **Build & Test**
-   - [ ] `pnpm build` erneut ausführen
-   - [ ] Build-Artefakte prüfen
-   - [ ] TypeScript Fehler beheben falls vorhanden
+### #5: N+1 Query Problem ✅ (90-98% Verbesserung)
+**Commit:** `7de2928`
 
-2. **Docker Deployment**
-   - [ ] Docker Image bauen
-   - [ ] Container starten und testen
-   - [ ] PWA Funktionalität verifizieren
-   - [ ] Service Worker registriert?
-   - [ ] Offline Mode funktioniert?
+#### Optimierungen:
+- [x] `getDayPlanItemsWithTrips()`: N+1 → Single LEFT JOIN
+  - Vorher: 1 + N queries (z.B. 1 + 50 = 51)
+  - Nachher: 1 query
+  - Improvement: 98% ↓
+- [x] `toggleFavorite()` & `toggleDone()`: SQL CASE statt read-then-write
+  - Vorher: 2 queries (read + write)
+  - Nachher: 1 query
+  - Improvement: 50% ↓
+- [x] `getDayPlanWithItems()`: Neue Helper-Funktion
+- [x] Export Router dedupliziert (planToICal, planToPDF)
 
-3. **Testing**
-   - [ ] Sprachenwechsel testen (alle 4 Sprachen)
-   - [ ] Theme Toggle testen (Light/Dark)
-   - [ ] PWA Installation testen
-   - [ ] Service Worker Cache-Strategien verifizieren
-   - [ ] Offline Funktionalität testen
+**Dateien:**
+- server/db.ts
+- server/routers.ts
 
-4. **Finish**
-   - [ ] Git Commit & Push
-   - [ ] Production Deployment
+### #6: Pagination ✅ (Skalierbarkeit)
+**Commit:** `7de2928`
+
+#### Implementiert:
+- [x] `searchTrips()`: Database-level filtering + pagination
+- [x] `getUserTrips()`: Pagination für Dashboard
+- [x] `getPublicTrips()`: Critical für Explore Page
+- [x] Pagination Input Validation (max 100 items)
+- [x] Parallel Count Queries
+- [x] Response Format: `{ data: [], pagination: { page, limit, total, totalPages } }`
+
+**Dateien:**
+- server/db.ts
+- server/routers.ts
+
+### #7: Datenbank Indexes ✅
+**Commit:** `7de2928` / Migration: `drizzle/0007_fast_mephisto.sql`
+
+#### Indexes hinzugefügt:
+- [x] **trips**: userId, isPublic, createdAt, region, category, cost + composite search index
+- [x] **destinations**: userId, createdAt
+- [x] **tripParticipants**: tripId, userId
+- [x] **tripComments**: tripId, createdAt
+- [x] **tripPhotos**: tripId, createdAt
+- [x] **dayPlans**: userId, createdAt
+- [x] **dayPlanItems**: dayPlanId, tripId
+
+**Nächste Schritte:**
+- [ ] Migration generieren: `npx drizzle-kit generate` ✅ DONE
+- [ ] Migration anwenden: `npx drizzle-kit migrate`
+
+**Dateien:**
+- drizzle/schema.ts
+- drizzle/0007_fast_mephisto.sql
 
 ---
 
-## 📊 Statistik
+## 🚀 PHASE 3: CODE QUALITY (In Entwicklung)
 
-**Gesamt implementierte Features:** 58/65
+### #8: Bilder zu Filesystem ✅
+**Commit:** `448dd76`
 
-**Completion Rate:** ~89%
+#### Implementiert:
+- [x] Storage-Funktionen vorhanden (server/storage.ts):
+  - `saveBase64ImageLocal()` - Base64 → Filesystem
+  - `deleteImageLocal()` - Datei löschen
+  - `validateImageFile()` - Image Validation
+  - Magic byte checking - Dateityp-Validierung
+- [x] Upload Endpoint optimiert (upload.tripImage)
+  - Base64 Validation
+  - Image Validation (Format, < 5MB)
+  - Dateipfad Rückgabe
+- [x] Storage Directory Initialization in Server Startup
+- [x] Statische File-Serving (`/uploads/images`)
+- [x] `.gitignore` aktualisiert für uploads/
 
-**Neue Features in dieser Session:** 25+
+**Nächste Schritte:**
+- [ ] Frontend: Image Upload UI in Trip Create/Update
+- [ ] Client: Base64 → File Upload anpassen
+
+**Dateien:**
+- server/storage.ts
+- server/routers.ts
+- server/_core/index.ts
+- .gitignore
 
 ---
 
-## 🎯 Version Info
+### #9: Große Dateien aufteilen ⏳
+**Priorität:** 🟡 MEDIUM | **Aufwand:** 5h
 
-- **Version:** 1.0.0
-- **Last Updated:** 2025-11-07
+#### Problem:
+```
+Explore.tsx: 896 Zeilen (zu groß)
+PlannerDetail.tsx: 1175 Zeilen (viel zu groß)
+ComponentShowcase.tsx: 1437 Zeilen (riesig)
+```
+
+#### Lösung:
+```
+client/src/pages/Explore/
+├── Explore.tsx (Layout)
+├── components/
+│   ├── ExploreHeader.tsx
+│   ├── ExploreHero.tsx
+│   ├── SearchFilters.tsx
+│   ├── TripGrid.tsx
+│   └── ...
+└── hooks/
+    ├── useExploreFilters.ts
+    └── useDestinations.ts
+```
+
+**Checklist:**
+- [ ] Explore.tsx in Komponenten aufteilen
+- [ ] PlannerDetail.tsx splitten
+- [ ] Custom Hooks für State extrahieren
+- [ ] Import-Pfade aktualisieren
+- [ ] Build testen
+
+---
+
+### #11: Error Handling standardisieren ⏳
+**Priorität:** 🟡 MEDIUM | **Aufwand:** 2h | **Status:** 90% DONE
+
+#### Vorhanden:
+- [x] AppError Klasse erstellt (server/_core/errors.ts)
+- [x] Spezifische Error-Typen: ValidationError, NotFoundError, etc.
+- [x] toTRPCError() Konvertierung
+- [x] trpcHandler() Wrapper für Procedures
+- [x] Error Logging
+
+**Noch zu tun:**
+- [ ] Alle Routers mit Error Handling ausstatten
+- [ ] Try-Catch Blöcke hinzufügen
+- [ ] Consistent Error Messages
+
+**Dateien:**
+- server/_core/errors.ts (bereits vorhanden)
+- server/routers.ts (Integration)
+- server/db.ts (Integration)
+
+---
+
+### #12: Input-Validierung vervollständigen ⏳
+**Priorität:** 🟡 MEDIUM | **Aufwand:** 2h | **Status:** 90% DONE
+
+#### Vorhanden:
+- [x] Zod Validation Schemas erstellt (server/_core/validation.ts)
+- [x] Trip Schemas: createTripSchema, updateTripSchema, searchTripsSchema
+- [x] Auth Schemas: loginSchema, registerSchema
+- [x] Destination, DayPlan, Packing, Budget, Checklist Schemas
+- [x] Pagination Schema mit min/max
+
+**Noch zu tun:**
+- [ ] Alle Input-Parameter in Routers validieren
+- [ ] Custom Error Messages
+- [ ] Rate-Limit auf Query-Parameter
+
+**Dateien:**
+- server/_core/validation.ts (bereits vorhanden)
+- server/routers.ts (Integration)
+
+---
+
+### #10: Unit Tests hinzufügen ⏳
+**Priorität:** 🟡 MEDIUM | **Aufwand:** 8h
+
+#### Setup:
+- Vitest ist bereits installiert
+
+**Checklist:**
+- [ ] Database Functions testen
+- [ ] API Routers testen (Happy Path)
+- [ ] Error Cases testen
+- [ ] Validation testen
+- [ ] React Component Tests (Sample)
+- [ ] Test Coverage >= 70%
+
+**Dateien:**
+- `**/__tests__/*.test.ts`
+- vitest.config.ts (Review)
+
+---
+
+## ⏳ PHASE 4: FEATURES (Optional)
+
+### #13: Offline-Unterstützung ⏳
+**Priorität:** 🟢 LOW | **Aufwand:** 4h
+
+- [ ] Dexie installieren
+- [ ] IndexedDB Schema
+- [ ] Offline Daten speichern
+- [ ] Service Worker Sync
+- [ ] Sync Status UI
+
+### #14: WebSocket Real-time Updates ⏳
+**Priorität:** 🟢 LOW | **Aufwand:** 6h
+
+- [ ] Socket.io installieren
+- [ ] WebSocket Server Setup
+- [ ] Client Real-time Updates
+- [ ] Presence Indicators
+
+### #15: Erweiterte Filter ⏳
+**Priorität:** 🟢 LOW | **Aufwand:** 3h
+
+- [ ] Range Slider UI
+- [ ] Multi-Select Komponenten
+- [ ] Date Range Picker
+- [ ] Filter Presets
+
+---
+
+## 🎯 NÄCHSTE SCHRITTE
+
+### Sofort (TODAY):
+1. [ ] **#11 & #12 Integration** - Error Handling + Validation einbauen (~2h)
+   - Routers mit try-catch ausstatten
+   - Input Validierung aktivieren
+   - Consistent Error Responses
+
+2. [ ] **#9 Refactoring** - Große Komponenten splitten (~3h)
+   - Explore.tsx aufteilen
+   - Custom Hooks extrahieren
+   - Build testen
+
+### Danach:
+3. [ ] **#10 Unit Tests** - Test Coverage aufbauen (~4h)
+4. [ ] Migration ausführen für Indexes
+5. [ ] Commit & Deploy
+
+---
+
+## 📁 WICHTIGE DATEIEN
+
+### Sicherheit & Infrastructure:
+- `server/_core/middleware.ts` - Rate Limiting & CORS
+- `server/_core/errors.ts` - Error Handling
+- `server/_core/validation.ts` - Input Validation
+- `.env.docker.example` - Environment Template
+
+### Performance:
+- `server/db.ts` - Optimierte Queries mit Pagination
+- `drizzle/schema.ts` - Database Indexes
+- `drizzle/0007_fast_mephisto.sql` - Migration
+
+### Storage:
+- `server/storage.ts` - Image Filesystem Handling
+- `server/_core/index.ts` - Storage Initialization
+- `uploads/` - Uploaded Files Directory
+
+### Dokumentation:
+- `DEPLOYMENT.md` - Deployment-Anleitung
+- `todo.md` - Dieses File (Single Source of Truth)
+
+---
+
+## 📊 STATISTIK
+
+**Gesamte Aufgaben:** 15
+**Abgeschlossen:** 8 (✅ Phasen 1-2 vollständig)
+**In Arbeit:** 5 (🚀 Phase 3)
+**Geplant:** 2 (⏳ Phase 4)
+
+**Completion Rate:** 53% (8/15)
+
+---
+
+## 🔧 BUILD & DEPLOYMENT
+
+### Build Status:
+```bash
+npm run build  # ✅ SUCCESS (79.8kb server bundle)
+```
+
+### Deployment:
+```bash
+# Docker
+docker-compose up
+
+# Production
+npm run build && npm start
+
+# Development
+npm run dev
+```
+
+### Database:
+```bash
+# Migrations
+npx drizzle-kit generate
+npx drizzle-kit migrate
+
+# Push to DB (future)
+npx drizzle-kit push
+```
+
+---
+
+## 🚀 TECH STACK
+
 - **Frontend:** React 19 + TypeScript + Vite
 - **Backend:** Express.js + tRPC + Drizzle ORM
 - **Database:** MySQL 8
 - **Auth:** JWT + bcryptjs
-- **PWA:** Service Worker + Web App Manifest
-- **i18n:** Custom Context (4 Sprachen)
+- **Security:** express-rate-limit + CORS + Security Headers
+- **Storage:** Local Filesystem + Validation
 - **Styling:** Tailwind CSS 4 + Radix UI
+- **PWA:** Service Worker + Web App Manifest
+- **i18n:** Custom Context (4 Sprachen: DE, EN, FR, IT)
+- **Testing:** Vitest (configured, not yet used)
+
+---
+
+## 📝 NOTES
+
+- Alle kritischen Security Fixes implementiert (Phase 1)
+- Performance optimiert für Skalierung (Phase 2)
+- Alle Funktionen vorhanden, müssen nur noch integriert werden (Phase 3)
+- Optional Features können später implementiert werden (Phase 4)
