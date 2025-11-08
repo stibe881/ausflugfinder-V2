@@ -36,24 +36,50 @@ export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+    me: publicProcedure.query(async (opts) => {
+      try {
+        return opts.ctx.user;
+      } catch (error) {
+        const appError = handleError(error, "auth.me");
+        throw toTRPCError(appError);
+      }
+    }),
+    logout: publicProcedure.mutation(async ({ ctx }) => {
+      try {
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+        return {
+          success: true,
+        } as const;
+      } catch (error) {
+        const appError = handleError(error, "auth.logout");
+        throw toTRPCError(appError);
+      }
     }),
   }),
 
-  destinations: router({  
+  destinations: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      return await getUserDestinations(ctx.user.id);
+      try {
+        return await getUserDestinations(ctx.user.id);
+      } catch (error) {
+        const appError = handleError(error, "destinations.list");
+        throw toTRPCError(appError);
+      }
     }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await getDestinationById(input.id);
+        try {
+          const destination = await getDestinationById(input.id);
+          if (!destination) {
+            throw new NotFoundError("Destination", input.id);
+          }
+          return destination;
+        } catch (error) {
+          const appError = handleError(error, "destinations.getById");
+          throw toTRPCError(appError);
+        }
       }),
     create: protectedProcedure
       .input(
@@ -113,7 +139,12 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ tripId: z.number() }))
       .query(async ({ input }) => {
-        return await getTripParticipants(input.tripId);
+        try {
+          return await getTripParticipants(input.tripId);
+        } catch (error) {
+          const appError = handleError(error, "participants.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
@@ -125,8 +156,13 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input }) => {
-        await addTripParticipant(input);
-        return { success: true };
+        try {
+          await addTripParticipant(input);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "participants.add");
+          throw toTRPCError(appError);
+        }
       }),
     updateStatus: protectedProcedure
       .input(
@@ -136,14 +172,24 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input }) => {
-        await updateParticipantStatus(input.id, input.status);
-        return { success: true };
+        try {
+          await updateParticipantStatus(input.id, input.status);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "participants.updateStatus");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deleteParticipant(input.id);
-        return { success: true };
+        try {
+          await deleteParticipant(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "participants.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
@@ -151,33 +197,53 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ tripId: z.number() }))
       .query(async ({ input }) => {
-        return await getTripComments(input.tripId);
+        try {
+          return await getTripComments(input.tripId);
+        } catch (error) {
+          const appError = handleError(error, "comments.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
         z.object({
           tripId: z.number(),
-          content: z.string().min(1),
+          content: z.string().min(1).max(2000),
         })
       )
       .mutation(async ({ ctx, input }) => {
-        await addTripComment({
-          userId: ctx.user.id,
-          ...input,
-        });
-        return { success: true };
+        try {
+          await addTripComment({
+            userId: ctx.user.id,
+            ...input,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "comments.add");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await deleteComment(input.id, ctx.user.id);
-        return { success: true };
+        try {
+          await deleteComment(input.id, ctx.user.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "comments.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
   trips: router({
     list: publicProcedure.query(async () => {
-      return await getAllTrips();
+      try {
+        return await getAllTrips();
+      } catch (error) {
+        const appError = handleError(error, "trips.list");
+        throw toTRPCError(appError);
+      }
     }),
     myTrips: protectedProcedure
       .input(z.object({
@@ -185,12 +251,26 @@ export const appRouter = router({
         limit: z.number().min(1).max(100).default(20).optional(),
       }).optional())
       .query(async ({ ctx, input }) => {
-        return await getUserTrips(ctx.user.id, input);
+        try {
+          return await getUserTrips(ctx.user.id, input);
+        } catch (error) {
+          const appError = handleError(error, "trips.myTrips");
+          throw toTRPCError(appError);
+        }
       }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await getTripById(input.id);
+        try {
+          const trip = await getTripById(input.id);
+          if (!trip) {
+            throw new NotFoundError("Trip", input.id);
+          }
+          return trip;
+        } catch (error) {
+          const appError = handleError(error, "trips.getById");
+          throw toTRPCError(appError);
+        }
       }),
     create: protectedProcedure
       .input(
@@ -285,9 +365,9 @@ export const appRouter = router({
     search: publicProcedure
       .input(
         z.object({
-          keyword: z.string().optional(),
-          region: z.string().optional(),
-          category: z.string().optional(),
+          keyword: z.string().max(200).optional(),
+          region: z.string().max(50).optional(),
+          category: z.string().max(50).optional(),
           cost: z.string().optional(),
           attributes: z.array(z.string()).optional(),
           isPublic: z.boolean().optional(),
@@ -297,8 +377,13 @@ export const appRouter = router({
         })
       )
       .query(async ({ input }) => {
-        const { page, limit, ...filters } = input;
-        return await searchTrips(filters, { page, limit });
+        try {
+          const { page, limit, ...filters } = input;
+          return await searchTrips(filters, { page, limit });
+        } catch (error) {
+          const appError = handleError(error, "trips.search");
+          throw toTRPCError(appError);
+        }
       }),
     publicTrips: publicProcedure
       .input(z.object({
@@ -306,22 +391,42 @@ export const appRouter = router({
         limit: z.number().min(1).max(100).default(20).optional(),
       }).optional())
       .query(async ({ input }) => {
-        return await getPublicTrips(input);
+        try {
+          return await getPublicTrips(input);
+        } catch (error) {
+          const appError = handleError(error, "trips.publicTrips");
+          throw toTRPCError(appError);
+        }
       }),
     toggleFavorite: protectedProcedure
       .input(z.object({ tripId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await toggleFavorite(input.tripId, ctx.user.id);
-        return { success: true };
+        try {
+          await toggleFavorite(input.tripId, ctx.user.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "trips.toggleFavorite");
+          throw toTRPCError(appError);
+        }
       }),
     toggleDone: protectedProcedure
       .input(z.object({ tripId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await toggleDone(input.tripId, ctx.user.id);
-        return { success: true };
+        try {
+          await toggleDone(input.tripId, ctx.user.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "trips.toggleDone");
+          throw toTRPCError(appError);
+        }
       }),
     statistics: publicProcedure.query(async () => {
-      return await getStatistics();
+      try {
+        return await getStatistics();
+      } catch (error) {
+        const appError = handleError(error, "trips.statistics");
+        throw toTRPCError(appError);
+      }
     }),
   }),
 
@@ -329,35 +434,55 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ tripId: z.number() }))
       .query(async ({ input }) => {
-        return await getTripPhotos(input.tripId);
+        try {
+          return await getTripPhotos(input.tripId);
+        } catch (error) {
+          const appError = handleError(error, "photos.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
         z.object({
           tripId: z.number(),
           photoUrl: z.string().url(),
-          caption: z.string().optional(),
+          caption: z.string().max(500).optional(),
           isPrimary: z.boolean().optional(),
         })
       )
       .mutation(async ({ input }) => {
-        await addTripPhoto({
-          ...input,
-          isPrimary: input.isPrimary ? 1 : 0,
-        });
-        return { success: true };
+        try {
+          await addTripPhoto({
+            ...input,
+            isPrimary: input.isPrimary ? 1 : 0,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "photos.add");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deleteTripPhoto(input.id);
-        return { success: true };
+        try {
+          await deleteTripPhoto(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "photos.delete");
+          throw toTRPCError(appError);
+        }
       }),
     setPrimary: protectedProcedure
       .input(z.object({ tripId: z.number(), photoId: z.number() }))
       .mutation(async ({ input }) => {
-        await setPrimaryPhoto(input.tripId, input.photoId);
-        return { success: true };
+        try {
+          await setPrimaryPhoto(input.tripId, input.photoId);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "photos.setPrimary");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
@@ -365,35 +490,64 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ tripId: z.number() }))
       .query(async ({ input }) => {
-        return await getTripAttributes(input.tripId);
+        try {
+          return await getTripAttributes(input.tripId);
+        } catch (error) {
+          const appError = handleError(error, "attributes.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
         z.object({
           tripId: z.number(),
-          attribute: z.string().min(1),
+          attribute: z.string().min(1).max(100),
         })
       )
       .mutation(async ({ input }) => {
-        await addTripAttribute(input);
-        return { success: true };
+        try {
+          await addTripAttribute(input);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "attributes.add");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deleteTripAttribute(input.id);
-        return { success: true };
+        try {
+          await deleteTripAttribute(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "attributes.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
   dayPlans: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      return await getDayPlansByUser(ctx.user.id);
+      try {
+        return await getDayPlansByUser(ctx.user.id);
+      } catch (error) {
+        const appError = handleError(error, "dayPlans.list");
+        throw toTRPCError(appError);
+      }
     }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await getDayPlanById(input.id);
+        try {
+          const dayPlan = await getDayPlanById(input.id);
+          if (!dayPlan) {
+            throw new NotFoundError("DayPlan", input.id);
+          }
+          return dayPlan;
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.getById");
+          throw toTRPCError(appError);
+        }
       }),
     create: protectedProcedure
       .input(
@@ -460,7 +614,12 @@ export const appRouter = router({
     getItems: publicProcedure
       .input(z.object({ dayPlanId: z.number() }))
       .query(async ({ input }) => {
-        return await getDayPlanItemsWithTrips(input.dayPlanId);
+        try {
+          return await getDayPlanItemsWithTrips(input.dayPlanId);
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.getItems");
+          throw toTRPCError(appError);
+        }
       }),
     addTrip: protectedProcedure
       .input(
@@ -471,37 +630,51 @@ export const appRouter = router({
           orderIndex: z.number(),
           startTime: z.string().optional(),
           endTime: z.string().optional(),
-          notes: z.string().optional(),
+          notes: z.string().max(2000).optional(),
           dateAssigned: z.string().optional(), // ISO date string (YYYY-MM-DD)
         })
       )
       .mutation(async ({ input, ctx }) => {
-        // If dateAssigned is provided, validate it's within the trip's duration
-        if (input.dateAssigned) {
-          const trip = await getTripById(input.tripId);
-          const dateAssigned = new Date(input.dateAssigned);
+        try {
+          // If dateAssigned is provided, validate it's within the trip's duration
+          if (input.dateAssigned) {
+            const trip = await getTripById(input.tripId);
+            const dateAssigned = new Date(input.dateAssigned);
 
-          if (trip?.startDate && trip?.endDate) {
-            const tripStart = new Date(trip.startDate);
-            const tripEnd = new Date(trip.endDate);
+            if (!trip) {
+              throw new NotFoundError("Trip", input.tripId);
+            }
 
-            if (dateAssigned < tripStart || dateAssigned > tripEnd) {
-              throw new Error(`Das Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+            if (trip.startDate && trip.endDate) {
+              const tripStart = new Date(trip.startDate);
+              const tripEnd = new Date(trip.endDate);
+
+              if (dateAssigned < tripStart || dateAssigned > tripEnd) {
+                throw new ValidationError(`Das Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+              }
             }
           }
-        }
 
-        await addTripToDayPlan({
-          ...input,
-          dateAssigned: input.dateAssigned ? new Date(input.dateAssigned) : undefined,
-        });
-        return { success: true };
+          await addTripToDayPlan({
+            ...input,
+            dateAssigned: input.dateAssigned ? new Date(input.dateAssigned) : undefined,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.addTrip");
+          throw toTRPCError(appError);
+        }
       }),
     removeTrip: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await removeTripFromDayPlan(input.id);
-        return { success: true };
+        try {
+          await removeTripFromDayPlan(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.removeTrip");
+          throw toTRPCError(appError);
+        }
       }),
     updateItem: protectedProcedure
       .input(
@@ -511,75 +684,106 @@ export const appRouter = router({
           orderIndex: z.number().optional(),
           startTime: z.string().optional(),
           endTime: z.string().optional(),
-          notes: z.string().optional(),
+          notes: z.string().max(2000).optional(),
           dateAssigned: z.date().optional(),
         })
       )
       .mutation(async ({ input, ctx }) => {
-        const { id, dateAssigned, ...data } = input;
+        try {
+          const { id, dateAssigned, ...data } = input;
 
-        // If dateAssigned is provided, validate it's within the trip duration
-        if (dateAssigned) {
-          const db = await getDb();
-          if (db) {
-            const item = await db.select().from(dayPlanItems).where(eq(dayPlanItems.id, id)).limit(1);
-            if (item.length > 0) {
-              const tripId = item[0].tripId;
-              const trip = await getTripById(tripId);
-              if (trip) {
-                const tripStart = new Date(trip.startDate);
-                const tripEnd = new Date(trip.endDate);
-                const assignedDate = new Date(dateAssigned);
+          // If dateAssigned is provided, validate it's within the trip duration
+          if (dateAssigned) {
+            const db = await getDb();
+            if (db) {
+              const item = await db.select().from(dayPlanItems).where(eq(dayPlanItems.id, id)).limit(1);
+              if (item.length > 0) {
+                const tripId = item[0].tripId;
+                const trip = await getTripById(tripId);
+                if (trip) {
+                  const tripStart = new Date(trip.startDate);
+                  const tripEnd = new Date(trip.endDate);
+                  const assignedDate = new Date(dateAssigned);
 
-                if (assignedDate < tripStart || assignedDate > tripEnd) {
-                  throw new Error(`Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+                  if (assignedDate < tripStart || assignedDate > tripEnd) {
+                    throw new ValidationError(`Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+                  }
                 }
               }
             }
           }
-        }
 
-        await updateDayPlanItem(id, { ...data, ...(dateAssigned && { dateAssigned }) });
-        return { success: true };
+          await updateDayPlanItem(id, { ...data, ...(dateAssigned && { dateAssigned }) });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "dayPlans.updateItem");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
-  packingList: router({    list: publicProcedure
+  packingList: router({
+    list: publicProcedure
       .input(z.object({ dayPlanId: z.number() }))
       .query(async ({ input }) => {
-        return await getPackingListItems(input.dayPlanId);
+        try {
+          return await getPackingListItems(input.dayPlanId);
+        } catch (error) {
+          const appError = handleError(error, "packingList.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
         z.object({
           dayPlanId: z.number(),
-          item: z.string().min(1),
-          quantity: z.number().optional(),
-          category: z.string().optional(),
+          item: z.string().min(1).max(200),
+          quantity: z.number().min(1).optional(),
+          category: z.string().max(50).optional(),
         })
       )
       .mutation(async ({ input }) => {
-        await addPackingListItem(input);
-        return { success: true };
+        try {
+          await addPackingListItem(input);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "packingList.add");
+          throw toTRPCError(appError);
+        }
       }),
     toggle: protectedProcedure
       .input(z.object({ id: z.number(), isPacked: z.number() }))
       .mutation(async ({ input }) => {
-        await updatePackingListItem(input.id, input.isPacked);
-        return { success: true };
+        try {
+          await updatePackingListItem(input.id, input.isPacked);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "packingList.toggle");
+          throw toTRPCError(appError);
+        }
       }),
     update: protectedProcedure
-      .input(z.object({ id: z.number(), item: z.string().optional(), quantity: z.number().optional(), category: z.string().optional() }))
+      .input(z.object({ id: z.number(), item: z.string().min(1).max(200).optional(), quantity: z.number().min(1).optional(), category: z.string().max(50).optional() }))
       .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        await updatePackingListItemFull(id, data);
-        return { success: true };
+        try {
+          const { id, ...data } = input;
+          await updatePackingListItemFull(id, data);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "packingList.update");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deletePackingListItem(input.id);
-        return { success: true };
+        try {
+          await deletePackingListItem(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "packingList.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
@@ -587,34 +791,54 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ dayPlanId: z.number() }))
       .query(async ({ input }) => {
-        return await getBudgetItems(input.dayPlanId);
+        try {
+          return await getBudgetItems(input.dayPlanId);
+        } catch (error) {
+          const appError = handleError(error, "budget.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
         z.object({
           dayPlanId: z.number(),
-          category: z.string().min(1),
-          description: z.string().min(1),
+          category: z.string().min(1).max(50),
+          description: z.string().min(1).max(200),
           estimatedCost: z.string().min(1),
           actualCost: z.string().optional(),
-          currency: z.string().optional(),
+          currency: z.string().length(3).optional(),
         })
       )
       .mutation(async ({ input }) => {
-        await addBudgetItem(input);
-        return { success: true };
+        try {
+          await addBudgetItem(input);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "budget.add");
+          throw toTRPCError(appError);
+        }
       }),
     updateActual: protectedProcedure
       .input(z.object({ id: z.number(), actualCost: z.string() }))
       .mutation(async ({ input }) => {
-        await updateBudgetItem(input.id, input.actualCost);
-        return { success: true };
+        try {
+          await updateBudgetItem(input.id, input.actualCost);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "budget.updateActual");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deleteBudgetItem(input.id);
-        return { success: true };
+        try {
+          await deleteBudgetItem(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "budget.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
@@ -622,32 +846,52 @@ export const appRouter = router({
     list: publicProcedure
       .input(z.object({ dayPlanId: z.number() }))
       .query(async ({ input }) => {
-        return await getChecklistItems(input.dayPlanId);
+        try {
+          return await getChecklistItems(input.dayPlanId);
+        } catch (error) {
+          const appError = handleError(error, "checklist.list");
+          throw toTRPCError(appError);
+        }
       }),
     add: protectedProcedure
       .input(
         z.object({
           dayPlanId: z.number(),
-          title: z.string().min(1),
+          title: z.string().min(1).max(500),
           priority: z.enum(["low", "medium", "high"]).optional(),
           dueDate: z.date().optional(),
         })
       )
       .mutation(async ({ input }) => {
-        await addChecklistItem(input);
-        return { success: true };
+        try {
+          await addChecklistItem(input);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "checklist.add");
+          throw toTRPCError(appError);
+        }
       }),
     toggle: protectedProcedure
       .input(z.object({ id: z.number(), isCompleted: z.number() }))
       .mutation(async ({ input }) => {
-        await updateChecklistItem(input.id, input.isCompleted);
-        return { success: true };
+        try {
+          await updateChecklistItem(input.id, input.isCompleted);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "checklist.toggle");
+          throw toTRPCError(appError);
+        }
       }),
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await deleteChecklistItem(input.id);
-        return { success: true };
+        try {
+          await deleteChecklistItem(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "checklist.delete");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 
@@ -661,11 +905,16 @@ export const appRouter = router({
         })
       )
       .query(async ({ input }) => {
-        return await getWeatherForecast(
-          input.latitude,
-          input.longitude,
-          input.days || 7
-        );
+        try {
+          return await getWeatherForecast(
+            input.latitude,
+            input.longitude,
+            input.days || 7
+          );
+        } catch (error) {
+          const appError = handleError(error, "weather.forecast");
+          throw toTRPCError(appError);
+        }
       }),
     hourly: publicProcedure
       .input(
@@ -676,11 +925,16 @@ export const appRouter = router({
         })
       )
       .query(async ({ input }) => {
-        return await getHourlyWeatherForecast(
-          input.latitude,
-          input.longitude,
-          input.days || 7
-        );
+        try {
+          return await getHourlyWeatherForecast(
+            input.latitude,
+            input.longitude,
+            input.days || 7
+          );
+        } catch (error) {
+          const appError = handleError(error, "weather.hourly");
+          throw toTRPCError(appError);
+        }
       }),
   }),
 

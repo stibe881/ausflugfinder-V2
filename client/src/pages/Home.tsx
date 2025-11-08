@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 export default function Home() {
   const { isAuthenticated, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage } = useI18n();
+  const { language, setLanguage, t } = useI18n();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
   const { data: stats } = trpc.trips.statistics.useQuery();
@@ -183,38 +183,38 @@ export default function Home() {
               AusflugFinder
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium">
-              Entdecke, plane und verwalte unvergessliche Familienausflüge und Abenteuer
+              {t("app.tagline")}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-delayed">
             {loading ? (
               <Button size="lg" disabled className="text-lg px-8 py-6 shadow-lg">
-                Laden...
+                Loading...
               </Button>
             ) : isAuthenticated ? (
               <Link href="/trips">
                 <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                  Meine Ausflüge
+                  {t("nav.myTrips")}
                 </Button>
               </Link>
             ) : (
               <a href={getLoginUrl()}>
                 <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                  Jetzt starten
+                  {t("nav.signIn")}
                 </Button>
               </a>
             )}
             {isAuthenticated && (
               <Link href="/profile">
                 <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-secondary/50 hover:border-secondary hover:bg-secondary/10 transition-all duration-300 hover:scale-105">
-                  Mein Profil
+                  {t("nav.profile")}
                 </Button>
               </Link>
             )}
             <Link href="/explore">
               <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-primary/50 hover:border-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105">
-                Ausflüge entdecken
+                {t("nav.explore")}
               </Button>
             </Link>
           </div>
@@ -232,10 +232,10 @@ export default function Home() {
       <section className="py-24 relative bg-gradient-to-b from-background to-muted/30">
         <div className="container">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            Alles für deine Ausflüge
+            {t("home.featuresTitle")}
           </h2>
           <p className="text-center text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-            Plane deine nächsten Abenteuer mit allen wichtigen Funktionen an einem Ort
+            {t("home.featuresSubtitle")}
           </p>
           
           {/* Statistics */}
@@ -244,19 +244,19 @@ export default function Home() {
               <Link href="/explore">
                 <div className="bg-primary/10 rounded-2xl p-6 text-center border-2 border-primary/20 hover:border-primary/40 transition-all cursor-pointer hover:scale-105">
                   <div className="text-4xl font-bold text-primary mb-2">{stats.totalActivities}</div>
-                  <div className="text-sm text-muted-foreground">Aktivitäten</div>
+                  <div className="text-sm text-muted-foreground">{t("home.activities")}</div>
                 </div>
               </Link>
               <Link href="/explore?cost=free">
                 <div className="bg-secondary/10 rounded-2xl p-6 text-center border-2 border-secondary/20 hover:border-secondary/40 transition-all cursor-pointer hover:scale-105">
                   <div className="text-4xl font-bold text-secondary mb-2">{stats.freeActivities}</div>
-                  <div className="text-sm text-muted-foreground">Kostenlos</div>
+                  <div className="text-sm text-muted-foreground">{t("home.freeActivities")}</div>
                 </div>
               </Link>
               <Link href="/explore?cost=free">
                 <div className="bg-accent/10 rounded-2xl p-6 text-center border-2 border-accent/20 hover:border-accent/40 transition-all cursor-pointer hover:scale-105">
                   <div className="text-4xl font-bold text-accent mb-2">{stats.totalCategories}</div>
-                  <div className="text-sm text-muted-foreground">Kategorien</div>
+                  <div className="text-sm text-muted-foreground">{t("home.categories")}</div>
                 </div>
               </Link>
             </div>
@@ -266,24 +266,24 @@ export default function Home() {
             {[
               {
                 icon: Plane,
-                title: "Ausflüge planen",
-                description: "Plane deine Ausflugstage mit allen nützlichen Funktionen",
+                titleKey: "home.planTrips",
+                descKey: "home.planTripsDesc",
                 color: "text-primary",
                 bgColor: "bg-primary/10",
                 link: "/planner"
               },
               {
                 icon: MapPin,
-                title: "Destinationen",
-                description: "Entdecke spannende Orte und speichere deine Lieblingsziele",
+                titleKey: "home.destinations",
+                descKey: "home.destinationsDesc",
                 color: "text-accent",
                 bgColor: "bg-accent/10",
                 link: "/explore"
               },
               {
                 icon: Users,
-                title: "Freunde",
-                description: "Verwalte deine Freunde und teile Ausflüge mit ihnen",
+                titleKey: "home.friends",
+                descKey: "home.friendsDesc",
                 color: "text-secondary",
                 bgColor: "bg-secondary/10",
                 link: "/friends"
@@ -301,8 +301,8 @@ export default function Home() {
                     <div className={`w-16 h-16 ${feature.bgColor} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                       <feature.icon className={`w-8 h-8 ${feature.color}`} />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2 text-card-foreground">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <h3 className="text-xl font-semibold mb-2 text-card-foreground">{t(feature.titleKey)}</h3>
+                    <p className="text-muted-foreground">{t(feature.descKey)}</p>
                   </div>
                 </div>
               </Link>
@@ -314,18 +314,18 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(34,197,94,0.1),transparent_50%),radial-gradient(circle_at_70%_50%,rgba(249,115,22,0.1),transparent_50%)]"></div>
-        
+
         <div className="container relative z-10 text-center space-y-8">
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-            Bereit für dein nächstes Abenteuer?
+            {t("home.ctaTitle")}
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Starte jetzt und plane unvergessliche Ausflüge mit Familie und Freunden
+            {t("home.ctaSubtitle")}
           </p>
           {!isAuthenticated && !loading && (
             <a href={getLoginUrl()}>
               <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                Kostenlos registrieren
+                {t("home.registerBtn")}
               </Button>
             </a>
           )}

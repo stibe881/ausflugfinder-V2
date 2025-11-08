@@ -551,7 +551,7 @@ export default function Explore() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredTrips.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
-                    <Card className="overflow-hidden cursor-pointer h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group">
+                    <Card className="overflow-hidden cursor-pointer h-full flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group p-0">
                       {/* Image Container with Overlay */}
                       <div className="relative w-full h-56 bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
                         {trip.image ? (
@@ -593,7 +593,7 @@ export default function Explore() {
                       </div>
 
                       {/* Content */}
-                      <CardHeader className="pb-3 pt-0">
+                      <CardHeader className="pb-3 pt-4 px-4">
                         <div className="space-y-2">
                           <CardTitle className="text-lg font-bold line-clamp-2 group-hover:text-primary transition-colors">
                             {trip.title}
@@ -605,7 +605,7 @@ export default function Explore() {
                         </div>
                       </CardHeader>
 
-                      <CardContent className="flex-grow pb-3 space-y-3">
+                      <CardContent className="flex-grow pb-3 px-4 space-y-3">
                         {trip.description && (
                           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                             {trip.description}
