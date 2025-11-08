@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useI18n } from "@/contexts/i18nContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -40,6 +41,7 @@ const PACKING_CATEGORIES = [
 ];
 
 export default function PlannerDetail() {
+  const { t } = useI18n();
   const params = useParams();
   const planId = params.id ? parseInt(params.id) : 0;
   const { user } = useAuth();
@@ -73,7 +75,7 @@ export default function PlannerDetail() {
 
   const addTripMutation = trpc.dayPlans.addTrip.useMutation({
     onSuccess: () => {
-      toast.success("Ausflug hinzugefügt!");
+      toast.success(t("plannerDetail.tripAdded"));
       refetchItems();
       setAddTripDialog(false);
       setSelectedTripId(null);
@@ -85,14 +87,14 @@ export default function PlannerDetail() {
 
   const removeTripMutation = trpc.dayPlans.removeTrip.useMutation({
     onSuccess: () => {
-      toast.success("Ausflug entfernt!");
+      toast.success(t("plannerDetail.tripRemoved"));
       refetchItems();
     },
   });
 
   const addPackingMutation = trpc.packingList.add.useMutation({
     onSuccess: () => {
-      toast.success("Artikel hinzugefügt!");
+      toast.success(t("plannerDetail.itemAdded"));
       refetchPacking();
       setPackingDialog(false);
       setPackingItem({ item: "", quantity: 1, category: "" });
@@ -105,19 +107,19 @@ export default function PlannerDetail() {
 
   const updatePackingMutation = trpc.packingList.update.useMutation({
     onSuccess: () => {
-      toast.success("Artikel aktualisiert!");
+      toast.success(t("plannerDetail.itemUpdated"));
       refetchPacking();
       setEditPackingId(null);
       setPackingItem({ item: "", quantity: 1, category: "" });
     },
     onError: () => {
-      toast.error("Fehler beim Aktualisieren des Artikels");
+      toast.error(t("plannerDetail.itemUpdateError"));
     },
   });
 
   const deletePackingMutation = trpc.packingList.delete.useMutation({
     onSuccess: () => {
-      toast.success("Artikel gelöscht!");
+      toast.success(t("plannerDetail.itemRemoved"));
       refetchPacking();
     },
   });
