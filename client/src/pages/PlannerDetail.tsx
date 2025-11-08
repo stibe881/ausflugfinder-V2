@@ -710,7 +710,7 @@ export default function PlannerDetail() {
               <CardContent>
                 {planItems && planItems.length > 0 ? (
                   <div className="space-y-4">
-                    {planItems.map((item: any, index: number) => (
+                    {planItems?.map((item: any, index: number) => (
                       <div key={item.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card">
                         <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                           {index + 1}
@@ -845,7 +845,7 @@ export default function PlannerDetail() {
               <CardContent>
                 {packingList && packingList.length > 0 ? (
                   <div className="space-y-2">
-                    {packingList.map((item) => (
+                    {packingList?.map((item) => (
                       <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
                         <Button
                           size="sm"
@@ -985,7 +985,7 @@ export default function PlannerDetail() {
               <CardContent>
                 {budget && budget.length > 0 ? (
                   <div className="space-y-3">
-                    {budget.map((item) => (
+                    {budget?.map((item) => (
                       <div key={item.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
@@ -1129,7 +1129,7 @@ export default function PlannerDetail() {
               <CardContent>
                 {checklist && checklist.length > 0 ? (
                   <div className="space-y-2">
-                    {checklist.map((item) => (
+                    {checklist?.map((item) => (
                       <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
                         <Button
                           size="sm"
