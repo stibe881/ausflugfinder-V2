@@ -194,7 +194,7 @@ export default function RouteMap({ planItems }: RouteMapProps) {
             <div>
               <h4 className="font-medium text-sm mb-3">Routenpunkte und Fahrtinformationen:</h4>
               <div className="space-y-3">
-                {itemsWithCoords.map((item, index) => (
+                {itemsWithCoords?.map((item, index) => (
                   <div key={item.id} className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">{index + 1}</Badge>

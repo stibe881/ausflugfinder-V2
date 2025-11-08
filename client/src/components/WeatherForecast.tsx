@@ -144,13 +144,13 @@ export default function WeatherForecast({ plan }: WeatherForecastProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {Array.from(forecastsByDate.entries()).map(([dateStr, forecasts]) => (
+          {Array.from(forecastsByDate.entries())?.map(([dateStr, forecasts]) => (
             <div key={dateStr}>
               <h3 className="font-semibold text-lg mb-3 text-gray-700">
                 {format(new Date(dateStr), "EEEE, d. MMMM yyyy", { locale: de })}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 overflow-x-auto pb-2">
-                {forecasts.map((forecast, index) => (
+                {forecasts?.map((forecast, index) => (
                   <div
                     key={index}
                     className="flex-shrink-0 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-3 text-center border border-blue-100"
