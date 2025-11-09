@@ -438,48 +438,53 @@ export default function PlannerDetail() {
         {/* Plan Header */}
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <CardTitle className="text-3xl">{plan.title}</CardTitle>
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <CardTitle className="text-2xl md:text-3xl">{plan.title}</CardTitle>
                   {plan.isDraft === 1 && (
-                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-600">
+                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-600 shrink-0">
                       Entwurf
                     </Badge>
                   )}
                   {plan.isDraft === 0 && (
-                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-600">
+                    <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-600 shrink-0">
                       Veröffentlicht
                     </Badge>
                   )}
                 </div>
-                <CardDescription className="text-base">{plan.description}</CardDescription>
+                <CardDescription className="text-sm md:text-base">{plan.description}</CardDescription>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleExportICal}
+                  className="whitespace-nowrap text-xs md:text-sm"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  iCal
+                  <Download className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                  <span className="hidden md:inline">iCal</span>
+                  <span className="md:hidden">iCal</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleExportPDF}
+                  className="whitespace-nowrap text-xs md:text-sm"
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  PDF
+                  <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                  <span className="hidden md:inline">PDF</span>
+                  <span className="md:hidden">PDF</span>
                 </Button>
                 {plan.isDraft === 1 && (
                   <Button
                     size="sm"
                     onClick={() => handleToggleDraft(0)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 whitespace-nowrap text-xs md:text-sm"
                   >
-                    <Check className="w-4 h-4 mr-2" />
-                    Veröffentlichen
+                    <Check className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    <span className="hidden md:inline">Veröffentlichen</span>
+                    <span className="md:hidden">Veröff.</span>
                   </Button>
                 )}
                 {plan.isDraft === 0 && (
@@ -487,8 +492,10 @@ export default function PlannerDetail() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleToggleDraft(1)}
+                    className="whitespace-nowrap text-xs md:text-sm"
                   >
-                    Zurück zu Entwurf
+                    <span className="hidden md:inline">Zurück zu Entwurf</span>
+                    <span className="md:hidden">Entwurf</span>
                   </Button>
                 )}
                 {plan.isDraft === 1 && (
@@ -497,9 +504,11 @@ export default function PlannerDetail() {
                     size="sm"
                     onClick={handleDeleteDraft}
                     disabled={deletePlanMutation.isPending}
+                    className="whitespace-nowrap text-xs md:text-sm"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Löschen
+                    <Trash2 className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    <span className="hidden md:inline">Löschen</span>
+                    <span className="md:hidden">Lösch</span>
                   </Button>
                 )}
               </div>
@@ -549,13 +558,17 @@ export default function PlannerDetail() {
         </Card>
 
         <Tabs defaultValue="timeline" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-            <TabsTrigger value="route">Route</TabsTrigger>
-            <TabsTrigger value="weather">Wetter</TabsTrigger>
-            <TabsTrigger value="packing">Packliste</TabsTrigger>
-            <TabsTrigger value="budget">Budget</TabsTrigger>
-            <TabsTrigger value="checklist">Checkliste</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-auto gap-1 md:gap-0 p-1 md:p-0 md:bg-muted md:rounded-lg">
+            <TabsTrigger value="timeline" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded">Timeline</TabsTrigger>
+            <TabsTrigger value="route" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded">Route</TabsTrigger>
+            <TabsTrigger value="weather" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded">Wetter</TabsTrigger>
+            <TabsTrigger value="packing" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded hidden md:inline-flex">Packliste</TabsTrigger>
+            <TabsTrigger value="budget" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded hidden md:inline-flex">Budget</TabsTrigger>
+            <TabsTrigger value="checklist" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded hidden md:inline-flex">Checkliste</TabsTrigger>
+            {/* Mobile alternative tabs */}
+            <TabsTrigger value="packing" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded md:hidden">Pack</TabsTrigger>
+            <TabsTrigger value="budget" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded md:hidden">Bud</TabsTrigger>
+            <TabsTrigger value="checklist" className="text-xs md:text-sm py-1 md:py-2 px-1 md:px-3 rounded md:hidden">Check</TabsTrigger>
           </TabsList>
 
           {/* Timeline Tab */}
@@ -711,37 +724,37 @@ export default function PlannerDetail() {
               </CardHeader>
               <CardContent>
                 {planItems && planItems.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {planItems?.map((item: any, index: number) => (
-                      <div key={item.id} className="flex items-start gap-4 p-4 rounded-lg border bg-card">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      <div key={item.id} className="flex flex-col md:flex-row md:items-start gap-3 md:gap-4 p-3 md:p-4 rounded-lg border bg-card">
+                        <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm md:text-base">
                           {index + 1}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{item.trip?.title || "Unbekannter Ausflug"}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base md:text-lg mb-2 md:mb-1 break-words">{item.trip?.title || "Unbekannter Ausflug"}</h3>
+                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground mb-2">
                             {item.startTime && item.endTime && (
                               <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {item.startTime} - {item.endTime}
+                                <Clock className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                                <span className="break-words">{item.startTime} - {item.endTime}</span>
                               </div>
                             )}
                             {item.trip?.destination && (
                               <div className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4" />
-                                {item.trip.destination}
+                                <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                                <span className="break-words">{item.trip.destination}</span>
                               </div>
                             )}
                           </div>
                           {item.notes && (
-                            <p className="text-sm text-muted-foreground">{item.notes}</p>
+                            <p className="text-xs md:text-sm text-muted-foreground break-words">{item.notes}</p>
                           )}
                         </div>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => removeTripMutation.mutate({ id: item.id })}
-                          className="text-destructive"
+                          className="text-destructive self-start md:self-center flex-shrink-0"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -749,7 +762,7 @@ export default function PlannerDetail() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-8">
+                  <p className="text-center text-muted-foreground py-8 text-sm md:text-base">
                     Noch keine Ausflüge hinzugefügt. Klicke auf "Ausflug hinzufügen" um zu starten.
                   </p>
                 )}
@@ -848,17 +861,17 @@ export default function PlannerDetail() {
                 {packingList && packingList.length > 0 ? (
                   <div className="space-y-2">
                     {packingList?.map((item) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                      <div key={item.id} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-lg border bg-card flex-wrap">
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => togglePackingMutation.mutate({ id: item.id, isPacked: item.isPacked ? 0 : 1 })}
-                          className="h-6 w-6 p-0"
+                          className="h-6 w-6 p-0 flex-shrink-0"
                         >
-                          {item.isPacked ? <Check className="w-4 h-4 text-green-600" /> : <div className="w-4 h-4 border-2 rounded" />}
+                          {item.isPacked ? <Check className="w-3 h-3 md:w-4 md:h-4 text-green-600" /> : <div className="w-3 h-3 md:w-4 md:h-4 border-2 rounded" />}
                         </Button>
-                        <div className="flex-1">
-                          <span className={item.isPacked ? "line-through text-muted-foreground" : ""}>
+                        <div className="flex-1 min-w-[120px]">
+                          <span className={`text-xs md:text-sm ${item.isPacked ? "line-through text-muted-foreground" : ""}`}>
                             {item.item} {item.quantity > 1 && `(${item.quantity}x)`}
                           </span>
                           {item.category && (
@@ -874,23 +887,24 @@ export default function PlannerDetail() {
                             handleEditPacking(item.id);
                             setPackingDialog(true);
                           }}
-                          className="text-blue-600"
+                          className="text-blue-600 text-xs md:text-sm px-2"
                         >
-                          Bearbeiten
+                          <span className="hidden md:inline">Bearbeiten</span>
+                          <span className="md:hidden">Bearb.</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => deletePackingMutation.mutate({ id: item.id })}
-                          className="text-destructive"
+                          className="text-destructive flex-shrink-0"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-8">
+                  <p className="text-center text-muted-foreground py-8 text-sm md:text-base">
                     Noch keine Artikel auf der Packliste
                   </p>
                 )}
@@ -988,22 +1002,24 @@ export default function PlannerDetail() {
                 {budget && budget.length > 0 ? (
                   <div className="space-y-3">
                     {budget?.map((item) => (
-                      <div key={item.id} className="flex items-center gap-4 p-4 rounded-lg border bg-card">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline">{item.category}</Badge>
-                            <span className="font-medium">{item.description}</span>
+                      <div key={item.id} className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3 md:p-4 rounded-lg border bg-card">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                            <span className="font-medium text-sm md:text-base break-words">{item.description}</span>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            Geschätzt: CHF {parseFloat(item.estimatedCost).toFixed(2)}
+                          <div className="text-xs md:text-sm text-muted-foreground">
+                            <span className="block md:inline">Geschätzt: CHF {parseFloat(item.estimatedCost).toFixed(2)}</span>
                             {item.actualCost && (
                               <>
-                                {` | Tatsächlich: CHF ${parseFloat(item.actualCost).toFixed(2)}`}
+                                <span className="hidden md:inline">{` | `}</span>
+                                <span className="block md:inline">Tatsächlich: CHF {parseFloat(item.actualCost).toFixed(2)}</span>
                                 {(() => {
                                   const diff = parseFloat(item.actualCost) - parseFloat(item.estimatedCost);
                                   return (
                                     <span className={diff >= 0 ? " text-orange-600" : " text-green-600"}>
-                                      {` | ${diff >= 0 ? "+" : ""}${diff.toFixed(2)}`}
+                                      <span className="hidden md:inline">{` | `}</span>
+                                      <span className="block md:inline">{diff >= 0 ? "+" : ""}{diff.toFixed(2)}</span>
                                     </span>
                                   );
                                 })()}
@@ -1011,20 +1027,23 @@ export default function PlannerDetail() {
                             )}
                           </div>
                         </div>
-                        <Dialog open={editBudgetId === item.id} onOpenChange={(open) => {
-                          if (!open) {
-                            setEditBudgetId(null);
-                            setEditBudgetActualCost("");
-                          }
-                        }}>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditBudget(item.id)}
-                          >
-                            Bearbeiten
-                          </Button>
-                          <DialogContent>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <Dialog open={editBudgetId === item.id} onOpenChange={(open) => {
+                            if (!open) {
+                              setEditBudgetId(null);
+                              setEditBudgetActualCost("");
+                            }
+                          }}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditBudget(item.id)}
+                              className="text-xs md:text-sm"
+                            >
+                              <span className="hidden md:inline">Bearbeiten</span>
+                              <span className="md:hidden">Bearb.</span>
+                            </Button>
+                            <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Tatsächliche Kosten eingeben</DialogTitle>
                               <DialogDescription>
@@ -1055,20 +1074,21 @@ export default function PlannerDetail() {
                               </Button>
                             </DialogFooter>
                           </DialogContent>
-                        </Dialog>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteBudgetMutation.mutate({ id: item.id })}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                          </Dialog>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deleteBudgetMutation.mutate({ id: item.id })}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-8">
+                  <p className="text-center text-muted-foreground py-8 text-sm md:text-base">
                     Noch keine Budget-Einträge
                   </p>
                 )}
@@ -1132,17 +1152,17 @@ export default function PlannerDetail() {
                 {checklist && checklist.length > 0 ? (
                   <div className="space-y-2">
                     {checklist?.map((item) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                      <div key={item.id} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-lg border bg-card flex-wrap">
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => toggleChecklistMutation.mutate({ id: item.id, isCompleted: item.isCompleted ? 0 : 1 })}
-                          className="h-6 w-6 p-0"
+                          className="h-6 w-6 p-0 flex-shrink-0"
                         >
-                          {item.isCompleted ? <Check className="w-4 h-4 text-green-600" /> : <div className="w-4 h-4 border-2 rounded" />}
+                          {item.isCompleted ? <Check className="w-3 h-3 md:w-4 md:h-4 text-green-600" /> : <div className="w-3 h-3 md:w-4 md:h-4 border-2 rounded" />}
                         </Button>
-                        <div className="flex-1">
-                          <span className={item.isCompleted ? "line-through text-muted-foreground" : ""}>
+                        <div className="flex-1 min-w-[100px]">
+                          <span className={`text-xs md:text-sm ${item.isCompleted ? "line-through text-muted-foreground" : ""}`}>
                             {item.title}
                           </span>
                           <Badge variant="outline" className={`ml-2 text-xs ${getPriorityColor(item.priority)}`}>
@@ -1155,15 +1175,15 @@ export default function PlannerDetail() {
                           size="sm"
                           variant="ghost"
                           onClick={() => deleteChecklistMutation.mutate({ id: item.id })}
-                          className="text-destructive"
+                          className="text-destructive flex-shrink-0"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-8">
+                  <p className="text-center text-muted-foreground py-8 text-sm md:text-base">
                     Noch keine Aufgaben auf der Checkliste
                   </p>
                 )}

@@ -14,13 +14,7 @@ import { de } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
-import { PhotoGallery } from "@/components/PhotoGallery";
-import { TripRatingCard } from "@/components/TripRatingCard";
 import { WeatherWidget } from "@/components/WeatherWidget";
-import { TripItineraryCard } from "@/components/TripItineraryCard";
-import { AchievementBadge } from "@/components/AchievementBadge";
-import { PackingChecklist } from "@/components/PackingChecklist";
-import { BudgetTracker } from "@/components/BudgetTracker";
 
 export default function TripDetail() {
   const { t } = useI18n();
@@ -268,77 +262,6 @@ export default function TripDetail() {
               <WeatherWidget location={trip.destination} />
             )}
 
-            {/* Photo Gallery */}
-            <PhotoGallery
-              photos={[]}
-              onUpload={async (file, caption) => {
-                toast.info(t("tripDetail.uploadingPhoto") || "Uploading photo...");
-              }}
-              onDelete={async (id) => {
-                toast.info(t("tripDetail.photoDeleted") || "Photo deleted");
-              }}
-              onSetPrimary={async (id) => {
-                toast.info(t("tripDetail.primaryPhotoSet") || "Primary photo set");
-              }}
-            />
-
-            {/* Budget Tracker */}
-            <BudgetTracker
-              budgetItems={[]}
-              onAddBudgetItem={async (item) => {
-                toast.success(t("tripDetail.budgetItemAdded") || "Budget item added");
-              }}
-              onUpdateBudgetItem={async (id, actualCost) => {
-                toast.success(t("tripDetail.budgetItemUpdated") || "Budget item updated");
-              }}
-              onDeleteBudgetItem={async (id) => {
-                toast.success(t("tripDetail.budgetItemDeleted") || "Budget item deleted");
-              }}
-            />
-
-            {/* Trip Itinerary */}
-            <TripItineraryCard
-              dayPlans={[]}
-              onAddDayPlan={async (plan) => {
-                toast.success(t("tripDetail.dayPlanAdded") || "Day plan added");
-              }}
-              onUpdateDayPlan={async (id, updates) => {
-                toast.success(t("tripDetail.dayPlanUpdated") || "Day plan updated");
-              }}
-              onDeleteDayPlan={async (id) => {
-                toast.success(t("tripDetail.dayPlanDeleted") || "Day plan deleted");
-              }}
-            />
-
-            {/* Packing Checklist */}
-            <PackingChecklist
-              items={[]}
-              onAddItem={async (item) => {
-                toast.success(t("tripDetail.packingItemAdded") || "Packing item added");
-              }}
-              onToggleItem={async (id) => {
-                toast.success(t("tripDetail.packingItemToggled") || "Packing item toggled");
-              }}
-              onDeleteItem={async (id) => {
-                toast.success(t("tripDetail.packingItemDeleted") || "Packing item deleted");
-              }}
-            />
-
-            {/* Ratings & Comments */}
-            <TripRatingCard
-              ratings={[]}
-              comments={[]}
-              onAddRating={async (rating) => {
-                toast.success(t("tripDetail.ratingAdded") || "Rating added");
-              }}
-              onAddComment={async (comment) => {
-                toast.success(t("tripDetail.commentAdded") || "Comment added");
-              }}
-              onDeleteComment={async (id) => {
-                toast.success(t("tripDetail.commentDeleted") || "Comment deleted");
-              }}
-            />
-
             {/* Nice to Know Section */}
             {trip.category || trip.region ? (
               <Card>
@@ -361,15 +284,6 @@ export default function TripDetail() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Achievements */}
-            <AchievementBadge
-              achievements={[
-                { id: 1, name: "Explorer", description: "Completed your first trip", rarity: "common", unlocked: true },
-                { id: 2, name: "Adventurer", description: "Complete 5 trips", rarity: "rare", unlocked: false, progress: 1, maxProgress: 5 },
-                { id: 3, name: "Globetrotter", description: "Visit 10 different regions", rarity: "epic", unlocked: false, progress: 1, maxProgress: 10 },
-              ]}
-            />
-
             {/* Information Card */}
             <Card>
               <CardHeader>
