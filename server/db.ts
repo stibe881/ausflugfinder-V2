@@ -1,8 +1,8 @@
 import { eq, and, sql, or, ilike, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
-  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry,
-  trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems, tripJournal
+  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry, InsertTripVideo,
+  trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems, tripJournal, tripVideos
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -759,4 +759,23 @@ export async function deleteJournalEntry(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(tripJournal).where(eq(tripJournal.id, id));
+}
+
+// ===== Trip Video Functions =====
+export async function addVideo(video: InsertTripVideo) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(tripVideos).values(video);
+}
+
+export async function getTripVideos(tripId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(tripVideos).where(eq(tripVideos.tripId, tripId)).orderBy(tripVideos.createdAt);
+}
+
+export async function deleteVideo(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(tripVideos).where(eq(tripVideos.id, id));
 }

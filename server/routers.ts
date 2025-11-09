@@ -28,6 +28,7 @@ import {
   addBudgetItem, getBudgetItems, updateBudgetItem, deleteBudgetItem,
   addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem,
   addJournalEntry, getTripJournalEntries, updateJournalEntry, deleteJournalEntry,
+  addVideo, getTripVideos, deleteVideo,
   getDb
 } from "./db";
 import { eq } from "drizzle-orm";
@@ -1122,6 +1123,58 @@ export const appRouter = router({
           return { success: true };
         } catch (error) {
           const appError = handleError(error, "journal.delete");
+          throw toTRPCError(appError);
+        }
+      }),
+  }),
+
+  videos: router({
+    list: publicProcedure
+      .input(z.object({ tripId: z.number() }))
+      .query(async ({ input }) => {
+        try {
+          const videos = await getTripVideos(input.tripId);
+          return videos.map((v) => ({
+            ...v,
+            id: v.id.toString(),
+            url: v.videoId,
+          }));
+        } catch (error) {
+          const appError = handleError(error, "videos.list");
+          throw toTRPCError(appError);
+        }
+      }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number(),
+          url: z.string().min(1),
+          title: z.string().optional(),
+          platform: z.enum(["youtube", "tiktok"]),
+        })
+      )
+      .mutation(async ({ input }) => {
+        try {
+          await addVideo({
+            tripId: input.tripId,
+            videoId: input.url,
+            title: input.title || undefined,
+            platform: input.platform,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "videos.add");
+          throw toTRPCError(appError);
+        }
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        try {
+          await deleteVideo(parseInt(input.id));
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "videos.delete");
           throw toTRPCError(appError);
         }
       }),

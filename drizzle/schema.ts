@@ -184,6 +184,26 @@ export type TripJournalEntry = typeof tripJournal.$inferSelect;
 export type InsertTripJournalEntry = typeof tripJournal.$inferInsert;
 
 /**
+ * Trip videos table for storing embedded videos from YouTube and TikTok.
+ * Allows users to add videos from their trips.
+ */
+export const tripVideos = mysqlTable("tripVideos", {
+  id: int("id").autoincrement().primaryKey(),
+  tripId: int("tripId").notNull(),
+  videoId: varchar("videoId", { length: 255 }).notNull(), // Platform-specific video ID
+  platform: mysqlEnum("platform", ["youtube", "tiktok"]).notNull(),
+  title: varchar("title", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for video lookups
+  tripIdIdx: index("trip_videos_trip_id_idx").on(table.tripId),
+  createdAtIdx: index("trip_videos_created_at_idx").on(table.createdAt),
+}));
+
+export type TripVideo = typeof tripVideos.$inferSelect;
+export type InsertTripVideo = typeof tripVideos.$inferInsert;
+
+/**
  * Trip attributes/tags table for filtering and categorization.
  * Stores various attributes like "Family-friendly", "Barrier-free", etc.
  */
