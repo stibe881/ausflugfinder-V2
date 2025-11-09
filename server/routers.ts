@@ -27,6 +27,7 @@ import {
   addPackingListItem, getPackingListItems, updatePackingListItem, updatePackingListItemFull, deletePackingListItem,
   addBudgetItem, getBudgetItems, updateBudgetItem, deleteBudgetItem,
   addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem,
+  addJournalEntry, getTripJournalEntries, updateJournalEntry, deleteJournalEntry,
   getDb
 } from "./db";
 import { eq } from "drizzle-orm";
@@ -1056,6 +1057,72 @@ export const appRouter = router({
         } catch (error) {
           console.error('PDF export error:', error);
           throw error;
+        }
+      }),
+  }),
+
+  journal: router({
+    list: publicProcedure
+      .input(z.object({ tripId: z.number() }))
+      .query(async ({ input }) => {
+        try {
+          return await getTripJournalEntries(input.tripId);
+        } catch (error) {
+          const appError = handleError(error, "journal.list");
+          throw toTRPCError(appError);
+        }
+      }),
+    add: protectedProcedure
+      .input(
+        z.object({
+          tripId: z.number(),
+          content: z.string().min(1).max(5000),
+          entryDate: z.date(),
+          mood: z.string().max(50).optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        try {
+          await addJournalEntry({
+            tripId: input.tripId,
+            userId: ctx.user.id,
+            content: input.content,
+            entryDate: input.entryDate,
+            mood: input.mood || undefined,
+          });
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "journal.add");
+          throw toTRPCError(appError);
+        }
+      }),
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          content: z.string().min(1).max(5000).optional(),
+          mood: z.string().max(50).optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        try {
+          const { id, ...data } = input;
+          await updateJournalEntry(id, data);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "journal.update");
+          throw toTRPCError(appError);
+        }
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        try {
+          await deleteJournalEntry(input.id);
+          return { success: true };
+        } catch (error) {
+          const appError = handleError(error, "journal.delete");
+          throw toTRPCError(appError);
         }
       }),
   }),

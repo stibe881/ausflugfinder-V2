@@ -1,8 +1,8 @@
 import { eq, and, sql, or, ilike, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem,
-  trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems
+import {
+  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry,
+  trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems, tripJournal
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -734,4 +734,29 @@ export async function deleteChecklistItem(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(checklistItems).where(eq(checklistItems.id, id));
+}
+
+// ===== Trip Journal Functions =====
+export async function addJournalEntry(entry: InsertTripJournalEntry) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(tripJournal).values(entry);
+}
+
+export async function getTripJournalEntries(tripId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(tripJournal).where(eq(tripJournal.tripId, tripId)).orderBy(tripJournal.entryDate);
+}
+
+export async function updateJournalEntry(id: number, data: Partial<Omit<InsertTripJournalEntry, 'id' | 'tripId' | 'userId'>>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(tripJournal).set(data).where(eq(tripJournal.id, id));
+}
+
+export async function deleteJournalEntry(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(tripJournal).where(eq(tripJournal.id, id));
 }

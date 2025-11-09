@@ -160,6 +160,30 @@ export type TripPhoto = typeof tripPhotos.$inferSelect;
 export type InsertTripPhoto = typeof tripPhotos.$inferInsert;
 
 /**
+ * Trip journal entries table for documenting trip experiences.
+ * Allows users to write entries during their trips with timestamps.
+ */
+export const tripJournal = mysqlTable("tripJournal", {
+  id: int("id").autoincrement().primaryKey(),
+  tripId: int("tripId").notNull(),
+  userId: int("userId").notNull(),
+  content: text("content").notNull(),
+  entryDate: timestamp("entryDate").notNull(), // Date when the entry was written (not today, but the trip date)
+  mood: varchar("mood", { length: 50 }), // e.g., "happy", "excited", "tired", "relaxed"
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for journal lookups
+  tripIdIdx: index("trip_journal_trip_id_idx").on(table.tripId),
+  userIdIdx: index("trip_journal_user_id_idx").on(table.userId),
+  entryDateIdx: index("trip_journal_entry_date_idx").on(table.entryDate),
+  createdAtIdx: index("trip_journal_created_at_idx").on(table.createdAt),
+}));
+
+export type TripJournalEntry = typeof tripJournal.$inferSelect;
+export type InsertTripJournalEntry = typeof tripJournal.$inferInsert;
+
+/**
  * Trip attributes/tags table for filtering and categorization.
  * Stores various attributes like "Family-friendly", "Barrier-free", etc.
  */
