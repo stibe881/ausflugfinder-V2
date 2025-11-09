@@ -87,8 +87,8 @@ export default function Explore() {
   const [maxDistance, setMaxDistance] = useState(50); // km
   const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"name" | "date" | "cost">("date");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<"name" | "date" | "cost">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [activeTab, setActiveTab] = useState<"trips" | "destinations">("trips");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [destFormData, setDestFormData] = useState({ name: "", location: "", description: "", imageUrl: "" });
@@ -246,7 +246,7 @@ export default function Explore() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
@@ -260,9 +260,7 @@ export default function Explore() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               {t("explore.header")}
             </h1>
-            <Link href="/trips">
-              <Button variant="outline">{t("explore.myTrips")}</Button>
-            </Link>
+            <div className="w-12"></div>
           </div>
         </div>
       </header>
@@ -331,16 +329,6 @@ export default function Explore() {
           >
             {t("explore.tabTrips")}
           </button>
-          <button
-            onClick={() => setActiveTab("destinations")}
-            className={`px-6 py-4 font-medium border-b-2 transition-colors ${
-              activeTab === "destinations"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t("explore.tabDestinations")}
-          </button>
         </div>
       </div>
 
@@ -348,7 +336,7 @@ export default function Explore() {
       {activeTab === "trips" && (
       <section className="py-8 bg-card border-b">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 w-full">
             {/* Keyword Search */}
             <div className="lg:col-span-2">
               <div className="relative">
@@ -435,16 +423,16 @@ export default function Explore() {
             )}
           </div>
 
-          <div className="flex justify-between items-center mt-4">
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleReset}>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button variant="outline" onClick={handleReset} className="w-full sm:w-auto">
                 <Filter className="w-4 h-4 mr-2" />
                 {t("explore.resetFilters")}
               </Button>
 
               {/* Sort Options */}
               <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date" | "cost")}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder={t("explore.sortBy")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -464,7 +452,7 @@ export default function Explore() {
               </Button>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="icon"
@@ -731,168 +719,6 @@ export default function Explore() {
       </section>
       )}
 
-      {/* Destinations Section - Destinations Tab */}
-      {activeTab === "destinations" && (
-      <section className="py-12">
-        <div className="container">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">{t("explore.destTitle")}</h2>
-              <p className="text-muted-foreground">
-                {t("explore.destSubtitle")}
-              </p>
-            </div>
-            <Dialog open={isDialogOpen} onOpenChange={(open) => {
-              setIsDialogOpen(open);
-              if (!open) resetDestForm();
-            }}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="gap-2">
-                  <Plus className="w-5 h-5" />
-                  {t("explore.destNew")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <form onSubmit={handleDestSubmit}>
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingDestId ? t("explore.destEdit") : t("explore.destCreate")}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {t("destinations.addFavorite")}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div>
-                      <Label htmlFor="name">{t("explore.destNameLabel")}</Label>
-                      <Input
-                        id="name"
-                        value={destFormData.name}
-                        onChange={(e) => setDestFormData({ ...destFormData, name: e.target.value })}
-                        required
-                        placeholder={t("explore.destNamePlaceholder")}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="location">{t("explore.destLocationLabel")}</Label>
-                      <Input
-                        id="location"
-                        value={destFormData.location}
-                        onChange={(e) => setDestFormData({ ...destFormData, location: e.target.value })}
-                        required
-                        placeholder={t("explore.destLocationPlaceholder")}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">{t("explore.destDescLabel")}</Label>
-                      <Textarea
-                        id="description"
-                        value={destFormData.description}
-                        onChange={(e) => setDestFormData({ ...destFormData, description: e.target.value })}
-                        placeholder={t("explore.destDescPlaceholder")}
-                        rows={3}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="imageUrl">{t("explore.destImageLabel")}</Label>
-                      <Input
-                        id="imageUrl"
-                        value={destFormData.imageUrl}
-                        onChange={(e) => setDestFormData({ ...destFormData, imageUrl: e.target.value })}
-                        placeholder={t("explore.destImagePlaceholder")}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      {t("explore.destCancel")}
-                    </Button>
-                    <Button type="submit" disabled={createDestMutation.isPending || updateDestMutation.isPending}>
-                      {(createDestMutation.isPending || updateDestMutation.isPending) && (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      )}
-                      {editingDestId ? t("explore.destUpdate") : t("explore.destCreateBtn")}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {destLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : allDestinations && allDestinations.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allDestinations?.map((destination) => (
-                <Card key={destination.id} className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
-                  {destination.imageUrl && (
-                    <div className="h-48 bg-muted overflow-hidden">
-                      <img
-                        src={destination.imageUrl}
-                        alt={destination.name}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-primary" />
-                      {destination.name}
-                    </CardTitle>
-                    <CardDescription>{destination.location}</CardDescription>
-                  </CardHeader>
-                  {destination.description && (
-                    <CardContent className="flex-grow">
-                      <p className="text-sm text-muted-foreground">{destination.description}</p>
-                    </CardContent>
-                  )}
-                  <CardFooter className="gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditDest(destination)}
-                      className="flex-1"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      {t("destinations.edit")}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteDest(destination.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-6">{t("explore.destNone")}</p>
-              <Dialog open={isDialogOpen} onOpenChange={(open) => {
-                setIsDialogOpen(open);
-                if (!open) resetDestForm();
-              }}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="w-5 h-5" />
-                    {t("explore.destFirstBtn")}
-                  </Button>
-                </DialogTrigger>
-              </Dialog>
-            </div>
-          )}
-        </div>
-      </section>
-      )}
     </div>
   );
 }

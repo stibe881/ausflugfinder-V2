@@ -6,7 +6,7 @@ export type Language = "de" | "fr" | "it" | "en";
 const translations: Record<Language, Record<string, string>> = {
   de: {
     "app.title": "AusflugFinder",
-    "app.tagline": "Entdecke, plane und verwalte unvergessliche Familienausflüge und Abenteuer",
+    "app.tagline": ":) Entdecke, plane und verwalte unvergessliche Familienausflüge und Abenteuer",
     "nav.myTrips": "Meine Ausflüge",
     "nav.profile": "Mein Profil",
     "nav.explore": "Ausflüge entdecken",
@@ -50,7 +50,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.categories": "Kategorien",
     "home.planTrips": "Ausflüge planen",
     "home.planTripsDesc": "Plane deine Ausflugstage mit allen nützlichen Funktionen",
-    "home.destinations": "Destinationen",
+    "home.destinations": "Ausflüge",
     "home.destinationsDesc": "Entdecke spannende Orte und speichere deine Lieblingsziele",
     "home.friends": "Freunde",
     "home.friendsDesc": "Verwalte deine Freunde und teile Ausflüge mit ihnen",

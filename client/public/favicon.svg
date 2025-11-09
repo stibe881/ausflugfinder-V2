@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background -->
+  <rect width="192" height="192" fill="#ffffff" rx="32"/>
+
+  <!-- Mountain Icon (left) -->
+  <g transform="translate(32, 48)">
+    <path d="M0 64L32 32L64 64" stroke="#3b82f6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="48" cy="48" r="4" fill="#3b82f6"/>
+    <path d="M0 64V16L32 32L64 16V64" stroke="#3b82f6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Sun Icon (center) -->
+  <g transform="translate(80, 48)">
+    <circle cx="16" cy="16" r="12" stroke="#f59e0b" stroke-width="3" fill="none"/>
+    <line x1="16" y1="0" x2="16" y2="4" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="32" y1="16" x2="28" y2="16" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="16" y1="32" x2="16" y2="28" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="0" y1="16" x2="4" y2="16" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="26.6" y1="5.4" x2="23.3" y2="8.7" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="26.6" y1="26.6" x2="23.3" y2="23.3" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="5.4" y1="26.6" x2="8.7" y2="23.3" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="5.4" y1="5.4" x2="8.7" y2="8.7" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Compass Icon (right) -->
+  <g transform="translate(128, 48)">
+    <circle cx="16" cy="16" r="14" stroke="#10b981" stroke-width="3" fill="none"/>
+    <path d="M16 2L22 14L16 18L10 14Z" fill="#10b981"/>
+    <circle cx="16" cy="16" r="3" fill="#10b981"/>
+  </g>
+</svg>

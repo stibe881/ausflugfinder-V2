@@ -250,11 +250,18 @@ export default function Home() {
                 Loading...
               </Button>
             ) : isAuthenticated ? (
-              <Link href="/trips">
-                <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                  {t("nav.myTrips")}
-                </Button>
-              </Link>
+              <>
+                <Link href="/explore">
+                  <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    {t("nav.explore")}
+                  </Button>
+                </Link>
+                <Link href="/profile">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-secondary/50 hover:border-secondary hover:bg-secondary/10 transition-all duration-300 hover:scale-105">
+                    {t("nav.profile")}
+                  </Button>
+                </Link>
+              </>
             ) : (
               <a href={getLoginUrl()}>
                 <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
@@ -262,18 +269,6 @@ export default function Home() {
                 </Button>
               </a>
             )}
-            {isAuthenticated && (
-              <Link href="/profile">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-secondary/50 hover:border-secondary hover:bg-secondary/10 transition-all duration-300 hover:scale-105">
-                  {t("nav.profile")}
-                </Button>
-              </Link>
-            )}
-            <Link href="/explore">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-primary/50 hover:border-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105">
-                {t("nav.explore")}
-              </Button>
-            </Link>
           </div>
         </div>
 
