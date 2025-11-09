@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
+import { useIsMobile } from "@/hooks/useMobile";
+import { FilterBottomSheet } from "@/components/FilterBottomSheet";
 
 const CATEGORIES = [
   "Aktion & Sport",
@@ -78,6 +80,8 @@ const COST_LABELS: Record<string, string> = {
 export default function Explore() {
   const { t } = useI18n();
   const [location] = useLocation();
+  const isMobile = useIsMobile();
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [region, setRegion] = useState<string>("");
   const [category, setCategory] = useState<string>("");
@@ -336,9 +340,9 @@ export default function Explore() {
       {activeTab === "trips" && (
       <section className="py-8 bg-card border-b">
         <div className="container">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 w-full">
-            {/* Keyword Search */}
-            <div className="lg:col-span-2">
+          {isMobile ? (
+            // Mobile Filter Button
+            <div className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -348,50 +352,74 @@ export default function Explore() {
                   className="pl-10"
                 />
               </div>
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => setIsFilterSheetOpen(true)}
+              >
+                <Filter className="w-4 h-4" />
+                {t("explore.filters")}
+              </Button>
             </div>
+          ) : (
+            // Desktop Grid Filters
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 w-full">
+              {/* Keyword Search */}
+              <div className="lg:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder={t("explore.search")}
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
-            {/* Region Filter */}
-            <Select value={region} onValueChange={setRegion}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("explore.allRegions")} />
-              </SelectTrigger>
-              <SelectContent>
-                {REGIONS.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {r}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {/* Region Filter */}
+              <Select value={region} onValueChange={setRegion}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("explore.allRegions")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {REGIONS.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {r}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Category Filter */}
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("explore.allCategories")} />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {/* Category Filter */}
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("explore.allCategories")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Cost Filter */}
-            <Select value={cost} onValueChange={setCost}>
-              <SelectTrigger>
-                <SelectValue placeholder={t("explore.allCosts")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="free">{t("explore.costFree")}</SelectItem>
-                <SelectItem value="low">CHF •</SelectItem>
-                <SelectItem value="medium">CHF ••</SelectItem>
-                <SelectItem value="high">CHF •••</SelectItem>
-                <SelectItem value="very_high">CHF ••••</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              {/* Cost Filter */}
+              <Select value={cost} onValueChange={setCost}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("explore.allCosts")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">{t("explore.costFree")}</SelectItem>
+                  <SelectItem value="low">CHF •</SelectItem>
+                  <SelectItem value="medium">CHF ••</SelectItem>
+                  <SelectItem value="high">CHF •••</SelectItem>
+                  <SelectItem value="very_high">CHF ••••</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Nearby Filter */}
           <div className="mt-4 flex items-center gap-4">
@@ -719,6 +747,22 @@ export default function Explore() {
       </section>
       )}
 
+      {/* Filter Bottom Sheet for Mobile */}
+      <FilterBottomSheet
+        isOpen={isFilterSheetOpen}
+        onClose={() => setIsFilterSheetOpen(false)}
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        region={region}
+        onRegionChange={setRegion}
+        category={category}
+        onCategoryChange={setCategory}
+        cost={cost}
+        onCostChange={setCost}
+        onReset={handleReset}
+        regions={REGIONS}
+        categories={CATEGORIES}
+      />
     </div>
   );
 }

@@ -20,6 +20,7 @@ export default function TripDetail() {
   const params = useParams();
   const tripId = params.id ? parseInt(params.id) : 0;
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [, navigate] = useLocation();
@@ -185,10 +186,14 @@ export default function TripDetail() {
           <Button
             variant={isFavorite ? "default" : "outline"}
             size="sm"
-            onClick={() => setIsFavorite(!isFavorite)}
+            onClick={() => {
+              setIsFavorite(!isFavorite);
+              setIsHeartAnimating(true);
+              setTimeout(() => setIsHeartAnimating(false), 600);
+            }}
             className="gap-2"
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
+            <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""} ${isHeartAnimating ? "animate-heart-beat" : ""}`} />
             {t("tripDetail.favorite")}
           </Button>
           <Button

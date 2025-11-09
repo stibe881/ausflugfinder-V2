@@ -8,17 +8,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, DollarSign, Flame, Eye, Share2, Zap } from "lucide-react";
+import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, DollarSign, Flame, Eye, Share2, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 export default function Trips() {
   const { t } = useI18n();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTripIndex, setSelectedTripIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Swipe navigation for mobile
+  useSwipeNavigation({
+    onSwipeLeft: () => {
+      setSelectedTripIndex((prev) => Math.min(prev + 1, (trips?.length || 1) - 1));
+    },
+    onSwipeRight: () => {
+      setSelectedTripIndex((prev) => Math.max(prev - 1, 0));
+    },
+  });
   
   const { data: trips, isLoading, refetch } = trpc.trips.myTrips.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -326,18 +339,35 @@ export default function Trips() {
       <main className="container py-12">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-card border-border animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="bg-card border-border overflow-hidden">
+                {/* Image Skeleton */}
+                <div className="h-32 bg-gradient-to-r from-muted via-muted-foreground/10 to-muted animate-pulse"></div>
+
                 <CardHeader>
-                  <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                  {/* Title Skeleton */}
+                  <div className="space-y-3 mb-3">
+                    <div className="h-5 bg-muted rounded w-3/4 animate-pulse"></div>
+                    <div className="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
+                  </div>
                 </CardHeader>
+
                 <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded"></div>
-                    <div className="h-4 bg-muted rounded w-5/6"></div>
+                  {/* Meta Info Skeleton */}
+                  <div className="space-y-3 mb-4">
+                    <div className="h-4 bg-muted rounded w-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="h-4 bg-muted rounded w-5/6 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="h-4 bg-muted rounded w-4/6 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
                   </div>
                 </CardContent>
+
+                <CardFooter>
+                  {/* Action Buttons Skeleton */}
+                  <div className="flex gap-2 w-full">
+                    <div className="h-9 bg-muted rounded flex-1 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    <div className="h-9 bg-muted rounded flex-1 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  </div>
+                </CardFooter>
               </Card>
             ))}
           </div>
