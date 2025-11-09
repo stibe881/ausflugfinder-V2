@@ -17,6 +17,7 @@ import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { PhotoOrganizer } from "@/components/PhotoOrganizer";
 import { TripJournal } from "@/components/TripJournal";
 import { VideoGallery } from "@/components/VideoGallery";
 
@@ -275,6 +276,11 @@ export default function TripDetail() {
               photos={photos}
               onRefresh={() => refetchPhotos()}
             />
+
+            {/* Photo Organizer */}
+            {photos.length > 0 && (
+              <PhotoOrganizer photos={photos} />
+            )}
 
             {/* Trip Journal */}
             <TripJournal
