@@ -2,42 +2,86 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Image as ImageIcon, Trash2, Plus, ImageOff } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 interface Photo {
-  id: string;
-  url: string;
-  caption?: string;
-  uploadedAt: Date;
-  isPrimary?: boolean;
+  id: number;
+  photoUrl: string;
+  caption?: string | null;
+  createdAt: Date;
+  isPrimary: number;
 }
 
 interface PhotoGalleryProps {
+  tripId: number;
   photos: Photo[];
-  onUpload: (file: File, caption: string) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
-  onSetPrimary: (id: string) => Promise<void>;
+  onRefresh: () => void;
 }
 
-export function PhotoGallery({ photos, onUpload, onDelete, onSetPrimary }: PhotoGalleryProps) {
+export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const uploadPhotoMutation = trpc.photos.add.useMutation({
+    onSuccess: () => {
+      toast.success("Foto erfolgreich hochgeladen");
+      setSelectedFile(null);
+      setCaption("");
+      onRefresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Hochladen des Fotos");
+    },
+  });
+
+  const deletePhotoMutation = trpc.photos.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Foto gelöscht");
+      onRefresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Löschen des Fotos");
+    },
+  });
+
+  const setPrimaryMutation = trpc.photos.setPrimary.useMutation({
+    onSuccess: () => {
+      toast.success("Titelbild aktualisiert");
+      onRefresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Aktualisieren des Titelbilds");
+    },
+  });
 
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     setUploading(true);
     try {
-      await onUpload(selectedFile, caption);
-      setSelectedFile(null);
-      setCaption("");
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = event.target?.result as string;
+        // Convert base64 data URL to URL using upload endpoint
+        const uploadResult = await trpc.upload.tripImage.mutate({ base64 });
+
+        // Add photo with the uploaded URL
+        uploadPhotoMutation.mutate({
+          tripId,
+          photoUrl: uploadResult.url,
+          caption: caption || undefined,
+        });
+      };
+      reader.readAsDataURL(selectedFile);
     } finally {
       setUploading(false);
     }
   };
 
-  const primaryPhoto = photos.find((p) => p.isPrimary);
-  const otherPhotos = photos.filter((p) => !p.isPrimary);
+  const primaryPhoto = photos.find((p) => p.isPrimary === 1);
+  const otherPhotos = photos.filter((p) => p.isPrimary === 0);
 
   return (
     <Card>
@@ -51,10 +95,10 @@ export function PhotoGallery({ photos, onUpload, onDelete, onSetPrimary }: Photo
         {/* Primary Photo */}
         {primaryPhoto && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">Cover Photo</h4>
+            <h4 className="text-sm font-semibold">Titelbild</h4>
             <div className="relative group overflow-hidden rounded-lg">
               <img
-                src={primaryPhoto.url}
+                src={primaryPhoto.photoUrl}
                 alt={primaryPhoto.caption || "Trip photo"}
                 className="w-full h-48 object-cover"
               />
@@ -66,7 +110,8 @@ export function PhotoGallery({ photos, onUpload, onDelete, onSetPrimary }: Photo
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => onDelete(primaryPhoto.id)}
+                onClick={() => deletePhotoMutation.mutate({ id: primaryPhoto.id })}
+                disabled={deletePhotoMutation.isPending}
                 className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
               >
                 <Trash2 className="w-4 h-4" />
@@ -78,27 +123,29 @@ export function PhotoGallery({ photos, onUpload, onDelete, onSetPrimary }: Photo
         {/* Other Photos Grid */}
         {otherPhotos.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">Other Photos</h4>
+            <h4 className="text-sm font-semibold">Weitere Fotos</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {otherPhotos.map((photo) => (
                 <div key={photo.id} className="relative group overflow-hidden rounded-lg">
                   <img
-                    src={photo.url}
+                    src={photo.photoUrl}
                     alt={photo.caption || "Trip photo"}
                     className="w-full h-32 object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                     <Button
                       size="sm"
-                      onClick={() => onSetPrimary(photo.id)}
+                      onClick={() => setPrimaryMutation.mutate({ tripId, photoId: photo.id })}
+                      disabled={setPrimaryMutation.isPending}
                       className="gap-1"
                     >
-                      Set as Cover
+                      Als Titelbild
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => onDelete(photo.id)}
+                      onClick={() => deletePhotoMutation.mutate({ id: photo.id })}
+                      disabled={deletePhotoMutation.isPending}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -113,13 +160,13 @@ export function PhotoGallery({ photos, onUpload, onDelete, onSetPrimary }: Photo
         {photos.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <ImageOff className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p>No photos yet</p>
+            <p>Noch keine Fotos</p>
           </div>
         )}
 
         {/* Upload Section */}
         <div className="pt-4 border-t space-y-3">
-          <h4 className="text-sm font-semibold">Add Photos</h4>
+          <h4 className="text-sm font-semibold">Fotos hochladen</h4>
           <div className="space-y-2">
             <input
               type="file"
@@ -129,18 +176,18 @@ export function PhotoGallery({ photos, onUpload, onDelete, onSetPrimary }: Photo
             />
             <input
               type="text"
-              placeholder="Photo caption (optional)"
+              placeholder="Fototitel (optional)"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               className="w-full p-2 border rounded-md"
             />
             <Button
               onClick={handleUpload}
-              disabled={!selectedFile || uploading}
+              disabled={!selectedFile || uploading || uploadPhotoMutation.isPending}
               className="w-full gap-2"
             >
               <Plus className="w-4 h-4" />
-              {uploading ? "Uploading..." : "Upload Photo"}
+              {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
             </Button>
           </div>
         </div>

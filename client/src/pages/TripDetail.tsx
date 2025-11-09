@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { CountdownTimer } from "@/components/CountdownTimer";
+import { PhotoGallery } from "@/components/PhotoGallery";
 
 export default function TripDetail() {
   const { t } = useI18n();
@@ -27,7 +29,8 @@ export default function TripDetail() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
-  const { data: trip, isLoading: tripLoading } = trpc.trips.getById.useQuery({ id: tripId });
+  const { data: trip, isLoading: tripLoading, refetch: refetchTrip } = trpc.trips.getById.useQuery({ id: tripId });
+  const { data: photos = [], refetch: refetchPhotos } = trpc.photos.list.useQuery({ tripId }, { enabled: !!tripId });
   const updateTripMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
       toast.success(t("tripDetail.updateSuccess"));
@@ -262,6 +265,13 @@ export default function TripDetail() {
               <WeatherWidget location={trip.destination} />
             )}
 
+            {/* Photo Gallery */}
+            <PhotoGallery
+              tripId={trip.id}
+              photos={photos}
+              onRefresh={() => refetchPhotos()}
+            />
+
             {/* Nice to Know Section */}
             {trip.category || trip.region ? (
               <Card>
@@ -284,6 +294,13 @@ export default function TripDetail() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Countdown Timer */}
+            <CountdownTimer
+              startDate={trip.startDate}
+              endDate={trip.endDate}
+              tripTitle={trip.title}
+            />
+
             {/* Information Card */}
             <Card>
               <CardHeader>
