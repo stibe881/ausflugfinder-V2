@@ -14,6 +14,7 @@ export interface ImportExcursion {
   website_url?: string;
   latitude?: string;
   longitude?: string;
+  image?: string; // Primary image/cover image
   // Legacy field mapping
   beschreibung?: string;
   adresse?: string;
@@ -21,6 +22,7 @@ export interface ImportExcursion {
   website?: string;
   lat?: string;
   lng?: string;
+  title_image?: string; // Legacy image field from old export format
 }
 
 export interface ImportResult {
@@ -52,6 +54,13 @@ export function parseJSON(jsonString: string): ImportResult {
     for (let i = 0; i < items.length; i++) {
       try {
         const item = items[i];
+        // Handle image paths - convert Windows paths to URL-friendly format
+        let imagePath = item.image || item.title_image || "";
+        if (imagePath && imagePath.includes("\\")) {
+          // Convert Windows path to filename only
+          imagePath = imagePath.split("\\").pop() || imagePath;
+        }
+
         const excursion: ImportExcursion = {
           name: item.name || item.title || `Excursion ${i + 1}`,
           description: item.description || item.beschreibung || "",
@@ -63,6 +72,7 @@ export function parseJSON(jsonString: string): ImportResult {
           website_url: item.website_url || item.website || "",
           latitude: item.latitude || item.lat || "",
           longitude: item.longitude || item.lng || "",
+          image: imagePath ? `/uploads/${imagePath}` : undefined,
         };
 
         if (!excursion.name) {

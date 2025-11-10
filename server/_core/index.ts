@@ -46,6 +46,8 @@ async function startServer() {
     await initializeLocalStorage();
     // Serve uploaded images statically
     app.use("/uploads/images", express.static(process.env.UPLOAD_DIR || "uploads/images"));
+    // Also serve uploads from root for imported images
+    app.use("/uploads", express.static("uploads"));
   } catch (error) {
     console.warn("[Storage] Failed to initialize local storage:", error);
   }

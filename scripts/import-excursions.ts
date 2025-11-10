@@ -65,12 +65,12 @@ function determineRouteType(is_rundtour: number, is_von_a_nach_b: number): "roun
   return "location";
 }
 
-// Convert image path to URL - assumes images are served from /uploads
+// Convert image path to URL - assumes images are served from /uploads/images
 function imagePathToUrl(imagePath: string): string {
   if (!imagePath) return "";
   // Convert Windows path to URL format
   const fileName = imagePath.split("\\").pop() || imagePath;
-  return `/uploads/${fileName}`;
+  return `/uploads/images/${fileName}`;
 }
 
 // Read image file and convert to base64

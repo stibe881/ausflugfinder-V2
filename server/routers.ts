@@ -1218,7 +1218,7 @@ export const appRouter = router({
           for (const exc of parseResult.excursions) {
             try {
               const today = new Date();
-              await createTrip({
+              const tripResult = await createTrip({
                 userId: targetUserId,
                 title: exc.name,
                 description: exc.description || "",
@@ -1238,6 +1238,23 @@ export const appRouter = router({
                 routeType: "location" as const,
                 isPublic: 1, // Mark imported trips as public for /explore page
               });
+
+              // Get the trip ID from the result
+              const tripId = tripResult[0].insertId as number;
+
+              // Add primary photo if it exists
+              if (exc.image) {
+                try {
+                  await addTripPhoto(tripId, {
+                    photoUrl: exc.image,
+                    caption: `${exc.name} - Cover Image`,
+                    isPrimary: 1,
+                  });
+                } catch (photoError) {
+                  // Log but don't fail the import if photo fails
+                  console.warn(`Warning: Failed to add photo for ${exc.name}`);
+                }
+              }
 
               importedTrips.push(exc.name);
             } catch (error) {
