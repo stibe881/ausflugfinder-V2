@@ -155,7 +155,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
               type="file"
               accept="image/*"
               onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              disabled={isLoading || !canEdit}
+              disabled={!canEdit}
               className="w-full"
             />
             <input
@@ -163,16 +163,16 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
               placeholder="Fototitel (optional)"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              disabled={isLoading || !canEdit}
+              disabled={!canEdit}
               className="w-full p-2 border rounded-md"
             />
             <Button
               onClick={handleUpload}
-              disabled={isLoading || !canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
+              disabled={!canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
               className="w-full gap-2"
             >
               <Plus className="w-4 h-4" />
-              {isLoading ? "Wird geladen..." : uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
+              {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
             </Button>
             {!isLoading && !canEdit && (
               <p className="text-xs text-muted-foreground text-center">
