@@ -642,9 +642,9 @@ export default function Explore() {
 
                         {/* Badges Row */}
                         <div className="flex flex-wrap gap-2 pt-2">
-                          {trip.region && (
+                          {trip.destination && (
                             <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
-                              {trip.region}
+                              {trip.destination}
                             </Badge>
                           )}
                           {trip.ageRecommendation && (

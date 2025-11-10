@@ -335,6 +335,22 @@ export default function TripDetail() {
             {t("tripDetail.favorite")}
           </Button>
           <Button
+            variant={trip?.isDone ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              if (canEdit && trip) {
+                updateTripMutation.mutate({
+                  id: trip.id,
+                  isDone: trip.isDone ? 0 : 1,
+                });
+              }
+            }}
+            disabled={updateTripMutation.isPending || !canEdit}
+            className="gap-2"
+          >
+            ✓ {trip?.isDone ? "Erledigt" : "Als erledigt markieren"}
+          </Button>
+          <Button
             variant="outline"
             size="sm"
             onClick={() => setShareDialog(true)}
