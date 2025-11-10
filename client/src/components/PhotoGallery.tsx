@@ -18,9 +18,10 @@ interface PhotoGalleryProps {
   photos: Photo[];
   onRefresh: () => void;
   canEdit?: boolean;
+  isLoading?: boolean;
 }
 
-export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true }: PhotoGalleryProps) {
+export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoading = false }: PhotoGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -154,7 +155,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true }: Phot
               type="file"
               accept="image/*"
               onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              disabled={!canEdit}
+              disabled={isLoading || !canEdit}
               className="w-full"
             />
             <input
@@ -162,18 +163,18 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true }: Phot
               placeholder="Fototitel (optional)"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              disabled={!canEdit}
+              disabled={isLoading || !canEdit}
               className="w-full p-2 border rounded-md"
             />
             <Button
               onClick={handleUpload}
-              disabled={!canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
+              disabled={isLoading || !canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
               className="w-full gap-2"
             >
               <Plus className="w-4 h-4" />
-              {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
+              {isLoading ? "Wird geladen..." : uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
             </Button>
-            {!canEdit && (
+            {!isLoading && !canEdit && (
               <p className="text-xs text-muted-foreground text-center">
                 Du musst der Ersteller dieses Ausflugs sein, um Fotos hochzuladen.
               </p>

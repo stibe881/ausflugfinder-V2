@@ -28,7 +28,7 @@ export default function TripDetail() {
   const [mapDialog, setMapDialog] = useState(false);
   const [mapUrl, setMapUrl] = useState("");
   const [, navigate] = useLocation();
-  const { user } = useAuth();
+  const { user, loading: userLoading } = useAuth();
 
   const { data: trip, isLoading: tripLoading, refetch: refetchTrip } = trpc.trips.getById.useQuery({ id: tripId });
   const { data: photos = [], refetch: refetchPhotos } = trpc.photos.list.useQuery({ tripId }, { enabled: !!tripId });
@@ -424,6 +424,7 @@ export default function TripDetail() {
               photos={photos}
               onRefresh={() => refetchPhotos()}
               canEdit={canEdit}
+              isLoading={userLoading}
             />
 
             {/* Nice to Know Section */}
