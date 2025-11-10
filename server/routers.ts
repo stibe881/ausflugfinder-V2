@@ -1193,7 +1193,10 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         try {
           // Get database instance
-          const db = getDb();
+          const db = await getDb();
+          if (!db) {
+            throw new ValidationError("Database connection failed");
+          }
 
           // Delete all existing trips first (clean slate for import)
           await db.delete(trips);
