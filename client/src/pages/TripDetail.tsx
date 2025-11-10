@@ -60,7 +60,6 @@ export default function TripDetail() {
     cost: "free" as const,
     image: "",
   });
-  const [imagePreview, setImagePreview] = useState<string>("");
 
   // Determine edit permissions
   // canEditTrip: Only trip owner or admin can edit/delete trip details
@@ -79,18 +78,6 @@ export default function TripDetail() {
     very_high: "CHF 🪙🪙🪙🪙",
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = (event.target?.result as string).replace(/\s+/g, '');
-        setEditForm({ ...editForm, image: base64 });
-        setImagePreview(base64);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleEditOpen = () => {
     if (trip) {
@@ -445,19 +432,33 @@ export default function TripDetail() {
                     <>
                       <div>
                         <label className="block text-sm font-medium mb-2">{t("tripDetail.category")}</label>
-                        <Input
-                          value={editForm.category}
-                          onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                          placeholder={t("tripDetail.categoryPlaceholder")}
-                        />
+                        <Select value={editForm.category} onValueChange={(value) => setEditForm({ ...editForm, category: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("tripDetail.categoryPlaceholder")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
+                              <SelectItem key={cat} value={cat}>
+                                {cat}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">{t("tripDetail.region")}</label>
-                        <Input
-                          value={editForm.region}
-                          onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
-                          placeholder={t("tripDetail.regionPlaceholder")}
-                        />
+                        <Select value={editForm.region} onValueChange={(value) => setEditForm({ ...editForm, region: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t("tripDetail.regionPlaceholder")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft", "Basel-Stadt", "Bern", "Fribourg", "Genève", "Glarus", "Graubünden", "Jura", "Luzern", "Neuchâtel", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz", "Solothurn", "St. Gallen", "Tessin", "Thurgau", "Uri", "Valais", "Vaud", "Zug", "Zürich", "Deutschland", "Österreich", "Frankreich", "Italien"].map((reg) => (
+                              <SelectItem key={reg} value={reg}>
+                                {reg}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </>
                   ) : (
@@ -662,31 +663,6 @@ export default function TripDetail() {
         <div className="bg-card border-b">
           <div className="container mx-auto px-4 py-6 max-w-2xl">
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">{t("tripDetail.uploadImage")}</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("tripDetail.imageFormats")}
-                </p>
-                {imagePreview && (
-                  <div className="mt-3">
-                    <p className="text-xs text-muted-foreground mb-2">{t("tripDetail.preview")}:</p>
-                    <img
-                      src={imagePreview}
-                      alt={t("tripDetail.imagePreview")}
-                      className="w-full h-32 object-cover rounded-md border"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
