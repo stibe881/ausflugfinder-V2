@@ -1,4 +1,4 @@
-import { eq, and, sql, or, ilike, count, inArray, isNotNull } from "drizzle-orm";
+import { eq, and, sql, or, like, count, inArray, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry, InsertTripVideo,
@@ -383,9 +383,9 @@ export async function searchTrips(
     const keyword = `%${filters.keyword}%`;
     conditions.push(
       or(
-        ilike(trips.title, keyword),
-        sql`COALESCE(${trips.description}, '') ILIKE ${keyword}`,
-        ilike(trips.destination, keyword)
+        like(trips.title, keyword),
+        sql`COALESCE(${trips.description}, '') LIKE ${keyword}`,
+        like(trips.destination, keyword)
       )
     );
   }
