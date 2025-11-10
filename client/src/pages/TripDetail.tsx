@@ -59,6 +59,10 @@ export default function TripDetail() {
     category: "",
     cost: "free" as const,
     image: "",
+    websiteUrl: "",
+    ageRecommendationMin: "",
+    ageRecommendationMax: "",
+    routeType: "location" as const,
   });
 
   // Determine edit permissions
@@ -81,6 +85,7 @@ export default function TripDetail() {
 
   const handleEditOpen = () => {
     if (trip) {
+      const ageRec = trip.ageRecommendation ? trip.ageRecommendation.split("-") : ["", ""];
       setEditForm({
         title: trip.title || "",
         description: trip.description || "",
@@ -89,6 +94,10 @@ export default function TripDetail() {
         category: trip.category || "",
         cost: (trip.cost as "free" | "low" | "medium" | "high" | "very_high") || "free",
         image: trip.image || "",
+        websiteUrl: trip.websiteUrl || "",
+        ageRecommendationMin: ageRec[0] || "",
+        ageRecommendationMax: ageRec[1] || "",
+        routeType: (trip.routeType as "round_trip" | "one_way" | "location") || "location",
       });
       setIsEditMode(true);
     }
@@ -104,11 +113,21 @@ export default function TripDetail() {
       category: "",
       cost: "free" as const,
       image: "",
+      websiteUrl: "",
+      ageRecommendationMin: "",
+      ageRecommendationMax: "",
+      routeType: "location" as const,
     });
   };
 
   const handleEditSave = () => {
     if (!trip) return;
+
+    // Combine age recommendation if both min and max are provided
+    const ageRecommendation = editForm.ageRecommendationMin && editForm.ageRecommendationMax
+      ? `${editForm.ageRecommendationMin}-${editForm.ageRecommendationMax}`
+      : undefined;
+
     updateTripMutation.mutate({
       id: trip.id,
       title: editForm.title,
@@ -118,6 +137,9 @@ export default function TripDetail() {
       category: editForm.category,
       cost: editForm.cost,
       image: editForm.image || undefined,
+      websiteUrl: editForm.websiteUrl || undefined,
+      ageRecommendation: ageRecommendation,
+      routeType: editForm.routeType,
     });
     setIsEditMode(false);
   };
@@ -661,6 +683,140 @@ export default function TripDetail() {
         <div className="bg-card border-b">
           <div className="container mx-auto px-4 py-6 max-w-2xl">
             <div className="space-y-4">
+              <Input
+                placeholder={t("tripDetail.titleLabel")}
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                className="w-full"
+              />
+              <Input
+                placeholder={t("tripDetail.destination")}
+                value={editForm.destination}
+                onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
+                className="w-full"
+              />
+              <Textarea
+                placeholder={t("tripDetail.description")}
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                className="w-full min-h-24"
+              />
+
+              {/* Region Select */}
+              <Select
+                value={editForm.region}
+                onValueChange={(value) => setEditForm({ ...editForm, region: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Wähle eine Region" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft", "Basel-Stadt", "Bern", "Fribourg", "Genève", "Glarus", "Graubünden", "Jura", "Luzern", "Neuchâtel", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz", "Solothurn", "St. Gallen", "Tessin", "Thurgau", "Uri", "Valais", "Vaud", "Zug", "Zürich", "Deutschland", "Österreich", "Frankreich", "Italien"].map((reg) => (
+                    <SelectItem key={reg} value={reg}>
+                      {reg}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Category Select */}
+              <Select
+                value={editForm.category}
+                onValueChange={(value) => setEditForm({ ...editForm, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Wähle eine Kategorie" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Route Type (only for Wanderweg/Abenteuerweg) */}
+              {(editForm.category === "Wanderweg" || editForm.category === "Abenteuerweg") && (
+                <Select
+                  value={editForm.routeType}
+                  onValueChange={(value: any) => setEditForm({ ...editForm, routeType: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wähle Routentyp" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="location">Standort</SelectItem>
+                    <SelectItem value="round_trip">Rundtour</SelectItem>
+                    <SelectItem value="one_way">Von-zu</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
+              {/* Cost Select */}
+              <Select
+                value={editForm.cost}
+                onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Wähle Kosten" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Kostenlos</SelectItem>
+                  <SelectItem value="low">CHF 🪙</SelectItem>
+                  <SelectItem value="medium">CHF 🪙🪙</SelectItem>
+                  <SelectItem value="high">CHF 🪙🪙🪙</SelectItem>
+                  <SelectItem value="very_high">CHF 🪙🪙🪙🪙</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Website URL */}
+              <Input
+                placeholder="Website URL"
+                type="url"
+                value={editForm.websiteUrl}
+                onChange={(e) => setEditForm({ ...editForm, websiteUrl: e.target.value })}
+                className="w-full"
+              />
+
+              {/* Age Recommendation */}
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  placeholder="Alter von"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={editForm.ageRecommendationMin}
+                  onChange={(e) => setEditForm({ ...editForm, ageRecommendationMin: e.target.value })}
+                />
+                <Input
+                  placeholder="Alter bis"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={editForm.ageRecommendationMax}
+                  onChange={(e) => setEditForm({ ...editForm, ageRecommendationMax: e.target.value })}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={handleEditSave}
+                  disabled={updateTripMutation.isPending}
+                  className="flex-1"
+                >
+                  {updateTripMutation.isPending ? "Wird gespeichert..." : "Speichern"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleEditCancel}
+                  disabled={updateTripMutation.isPending}
+                  className="flex-1"
+                >
+                  Abbrechen
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -91,6 +91,10 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
     region: "",
     categories: [] as string[],
     cost: "free" as const,
+    websiteUrl: "",
+    ageRecommendationMin: "",
+    ageRecommendationMax: "",
+    routeType: "location" as const,
   });
 
   const uploadTripImageMutation = trpc.upload.tripImage.useMutation();
@@ -116,6 +120,10 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
       region: "",
       categories: [],
       cost: "free",
+      websiteUrl: "",
+      ageRecommendationMin: "",
+      ageRecommendationMax: "",
+      routeType: "location",
     });
     setImageFile(null);
     setImagePreview("");
