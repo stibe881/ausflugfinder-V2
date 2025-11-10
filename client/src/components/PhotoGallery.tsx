@@ -147,34 +147,39 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true }: Phot
         )}
 
         {/* Upload Section */}
-        {canEdit && (
-          <div className="pt-4 border-t space-y-3">
-            <h4 className="text-sm font-semibold">Fotos hochladen</h4>
-            <div className="space-y-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                className="w-full"
-              />
-              <input
-                type="text"
-                placeholder="Fototitel (optional)"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                className="w-full p-2 border rounded-md"
-              />
-              <Button
-                onClick={handleUpload}
-                disabled={!selectedFile || uploading || uploadPhotoMutation.isPending}
-                className="w-full gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
-              </Button>
-            </div>
+        <div className="pt-4 border-t space-y-3">
+          <h4 className="text-sm font-semibold">Fotos hochladen</h4>
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              disabled={!canEdit}
+              className="w-full"
+            />
+            <input
+              type="text"
+              placeholder="Fototitel (optional)"
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              disabled={!canEdit}
+              className="w-full p-2 border rounded-md"
+            />
+            <Button
+              onClick={handleUpload}
+              disabled={!canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
+              className="w-full gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
+            </Button>
+            {!canEdit && (
+              <p className="text-xs text-muted-foreground text-center">
+                Du musst der Ersteller dieses Ausflugs sein, um Fotos hochzuladen.
+              </p>
+            )}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

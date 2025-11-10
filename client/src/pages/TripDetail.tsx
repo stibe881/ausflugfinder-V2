@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { PhotoGallery } from "@/components/PhotoGallery";
-import { VideoGallery } from "@/components/VideoGallery";
 
 export default function TripDetail() {
   const { t } = useI18n();
@@ -33,7 +32,6 @@ export default function TripDetail() {
 
   const { data: trip, isLoading: tripLoading, refetch: refetchTrip } = trpc.trips.getById.useQuery({ id: tripId });
   const { data: photos = [], refetch: refetchPhotos } = trpc.photos.list.useQuery({ tripId }, { enabled: !!tripId });
-  const { data: videos = [], refetch: refetchVideos } = trpc.videos.list.useQuery({ tripId }, { enabled: !!tripId });
   const updateTripMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
       toast.success(t("tripDetail.updateSuccess"));
@@ -374,13 +372,6 @@ export default function TripDetail() {
               canEdit={canEdit}
             />
 
-            {/* Videos */}
-            <VideoGallery
-              tripId={trip.id}
-              videos={videos}
-              onRefresh={() => refetchVideos()}
-            />
-
             {/* Nice to Know Section */}
             {trip.category || trip.region || isEditMode ? (
               <Card>
@@ -492,7 +483,19 @@ export default function TripDetail() {
                     {trip.destination && (
                       <div>
                         <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.destination")}</div>
-                        <div className="font-medium">{trip.destination}</div>
+                        <div
+                          className="font-medium cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => handleLocationClick(trip.destination)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              handleLocationClick(trip.destination);
+                            }
+                          }}
+                        >
+                          {trip.destination}
+                        </div>
                       </div>
                     )}
                   </>
