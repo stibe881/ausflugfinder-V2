@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
 import { useIsMobile } from "@/hooks/useMobile";
 import { FilterBottomSheet } from "@/components/FilterBottomSheet";
+import { CreateTripWizard } from "@/components/CreateTripWizard";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 const CATEGORIES = [
   "Aktion & Sport",
@@ -81,7 +83,9 @@ export default function Explore() {
   const { t } = useI18n();
   const [location] = useLocation();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [isCreateTripOpen, setIsCreateTripOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [region, setRegion] = useState<string>("");
   const [category, setCategory] = useState<string>("");
@@ -262,7 +266,16 @@ export default function Explore() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               {t("explore.header")}
             </h1>
-            <div className="w-12"></div>
+            {user && (
+              <Button
+                onClick={() => setIsCreateTripOpen(true)}
+                size="sm"
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                {isMobile ? "" : "Neuer Ausflug"}
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -760,6 +773,12 @@ export default function Explore() {
         onReset={handleReset}
         regions={REGIONS}
         categories={CATEGORIES}
+      />
+
+      {/* Create Trip Wizard */}
+      <CreateTripWizard
+        open={isCreateTripOpen}
+        onOpenChange={setIsCreateTripOpen}
       />
     </div>
   );
