@@ -12,7 +12,7 @@
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "import:excursions": "tsx scripts/import-excursions.ts",
-    "link:images": "tsx scripts/link-images-to-trips.ts"
+    "link:images": "node scripts/link-images-to-trips.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
