@@ -207,35 +207,11 @@ export default function Explore() {
     return R * c;
   };
 
-  // Filter trips by distance and attributes
+  // Filter trips - only apply client-side filters (distance/nearby) since other filters are done server-side
+  // Server handles: keyword, region, category, cost
+  // Client handles: distance, sorting
   const filteredTrips = (trips?.data?.filter(trip => {
-    // Search keyword filter
-    if (keyword) {
-      const searchLower = keyword.toLowerCase();
-      const matches =
-        trip.title?.toLowerCase().includes(searchLower) ||
-        trip.description?.toLowerCase().includes(searchLower) ||
-        trip.destination?.toLowerCase().includes(searchLower) ||
-        trip.category?.toLowerCase().includes(searchLower);
-      if (!matches) return false;
-    }
-
-    // Region filter
-    if (region && trip.region !== region) {
-      return false;
-    }
-
-    // Category filter
-    if (category && trip.category !== category) {
-      return false;
-    }
-
-    // Cost filter
-    if (cost && trip.cost !== cost) {
-      return false;
-    }
-
-    // Distance filter
+    // Distance filter (only remaining client-side filter)
     if (nearbyOnly && userLocation) {
       if (!trip.latitude || !trip.longitude) return false;
       const distance = calculateDistance(
@@ -246,10 +222,6 @@ export default function Explore() {
       );
       if (distance > maxDistance) return false;
     }
-    // Attribute filter (not implemented in backend yet, would need trip attributes)
-    // if (selectedAttributes.length > 0) {
-    //   return selectedAttributes.some(attr => trip.attributes?.includes(attr));
-    // }
     return true;
   }) || []).sort((a, b) => {
     let comparison = 0;

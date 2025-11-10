@@ -1,4 +1,4 @@
-import { eq, and, sql, or, ilike, count } from "drizzle-orm";
+import { eq, and, sql, or, ilike, count, inArray, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry, InsertTripVideo,
@@ -392,8 +392,8 @@ export async function searchTrips(
   // Combine all conditions
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  // Fetch data and total count in parallel
-  const [data, countResult] = await Promise.all([
+  // Fetch trips and total count in parallel
+  const [tripsData, countResult] = await Promise.all([
     db.select()
       .from(trips)
       .where(whereClause)
@@ -405,10 +405,30 @@ export async function searchTrips(
       .where(whereClause)
   ]);
 
+  // Get primary photos for these trips
+  const tripIds = tripsData.map(t => t.id);
+  const photosData = tripIds.length > 0 ? await db.select()
+    .from(tripPhotos)
+    .where(
+      and(
+        inArray(tripPhotos.tripId, tripIds),
+        eq(tripPhotos.isPrimary, 1)
+      )
+    ) : [];
+
+  // Create a map for quick lookup
+  const photoMap = new Map(photosData.map(p => [p.tripId, p.photoUrl]));
+
+  // Map results to combine trip with primary photo
+  const mappedData = tripsData.map(trip => ({
+    ...trip,
+    image: photoMap.get(trip.id) || trip.image || null
+  }));
+
   const total = countResult[0]?.value || 0;
 
   return {
-    data,
+    data: mappedData,
     pagination: {
       page,
       limit,
@@ -462,10 +482,10 @@ export async function getPublicTrips(pagination?: { page?: number; limit?: numbe
   const limit = Math.min(pagination?.limit || 20, 100);
   const offset = (page - 1) * limit;
 
-  const [data, countResult] = await Promise.all([
+  // Get trips without photos first (avoiding duplicate rows from leftJoin)
+  const [tripsData, countResult] = await Promise.all([
     db.select()
       .from(trips)
-      .leftJoin(tripPhotos, eq(trips.id, tripPhotos.tripId))
       .where(eq(trips.isPublic, 1))
       .orderBy(trips.createdAt)
       .limit(limit)
@@ -475,13 +495,27 @@ export async function getPublicTrips(pagination?: { page?: number; limit?: numbe
       .where(eq(trips.isPublic, 1))
   ]);
 
-  const total = countResult[0]?.value || 0;
+  // Get primary photos for these trips in parallel
+  const tripIds = tripsData.map(t => t.id);
+  const photosData = tripIds.length > 0 ? await db.select()
+    .from(tripPhotos)
+    .where(
+      and(
+        inArray(tripPhotos.tripId, tripIds),
+        eq(tripPhotos.isPrimary, 1)
+      )
+    ) : [];
+
+  // Create a map for quick lookup
+  const photoMap = new Map(photosData.map(p => [p.tripId, p.photoUrl]));
 
   // Map results to combine trip with primary photo
-  const mappedData = data.map((row: any) => ({
-    ...row.trips,
-    image: row.tripPhotos?.photoUrl || null
+  const mappedData = tripsData.map(trip => ({
+    ...trip,
+    image: photoMap.get(trip.id) || trip.image || null
   }));
+
+  const total = countResult[0]?.value || 0;
 
   return {
     data: mappedData,
@@ -494,21 +528,30 @@ export async function getPublicTrips(pagination?: { page?: number; limit?: numbe
   };
 }
 
-// Get statistics
+// Get statistics using SQL aggregation (much faster!)
 export async function getStatistics() {
   const db = await getDb();
   if (!db) {
     throw new Error("Database not available");
   }
-  
-  const allTrips = await db.select().from(trips).where(eq(trips.isPublic, 1));
-  const freeTrips = allTrips.filter(t => t.cost === 'free');
-  const categories = new Set(allTrips.map(t => t.category).filter(Boolean));
-  
+
+  // Use SQL COUNT and DISTINCT instead of loading all data into memory
+  const [totalResult, freeResult, categoriesResult] = await Promise.all([
+    db.select({ value: count() })
+      .from(trips)
+      .where(eq(trips.isPublic, 1)),
+    db.select({ value: count() })
+      .from(trips)
+      .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
+    db.select({ value: sql`COUNT(DISTINCT ${trips.category})` })
+      .from(trips)
+      .where(and(eq(trips.isPublic, 1), isNotNull(trips.category)))
+  ]);
+
   return {
-    totalActivities: allTrips.length,
-    freeActivities: freeTrips.length,
-    totalCategories: categories.size,
+    totalActivities: totalResult[0]?.value || 0,
+    freeActivities: freeResult[0]?.value || 0,
+    totalCategories: (categoriesResult[0]?.value as number) || 0,
   };
 }
 
