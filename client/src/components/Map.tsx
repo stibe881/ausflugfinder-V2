@@ -86,27 +86,47 @@ declare global {
   }
 }
 
-const API_KEY = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
-const FORGE_BASE_URL =
-  import.meta.env.VITE_FRONTEND_FORGE_API_URL ||
-  "https://forge.butterfly-effect.dev";
-const MAPS_PROXY_URL = `${FORGE_BASE_URL}/v1/maps/proxy`;
+function getApiKey(): string {
+  // Try to get from Vite env vars first
+  const viteKey = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
+  const altViteKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  const key = viteKey || altViteKey;
+
+  if (!key) {
+    console.warn("⚠️  Google Maps API key not configured. Map will not load.");
+    return "";
+  }
+
+  if (key.includes("YOUR_")) {
+    console.warn("⚠️  Google Maps API key is a template placeholder. Please set a real API key.");
+    return "";
+  }
+
+  return key;
+}
 
 function loadMapScript() {
   return new Promise<void>((resolve, reject) => {
     // Check if already loaded
     if (window.google?.maps) {
+      console.log("✓ Google Maps already loaded");
       resolve();
       return;
     }
 
+    const apiKey = getApiKey();
+    const forgeBaseUrl = import.meta.env.VITE_FRONTEND_FORGE_API_URL || "https://forge.butterfly-effect.dev";
+
     const script = document.createElement("script");
 
-    // Use direct Google Maps API if key is available, otherwise use proxy
-    if (API_KEY && !API_KEY.includes("YOUR_")) {
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
+    // Use direct Google Maps API if key is available
+    if (apiKey) {
+      console.log("📍 Loading Google Maps from googleapis.com with provided API key");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&libraries=marker,places,geocoding,geometry`;
     } else {
-      script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
+      console.log("📍 Loading Google Maps from proxy (no API key available)");
+      script.src = `${forgeBaseUrl}/v1/maps/proxy/maps/api/js?key=&v=weekly&libraries=marker,places,geocoding,geometry`;
     }
 
     script.async = true;
@@ -114,16 +134,17 @@ function loadMapScript() {
     script.crossOrigin = "anonymous";
 
     script.onload = () => {
-      console.log("✓ Google Maps API loaded successfully");
+      console.log("✓ Google Maps API script loaded successfully");
       resolve();
     };
 
-    script.onerror = () => {
-      const errorMsg = "Failed to load Google Maps script. Check your API key in .env";
+    script.onerror = (error) => {
+      const errorMsg = `Failed to load Google Maps script from: ${script.src}. Error: ${error}`;
       console.error(errorMsg);
       reject(new Error(errorMsg));
     };
 
+    console.log(`🔄 Appending script tag with src: ${script.src}`);
     document.head.appendChild(script);
   });
 }
