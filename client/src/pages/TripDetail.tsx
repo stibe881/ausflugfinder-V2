@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { PhotoGallery } from "@/components/PhotoGallery";
-import { PhotoOrganizer } from "@/components/PhotoOrganizer";
 import { VideoGallery } from "@/components/VideoGallery";
 
 export default function TripDetail() {
@@ -376,11 +375,6 @@ export default function TripDetail() {
               photos={photos}
               onRefresh={() => refetchPhotos()}
             />
-
-            {/* Photo Organizer */}
-            {photos.length > 0 && (
-              <PhotoOrganizer photos={photos} />
-            )}
 
             {/* Videos */}
             <VideoGallery
