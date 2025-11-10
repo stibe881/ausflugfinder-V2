@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
@@ -80,6 +80,8 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
   const [, navigate] = useLocation();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   // Form data
   const [formData, setFormData] = useState({
@@ -89,21 +91,20 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
     region: "",
     category: "",
     cost: "free" as const,
-    startDate: "",
-    endDate: "",
-    participants: "1",
   });
+
+  const uploadTripImageMutation = trpc.upload.tripImage.useMutation();
 
   const createTripMutation = trpc.trips.create.useMutation({
     onSuccess: (newTrip) => {
-      toast.success(t("tripDetail.createSuccess") || "Trip created successfully!");
+      toast.success(t("tripDetail.createSuccess") || "Ausflug erstellt!");
       onOpenChange(false);
       resetForm();
       // Navigate to the new trip
       navigate(`/trip/${newTrip.id}`);
     },
     onError: (error) => {
-      toast.error(error.message || t("tripDetail.createError") || "Failed to create trip");
+      toast.error(error.message || t("tripDetail.createError") || "Fehler beim Erstellen");
     },
   });
 
@@ -115,10 +116,9 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
       region: "",
       category: "",
       cost: "free",
-      startDate: "",
-      endDate: "",
-      participants: "1",
     });
+    setImageFile(null);
+    setImagePreview("");
     setStep(1);
   };
 
@@ -129,22 +129,23 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImagePreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleNext = () => {
     // Validate current step
     if (step === 1) {
       if (!formData.title.trim() || !formData.destination.trim()) {
         toast.error("Bitte fülle alle erforderlichen Felder aus");
-        return;
-      }
-    } else if (step === 2) {
-      if (!formData.startDate || !formData.endDate) {
-        toast.error("Bitte wähle Start- und Enddatum");
-        return;
-      }
-      const start = new Date(formData.startDate);
-      const end = new Date(formData.endDate);
-      if (start > end) {
-        toast.error("Enddatum muss nach Startdatum liegen");
         return;
       }
     }
@@ -163,20 +164,45 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
 
     setLoading(true);
     try {
-      const startDate = new Date(formData.startDate);
-      const endDate = new Date(formData.endDate);
+      let imageUrl = "";
 
-      createTripMutation.mutate({
-        title: formData.title,
-        description: formData.description,
-        destination: formData.destination,
-        region: formData.region,
-        category: formData.category,
-        cost: formData.cost,
-        startDate,
-        endDate,
-        participants: parseInt(formData.participants) || 1,
-      });
+      // Upload image if provided
+      if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const base64 = event.target?.result as string;
+          const uploadResult = await uploadTripImageMutation.mutateAsync({ base64 });
+          imageUrl = uploadResult.url;
+
+          // Create trip with image
+          createTripMutation.mutate({
+            title: formData.title,
+            description: formData.description,
+            destination: formData.destination,
+            region: formData.region,
+            category: formData.category,
+            cost: formData.cost,
+            image: imageUrl,
+            startDate: new Date(),
+            endDate: new Date(),
+            participants: 1,
+          });
+        };
+        reader.readAsDataURL(imageFile);
+      } else {
+        // Create trip without image
+        createTripMutation.mutate({
+          title: formData.title,
+          description: formData.description,
+          destination: formData.destination,
+          region: formData.region,
+          category: formData.category,
+          cost: formData.cost,
+          startDate: new Date(),
+          endDate: new Date(),
+          participants: 1,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -188,7 +214,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
         <DialogHeader>
           <DialogTitle>Neuen Ausflug erstellen</DialogTitle>
           <DialogDescription>
-            Schritt {step} von 3: Erstelle einen neuen Familienausflug
+            Schritt {step} von 2: Erstelle einen neuen Familienausflug
           </DialogDescription>
         </DialogHeader>
 
@@ -199,7 +225,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Grundinformationen</CardTitle>
-                  <CardDescription>Titel und Destination des Ausflugs</CardDescription>
+                  <CardDescription>Titel, Destination und Beschreibung</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -255,63 +281,13 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
             </div>
           )}
 
-          {/* Step 2: Dates and Participants */}
+          {/* Step 2: Category, Cost and Image */}
           {step === 2 && (
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Daten und Teilnehmer</CardTitle>
-                  <CardDescription>Wann und mit wie vielen Personen</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="startDate">Startdatum *</Label>
-                      <Input
-                        id="startDate"
-                        type="date"
-                        value={formData.startDate}
-                        onChange={(e) => handleInputChange("startDate", e.target.value)}
-                        className="mt-2"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="endDate">Enddatum *</Label>
-                      <Input
-                        id="endDate"
-                        type="date"
-                        value={formData.endDate}
-                        onChange={(e) => handleInputChange("endDate", e.target.value)}
-                        className="mt-2"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="participants">Anzahl Teilnehmer</Label>
-                    <Input
-                      id="participants"
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={formData.participants}
-                      onChange={(e) => handleInputChange("participants", e.target.value)}
-                      className="mt-2"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Step 3: Category and Cost */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
                   <CardTitle className="text-lg">Kategorie und Kosten</CardTitle>
-                  <CardDescription>Art und Preis des Ausflugs</CardDescription>
+                  <CardDescription>Wähle die Art und den Preis des Ausflugs</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -345,6 +321,51 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                       </SelectContent>
                     </Select>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Titelbild (optional)</CardTitle>
+                  <CardDescription>Lade ein Bild für deinen Ausflug hoch</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {imagePreview && (
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-border">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <Label htmlFor="image">Bild hochladen</Label>
+                    <div className="mt-2 flex items-center justify-center px-6 py-10 border-2 border-dashed border-border rounded-lg hover:border-primary/50 transition cursor-pointer">
+                      <div className="text-center">
+                        <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          <label
+                            htmlFor="image"
+                            className="font-semibold text-primary hover:text-primary/80 cursor-pointer"
+                          >
+                            Klick zum Hochladen
+                          </label>
+                          {" "}oder ziehe ein Bild herein
+                        </p>
+                        <p className="text-xs text-muted-foreground">PNG, JPG, GIF bis 10MB</p>
+                      </div>
+                      <input
+                        id="image"
+                        name="image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="sr-only"
+                      />
+                    </div>
+                  </div>
 
                   <div className="pt-4 border-t">
                     <h4 className="font-semibold mb-3">Zusammenfassung</h4>
@@ -358,12 +379,18 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                         <span className="font-medium">{formData.destination}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Datum:</span>
-                        <span className="font-medium">{formData.startDate} bis {formData.endDate}</span>
-                      </div>
-                      <div className="flex justify-between">
                         <span className="text-muted-foreground">Kategorie:</span>
                         <span className="font-medium">{formData.category || "-"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Kosten:</span>
+                        <span className="font-medium">
+                          {COST_OPTIONS.find(opt => opt.value === formData.cost)?.label}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Titelbild:</span>
+                        <span className="font-medium">{imageFile ? "✓ Vorhanden" : "-"}</span>
                       </div>
                     </div>
                   </div>
@@ -383,7 +410,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
               Zurück
             </Button>
 
-            {step < 3 ? (
+            {step < 2 ? (
               <Button
                 onClick={handleNext}
                 disabled={loading}
