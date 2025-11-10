@@ -17,9 +17,10 @@ interface PhotoGalleryProps {
   tripId: number;
   photos: Photo[];
   onRefresh: () => void;
+  canEdit?: boolean;
 }
 
-export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
+export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true }: PhotoGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -80,8 +81,8 @@ export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
     }
   };
 
-  // Only show non-primary photos in the gallery
-  const galleryPhotos = photos.filter((p) => p.isPrimary === 0);
+  // Show all photos in the gallery
+  const galleryPhotos = photos;
 
   return (
     <Card>
@@ -104,24 +105,33 @@ export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
                     alt={photo.caption || "Trip photo"}
                     className="w-full h-32 object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => setPrimaryMutation.mutate({ tripId, photoId: photo.id })}
-                      disabled={setPrimaryMutation.isPending}
-                      className="gap-1"
-                    >
-                      Als Titelbild
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deletePhotoMutation.mutate({ id: photo.id })}
-                      disabled={deletePhotoMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  {photo.isPrimary === 1 && (
+                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-semibold">
+                      Titelbild
+                    </div>
+                  )}
+                  {canEdit && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                      {photo.isPrimary === 0 && (
+                        <Button
+                          size="sm"
+                          onClick={() => setPrimaryMutation.mutate({ tripId, photoId: photo.id })}
+                          disabled={setPrimaryMutation.isPending}
+                          className="gap-1"
+                        >
+                          Als Titelbild
+                        </Button>
+                      )}
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deletePhotoMutation.mutate({ id: photo.id })}
+                        disabled={deletePhotoMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -137,32 +147,34 @@ export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
         )}
 
         {/* Upload Section */}
-        <div className="pt-4 border-t space-y-3">
-          <h4 className="text-sm font-semibold">Fotos hochladen</h4>
-          <div className="space-y-2">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              className="w-full"
-            />
-            <input
-              type="text"
-              placeholder="Fototitel (optional)"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              className="w-full p-2 border rounded-md"
-            />
-            <Button
-              onClick={handleUpload}
-              disabled={!selectedFile || uploading || uploadPhotoMutation.isPending}
-              className="w-full gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
-            </Button>
+        {canEdit && (
+          <div className="pt-4 border-t space-y-3">
+            <h4 className="text-sm font-semibold">Fotos hochladen</h4>
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                className="w-full"
+              />
+              <input
+                type="text"
+                placeholder="Fototitel (optional)"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              />
+              <Button
+                onClick={handleUpload}
+                disabled={!selectedFile || uploading || uploadPhotoMutation.isPending}
+                className="w-full gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -26,6 +26,8 @@ export default function TripDetail() {
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [mapDialog, setMapDialog] = useState(false);
+  const [mapUrl, setMapUrl] = useState("");
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
@@ -157,30 +159,25 @@ export default function TripDetail() {
   }
 
   const handlePrint = () => {
-    // Wait a bit to ensure all images are loaded
+    // Wait for images to load before printing
     setTimeout(() => {
       window.print();
-    }, 500);
+    }, 2000);
   };
 
   const handleLocationClick = (destination: string) => {
     if (!destination) return;
+    setMapDialog(true);
+    setMapUrl(destination);
+  };
 
-    // Create options for maps
-    const encodedLocation = encodeURIComponent(destination);
-    const googleMapsUrl = `https://www.google.com/maps/search/${encodedLocation}`;
-    const appleMapsUrl = `https://maps.apple.com/?q=${encodedLocation}`;
-
-    // Show choice dialog
-    const choice = confirm(
-      `Öffne "${destination}" in Google Maps?\n\nOK = Google Maps\nAbbrechen = Apple Maps`
-    );
-
-    if (choice) {
-      window.open(googleMapsUrl, '_blank');
-    } else {
-      window.open(appleMapsUrl, '_blank');
-    }
+  const handleMapSelection = (mapType: 'google' | 'apple') => {
+    const encodedLocation = encodeURIComponent(mapUrl);
+    const url = mapType === 'google'
+      ? `https://www.google.com/maps/search/${encodedLocation}`
+      : `https://maps.apple.com/?q=${encodedLocation}`;
+    window.open(url, '_blank');
+    setMapDialog(false);
   };
 
   // Get the primary photo for the hero section
@@ -374,6 +371,7 @@ export default function TripDetail() {
               tripId={trip.id}
               photos={photos}
               onRefresh={() => refetchPhotos()}
+              canEdit={canEdit}
             />
 
             {/* Videos */}
@@ -628,6 +626,40 @@ export default function TripDetail() {
           </div>
         </div>
       )}
+
+      {/* Map Selection Dialog */}
+      <Dialog open={mapDialog} onOpenChange={setMapDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Standort öffnen</DialogTitle>
+            <DialogDescription>
+              Wähle eine Karten-App für den Standort: {mapUrl}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setMapDialog(false)}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={() => handleMapSelection('google')}
+              className="gap-2"
+            >
+              <MapPin className="w-4 h-4" />
+              Google Maps
+            </Button>
+            <Button
+              onClick={() => handleMapSelection('apple')}
+              className="gap-2"
+            >
+              <MapPin className="w-4 h-4" />
+              Apple Maps
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -157,7 +157,7 @@ const translations: Record<Language, Record<string, string>> = {
     "tripDetail.delete": "Löschen",
     "tripDetail.deleteConfirm": "Möchten Sie diesen Ausflug wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
     "tripDetail.description": "Beschreibung",
-    "tripDetail.niceToKnow": "Wissenswert",
+    "tripDetail.niceToKnow": "Wissenswertes",
     "tripDetail.info": "Informationen",
     "tripDetail.cost": "Kosten",
     "tripDetail.category": "Kategorie",
