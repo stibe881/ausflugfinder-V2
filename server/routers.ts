@@ -1192,6 +1192,9 @@ export const appRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         try {
+          // Delete all existing trips first (clean slate for import)
+          await db.delete(trips);
+
           // Parse the file
           const parseResult = parseImportFile(input.fileContent, input.filename);
 
