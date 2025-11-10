@@ -35,7 +35,7 @@ export default function TripDetail() {
   const updateTripMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
       toast.success(t("tripDetail.updateSuccess"));
-      setEditDialog(false);
+      setIsEditMode(false);
     },
     onError: (error) => {
       toast.error(error.message || t("tripDetail.updateError"));
