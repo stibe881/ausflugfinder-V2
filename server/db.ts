@@ -380,11 +380,12 @@ export async function searchTrips(
 
   if (filters.keyword) {
     // Search in title, description, and destination
+    const keyword = `%${filters.keyword}%`;
     conditions.push(
       or(
-        ilike(trips.title, `%${filters.keyword}%`),
-        ilike(trips.description, `%${filters.keyword}%`),
-        ilike(trips.destination, `%${filters.keyword}%`)
+        ilike(trips.title, keyword),
+        sql`COALESCE(${trips.description}, '') ILIKE ${keyword}`,
+        ilike(trips.destination, keyword)
       )
     );
   }

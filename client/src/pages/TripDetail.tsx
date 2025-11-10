@@ -158,7 +158,30 @@ export default function TripDetail() {
   }
 
   const handlePrint = () => {
-    window.print();
+    // Wait a bit to ensure all images are loaded
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+
+  const handleLocationClick = (destination: string) => {
+    if (!destination) return;
+
+    // Create options for maps
+    const encodedLocation = encodeURIComponent(destination);
+    const googleMapsUrl = `https://www.google.com/maps/search/${encodedLocation}`;
+    const appleMapsUrl = `https://maps.apple.com/?q=${encodedLocation}`;
+
+    // Show choice dialog
+    const choice = confirm(
+      `Öffne "${destination}" in Google Maps?\n\nOK = Google Maps\nAbbrechen = Apple Maps`
+    );
+
+    if (choice) {
+      window.open(googleMapsUrl, '_blank');
+    } else {
+      window.open(appleMapsUrl, '_blank');
+    }
   };
 
   // Get the primary photo for the hero section
@@ -213,7 +236,17 @@ export default function TripDetail() {
             ) : (
               <>
                 <h1 className="text-4xl font-bold text-white mb-2">{trip.title}</h1>
-                <div className="flex items-center gap-2 text-white/90">
+                <div
+                  className="flex items-center gap-2 text-white/90 cursor-pointer hover:text-white transition-colors"
+                  onClick={() => handleLocationClick(trip.destination)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleLocationClick(trip.destination);
+                    }
+                  }}
+                >
                   <MapPin className="w-5 h-5" />
                   <span>{trip.destination}</span>
                 </div>
@@ -360,7 +393,7 @@ export default function TripDetail() {
             {trip.category || trip.region || isEditMode ? (
               <Card>
                 <CardHeader>
-                  <h2 className="text-xl font-bold">{t("tripDetail.worthKnowing")}</h2>
+                  <h2 className="text-xl font-bold">{t("tripDetail.niceToKnow")}</h2>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {isEditMode ? (
@@ -402,7 +435,7 @@ export default function TripDetail() {
             {/* Information Card */}
             <Card>
               <CardHeader>
-                <h3 className="font-bold text-lg">{t("tripDetail.information")}</h3>
+                <h3 className="font-bold text-lg">{t("tripDetail.info")}</h3>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isEditMode ? (
