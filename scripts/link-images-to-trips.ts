@@ -22,7 +22,7 @@ function imagePathToUrl(imagePath: string): string {
   if (!imagePath) return "";
   // Convert Windows path to URL format
   const fileName = imagePath.split("\\").pop() || imagePath;
-  return `/uploads/${fileName}`;
+  return `/uploads/images/${fileName}`;
 }
 
 async function linkImagesToTrips() {

@@ -31,7 +31,7 @@ var import_promise = __toESM(require("mysql2/promise"), 1);
 function imagePathToUrl(imagePath) {
   if (!imagePath) return "";
   const fileName = imagePath.split("\\").pop() || imagePath;
-  return `/uploads/${fileName}`;
+  return `/uploads/images/${fileName}`;
 }
 async function linkImagesToTrips() {
   if (!process.env.DATABASE_URL) {
