@@ -33,7 +33,7 @@ import {
   getDb
 } from "./db";
 import { eq } from "drizzle-orm";
-import { dayPlanItems } from "../drizzle/schema";
+import { dayPlanItems, trips } from "../drizzle/schema";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -1192,6 +1192,9 @@ export const appRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         try {
+          // Get database instance
+          const db = getDb();
+
           // Delete all existing trips first (clean slate for import)
           await db.delete(trips);
 
