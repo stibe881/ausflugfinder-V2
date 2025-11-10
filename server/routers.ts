@@ -1233,6 +1233,7 @@ export const appRouter = router({
                 longitude: exc.longitude || "",
                 ageRecommendation: undefined,
                 routeType: "location" as const,
+                isPublic: 1, // Mark imported trips as public for /explore page
               });
 
               importedTrips.push(exc.name);
