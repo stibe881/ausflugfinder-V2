@@ -315,3 +315,21 @@ export const checklistItems = mysqlTable("checklistItems", {
 
 export type ChecklistItem = typeof checklistItems.$inferSelect;
 export type InsertChecklistItem = typeof checklistItems.$inferInsert;
+
+/**
+ * Trip categories table for storing multiple categories per trip.
+ * Allows trips to have multiple category tags instead of just one.
+ */
+export const tripCategories = mysqlTable("tripCategories", {
+  id: int("id").autoincrement().primaryKey(),
+  tripId: int("tripId").notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  // OPTIMIZATION #7: Indexes for category lookups
+  tripIdIdx: index("trip_categories_trip_id_idx").on(table.tripId),
+  categoryIdx: index("trip_categories_category_idx").on(table.category),
+}));
+
+export type TripCategory = typeof tripCategories.$inferSelect;
+export type InsertTripCategory = typeof tripCategories.$inferInsert;

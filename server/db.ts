@@ -1,8 +1,8 @@
 import { eq, and, sql, or, like, count, inArray, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
-  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry, InsertTripVideo,
-  trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems, tripJournal, tripVideos
+  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry, InsertTripVideo, InsertTripCategory,
+  trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems, tripJournal, tripVideos, tripCategories
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -153,6 +153,15 @@ export async function getTripById(id: number) {
   }
   const result = await db.select().from(trips).where(eq(trips.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getTripCategories(tripId: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  const result = await db.select().from(tripCategories).where(eq(tripCategories.tripId, tripId)).orderBy(tripCategories.createdAt);
+  return result.map((r) => r.category);
 }
 
 export async function updateTrip(id: number, userId: number, data: Partial<InsertTrip>) {
@@ -330,6 +339,31 @@ export async function deleteTripAttribute(id: number) {
     throw new Error("Database not available");
   }
   return await db.delete(tripAttributes).where(eq(tripAttributes.id, id));
+}
+
+// Trip Category queries
+export async function addTripCategory(tripId: number, category: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  return await db.insert(tripCategories).values({ tripId, category });
+}
+
+export async function deleteTripCategory(tripId: number, category: string) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  return await db.delete(tripCategories).where(and(eq(tripCategories.tripId, tripId), eq(tripCategories.category, category)));
+}
+
+export async function deleteTripCategories(tripId: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+  return await db.delete(tripCategories).where(eq(tripCategories.tripId, tripId));
 }
 
 // Advanced search and filter queries with pagination

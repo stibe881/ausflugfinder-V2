@@ -63,20 +63,40 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
 
     setUploading(true);
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const base64 = event.target?.result as string;
-        // Convert base64 data URL to URL using upload endpoint
-        const uploadResult = await trpc.upload.tripImage.mutate({ base64 });
+      // Read file as base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve(event.target?.result as string);
+        };
+        reader.onerror = () => {
+          reject(new Error("Fehler beim Lesen der Datei"));
+        };
+        reader.readAsDataURL(selectedFile);
+      });
 
-        // Add photo with the uploaded URL
-        uploadPhotoMutation.mutate({
-          tripId,
-          photoUrl: uploadResult.url,
-          caption: caption || undefined,
-        });
-      };
-      reader.readAsDataURL(selectedFile);
+      // Upload image and get URL
+      const uploadResult = await new Promise<{ url: string }>(async (resolve, reject) => {
+        trpc.upload.tripImage.mutate(
+          { base64 },
+          {
+            onSuccess: (data) => resolve(data),
+            onError: (error) => reject(error),
+          }
+        );
+      });
+
+      // Add photo with the uploaded URL
+      uploadPhotoMutation.mutate({
+        tripId,
+        photoUrl: uploadResult.url,
+        caption: caption || undefined,
+      });
+
+      // Success is handled by onSuccess callback
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error(error instanceof Error ? error.message : "Fehler beim Hochladen des Fotos");
     } finally {
       setUploading(false);
     }

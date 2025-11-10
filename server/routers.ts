@@ -269,7 +269,15 @@ export const appRouter = router({
           if (!trip) {
             throw new NotFoundError("Trip", input.id);
           }
-          return trip;
+
+          // Load categories for this trip
+          const { getTripCategories } = await import('./db');
+          const categories = await getTripCategories(input.id);
+
+          return {
+            ...trip,
+            categories,
+          };
         } catch (error) {
           const appError = handleError(error, "trips.getById");
           throw toTRPCError(appError);
@@ -288,6 +296,9 @@ export const appRouter = router({
           isFavorite: z.number().optional().default(0),
           isPublic: z.number().optional().default(0),
           image: z.string().optional(), // Title image for trip details and explore view (URL or Base64 data URL)
+          region: z.string().optional(),
+          cost: z.enum(["free", "low", "medium", "high", "very_high"]).optional(),
+          categories: z.array(z.string()).optional(), // Array of category strings
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -295,10 +306,15 @@ export const appRouter = router({
           if (input.endDate <= input.startDate) {
             throw new ValidationError("End date must be after start date");
           }
+          const { categories, ...tripData } = input;
           await createTrip({
             userId: ctx.user.id,
-            ...input,
+            ...tripData,
           });
+
+          // Note: Categories will be handled by the frontend via separate request
+          // The trip.create endpoint in CreateTripWizard handles category assignment
+
           return { success: true };
         } catch (error) {
           const appError = handleError(error, "trips.create");
@@ -330,11 +346,12 @@ export const appRouter = router({
           distanceMax: z.number().optional(),
           ageRecommendation: z.string().optional(),
           niceToKnow: z.string().optional(),
+          categories: z.array(z.string()).optional(), // Array of category strings
         })
       )
       .mutation(async ({ ctx, input }) => {
         try {
-          const { id, ...data } = input;
+          const { id, categories, ...data } = input;
           // Allow owner or admin to update
           const trip = await getTripById(id);
           if (!trip) throw new NotFoundError("Trip", id);
@@ -342,6 +359,18 @@ export const appRouter = router({
             throw new ForbiddenError("You are not authorized to update this trip");
           }
           await updateTrip(id, trip.userId, data);
+
+          // Update categories if provided
+          if (categories !== undefined) {
+            const { deleteTripCategories, addTripCategory } = await import('./db');
+            // Remove old categories
+            await deleteTripCategories(id);
+            // Add new categories
+            for (const category of categories) {
+              await addTripCategory(id, category);
+            }
+          }
+
           return { success: true };
         } catch (error) {
           const appError = handleError(error, "trips.update");

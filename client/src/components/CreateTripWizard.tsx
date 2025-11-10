@@ -89,19 +89,19 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
     description: "",
     destination: "",
     region: "",
-    category: "",
+    categories: [] as string[],
     cost: "free" as const,
   });
 
   const uploadTripImageMutation = trpc.upload.tripImage.useMutation();
 
   const createTripMutation = trpc.trips.create.useMutation({
-    onSuccess: (newTrip) => {
+    onSuccess: () => {
       toast.success(t("tripDetail.createSuccess") || "Ausflug erstellt!");
       onOpenChange(false);
       resetForm();
-      // Navigate to the new trip
-      navigate(`/trip/${newTrip.id}`);
+      // Navigate to my trips page
+      navigate("/mytrips");
     },
     onError: (error) => {
       toast.error(error.message || t("tripDetail.createError") || "Fehler beim Erstellen");
@@ -114,7 +114,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
       description: "",
       destination: "",
       region: "",
-      category: "",
+      categories: [],
       cost: "free",
     });
     setImageFile(null);
@@ -168,41 +168,45 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
 
       // Upload image if provided
       if (imageFile) {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const base64 = event.target?.result as string;
-          const uploadResult = await uploadTripImageMutation.mutateAsync({ base64 });
-          imageUrl = uploadResult.url;
-
-          // Create trip with image
-          createTripMutation.mutate({
-            title: formData.title,
-            description: formData.description,
-            destination: formData.destination,
-            region: formData.region,
-            category: formData.category,
-            cost: formData.cost,
-            image: imageUrl,
-            startDate: new Date(),
-            endDate: new Date(),
-            participants: 1,
-          });
-        };
-        reader.readAsDataURL(imageFile);
-      } else {
-        // Create trip without image
-        createTripMutation.mutate({
-          title: formData.title,
-          description: formData.description,
-          destination: formData.destination,
-          region: formData.region,
-          category: formData.category,
-          cost: formData.cost,
-          startDate: new Date(),
-          endDate: new Date(),
-          participants: 1,
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            resolve(event.target?.result as string);
+          };
+          reader.onerror = () => {
+            reject(new Error("Fehler beim Lesen der Datei"));
+          };
+          reader.readAsDataURL(imageFile);
         });
+
+        const uploadResult = await new Promise<{ url: string }>((resolve, reject) => {
+          uploadTripImageMutation.mutate(
+            { base64 },
+            {
+              onSuccess: (result) => resolve(result),
+              onError: (error) => reject(error),
+            }
+          );
+        });
+        imageUrl = uploadResult.url;
       }
+
+      // Create trip with or without image
+      createTripMutation.mutate({
+        title: formData.title,
+        description: formData.description,
+        destination: formData.destination,
+        region: formData.region,
+        categories: formData.categories,
+        cost: formData.cost,
+        image: imageUrl || undefined,
+        startDate: new Date(),
+        endDate: new Date(),
+        participants: 1,
+      });
+    } catch (error) {
+      console.error("Submit failed:", error);
+      toast.error(error instanceof Error ? error.message : "Fehler beim Erstellen des Ausflugs");
     } finally {
       setLoading(false);
     }
@@ -291,19 +295,58 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="category">Kategorie</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                      <SelectTrigger id="category" className="mt-2">
-                        <SelectValue placeholder="Wähle eine Kategorie" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
+                    <Label>Kategorien (Mehrfachauswahl möglich)</Label>
+                    <div className="mt-2 space-y-2 border rounded-md p-3 max-h-48 overflow-y-auto">
+                      {CATEGORIES.map((cat) => (
+                        <div key={cat} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`cat-${cat}`}
+                            checked={formData.categories.includes(cat)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  categories: [...prev.categories, cat],
+                                }));
+                              } else {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  categories: prev.categories.filter((c) => c !== cat),
+                                }));
+                              }
+                            }}
+                            className="rounded"
+                          />
+                          <label htmlFor={`cat-${cat}`} className="text-sm cursor-pointer">
                             {cat}
-                          </SelectItem>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {formData.categories.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {formData.categories.map((cat) => (
+                          <div
+                            key={cat}
+                            className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs flex items-center gap-1"
+                          >
+                            {cat}
+                            <button
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  categories: prev.categories.filter((c) => c !== cat),
+                                }));
+                              }}
+                              className="font-bold hover:opacity-75"
+                            >
+                              ×
+                            </button>
+                          </div>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -379,8 +422,8 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                         <span className="font-medium">{formData.destination}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Kategorie:</span>
-                        <span className="font-medium">{formData.category || "-"}</span>
+                        <span className="text-muted-foreground">Kategorien:</span>
+                        <span className="font-medium">{formData.categories.length > 0 ? formData.categories.join(", ") : "-"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Kosten:</span>
