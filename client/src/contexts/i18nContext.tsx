@@ -167,7 +167,7 @@ const translations: Record<Language, Record<string, string>> = {
     "tripDetail.category": "Kategorie",
     "tripDetail.region": "Region",
     "tripDetail.destination": "Zielort",
-    "tripDetail.contact": "Kontakt",
+    "tripDetail.contact": "Teilen",
     "tripDetail.email": "E-Mail",
     "tripDetail.whatsapp": "WhatsApp",
     "tripDetail.shareTitle": "Ausflug teilen",
