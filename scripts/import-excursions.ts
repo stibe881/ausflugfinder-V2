@@ -100,6 +100,12 @@ async function importExcursions() {
   }
 
   try {
+    // Clean up old trips and photos
+    console.log("🧹 Cleaning up old data...");
+    await db.delete(tripPhotos);
+    await db.delete(trips);
+    console.log("✅ Old data cleared\n");
+
     // Read the JSON file
     const filePath = resolve("ausfluge_export_2025-11-10_08-12-34.json");
     const fileContent = readFileSync(filePath, "utf-8");
