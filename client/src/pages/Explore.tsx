@@ -517,7 +517,7 @@ export default function Explore() {
             </div>
           ) : trips?.data && trips.data.length > 0 ? (
             <>
-              <p className="text-muted-foreground mb-6">{trips.data.length} {t("explore.resultsFound")}</p>
+              <p className="text-muted-foreground mb-6">{filteredTrips.length} {t("explore.resultsFound")}</p>
               {viewMode === "map" ? (
                 <div className="h-[600px] w-full rounded-lg overflow-hidden border">
                   <MapView

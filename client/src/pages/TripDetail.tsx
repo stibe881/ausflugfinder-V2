@@ -93,7 +93,7 @@ export default function TripDetail() {
         destination: trip.destination || "",
         region: trip.region || "",
         category: trip.category || "",
-        cost: (trip.cost || "free") as const,
+        cost: (trip.cost as "free" | "low" | "medium" | "high" | "very_high") || "free",
         image: trip.image || "",
       });
       setImagePreview(trip.image || "");
@@ -157,10 +157,64 @@ export default function TripDetail() {
   }
 
   const handlePrint = () => {
-    // Wait for images to load before printing
-    setTimeout(() => {
-      window.print();
-    }, 2000);
+    try {
+      // Add print class to body to enable print-specific styling
+      document.body.classList.add('is-printing');
+
+      // Wait for all images and resources to load before printing
+      let imageCount = 0;
+      let loadedImages = 0;
+
+      const images = document.querySelectorAll('img');
+      imageCount = images.length;
+
+      if (imageCount === 0) {
+        // No images, print immediately
+        setTimeout(() => {
+          window.print();
+          document.body.classList.remove('is-printing');
+        }, 500);
+        return;
+      }
+
+      // Wait for all images to load
+      images.forEach((img) => {
+        if (img.complete) {
+          loadedImages++;
+        } else {
+          img.addEventListener('load', () => {
+            loadedImages++;
+            if (loadedImages === imageCount) {
+              setTimeout(() => {
+                window.print();
+                document.body.classList.remove('is-printing');
+              }, 300);
+            }
+          }, { once: true });
+
+          img.addEventListener('error', () => {
+            loadedImages++;
+            if (loadedImages === imageCount) {
+              setTimeout(() => {
+                window.print();
+                document.body.classList.remove('is-printing');
+              }, 300);
+            }
+          }, { once: true });
+        }
+      });
+
+      // Fallback timeout in case images don't load
+      setTimeout(() => {
+        if (loadedImages < imageCount) {
+          window.print();
+          document.body.classList.remove('is-printing');
+        }
+      }, 3000);
+    } catch (error) {
+      console.error('Print error:', error);
+      document.body.classList.remove('is-printing');
+    }
   };
 
   const handleLocationClick = (destination: string) => {
@@ -360,8 +414,8 @@ export default function TripDetail() {
             </Card>
 
             {/* Weather Widget */}
-            {trip.destination && (
-              <WeatherWidget location={trip.destination} />
+            {trip.latitude && trip.longitude && (
+              <WeatherWidget latitude={parseFloat(trip.latitude)} longitude={parseFloat(trip.longitude)} />
             )}
 
             {/* Photo Gallery */}

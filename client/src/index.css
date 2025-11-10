@@ -357,3 +357,54 @@ video::-webkit-media-controls {
 video::-webkit-media-controls-enclosure {
   display: none !important;
 }
+
+/* Print-specific styles */
+@media print {
+  /* Hide navigation and interactive elements */
+  header,
+  footer,
+  .sticky,
+  nav,
+  [class*="Button"],
+  button {
+    display: none !important;
+  }
+
+  /* Hide share and action buttons */
+  [class*="Action"],
+  [class*="Share"],
+  [class*="Contact"],
+  .gap-2 {
+    display: none !important;
+  }
+
+  /* Make content printable */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    color: black;
+  }
+
+  * {
+    background: transparent !important;
+    color: black !important;
+    border-color: #999 !important;
+  }
+
+  /* Ensure images print */
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure text is readable */
+  p, h1, h2, h3, h4, h5, h6 {
+    page-break-inside: avoid;
+  }
+
+  .container {
+    max-width: 100%;
+    padding: 0.5in;
+  }
+}
