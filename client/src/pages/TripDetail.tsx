@@ -90,7 +90,6 @@ export default function TripDetail() {
         cost: (trip.cost as "free" | "low" | "medium" | "high" | "very_high") || "free",
         image: trip.image || "",
       });
-      setImagePreview(trip.image || "");
       setIsEditMode(true);
     }
   };
@@ -106,7 +105,6 @@ export default function TripDetail() {
       cost: "free" as const,
       image: "",
     });
-    setImagePreview("");
   };
 
   const handleEditSave = () => {
