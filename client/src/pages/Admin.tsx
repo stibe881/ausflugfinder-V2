@@ -146,16 +146,16 @@ export default function Admin() {
 
           {/* Import Section */}
           <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <h2 className="text-3xl font-bold">{t("admin.import") || "Import Excursions"}</h2>
               <Button
-                variant={showImport ? "default" : "outline"}
-                size="sm"
+                variant={showImport ? "default" : "secondary"}
+                size="md"
                 onClick={() => setShowImport(!showImport)}
-                className="gap-2"
+                className="gap-2 whitespace-nowrap"
               >
                 <Upload className="w-4 h-4" />
-                {showImport ? "Hide" : "Show"} Import
+                {showImport ? "Hide Import" : "Show Import"}
               </Button>
             </div>
             {showImport && <ImportExcursions />}
