@@ -18,7 +18,6 @@ import { WeatherWidget } from "@/components/WeatherWidget";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { PhotoOrganizer } from "@/components/PhotoOrganizer";
-import { TripJournal } from "@/components/TripJournal";
 import { VideoGallery } from "@/components/VideoGallery";
 
 export default function TripDetail() {
@@ -34,7 +33,6 @@ export default function TripDetail() {
 
   const { data: trip, isLoading: tripLoading, refetch: refetchTrip } = trpc.trips.getById.useQuery({ id: tripId });
   const { data: photos = [], refetch: refetchPhotos } = trpc.photos.list.useQuery({ tripId }, { enabled: !!tripId });
-  const { data: journalEntries = [], refetch: refetchJournal } = trpc.journal.list.useQuery({ tripId }, { enabled: !!tripId });
   const { data: videos = [], refetch: refetchVideos } = trpc.videos.list.useQuery({ tripId }, { enabled: !!tripId });
   const updateTripMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
@@ -281,13 +279,6 @@ export default function TripDetail() {
             {photos.length > 0 && (
               <PhotoOrganizer photos={photos} />
             )}
-
-            {/* Trip Journal */}
-            <TripJournal
-              tripId={trip.id}
-              entries={journalEntries}
-              onRefresh={() => refetchJournal()}
-            />
 
             {/* Videos */}
             <VideoGallery
