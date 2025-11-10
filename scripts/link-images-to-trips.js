@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { drizzle } from "drizzle-orm/mysql2";
-import { trips, tripPhotos } from "../drizzle/schema.js";
+import { trips, tripPhotos } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // Load environment variables

@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { drizzle } from "drizzle-orm/mysql2";
-import { trips, tripPhotos } from "../drizzle/schema";
+import * as schema from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 // Load environment variables
@@ -57,8 +57,8 @@ async function linkImagesToTrips() {
       try {
         // Find trip by name
         const tripByName = await db.select()
-          .from(trips)
-          .where(eq(trips.title, exc.name));
+          .from(schema.trips)
+          .where(eq(schema.trips.title, exc.name));
 
         if (tripByName.length === 0) {
           console.log(`⏭️  Skipped: "${exc.name}" (not found in database)`);
@@ -69,13 +69,13 @@ async function linkImagesToTrips() {
         const tripId = tripByName[0].id;
 
         // Delete existing photos for this trip
-        await db.delete(tripPhotos).where(eq(tripPhotos.tripId, tripId));
+        await db.delete(schema.tripPhotos).where(eq(schema.tripPhotos.tripId, tripId));
 
         // Add title image if exists
         if (exc.title_image) {
           const imageUrl = imagePathToUrl(exc.title_image);
           try {
-            await db.insert(tripPhotos).values({
+            await db.insert(schema.tripPhotos).values({
               tripId,
               photoUrl: imageUrl,
               caption: `${exc.name} - Cover Image`,
