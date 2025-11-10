@@ -15,7 +15,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
-import { CountdownTimer } from "@/components/CountdownTimer";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { PhotoOrganizer } from "@/components/PhotoOrganizer";
 import { VideoGallery } from "@/components/VideoGallery";
@@ -27,7 +26,7 @@ export default function TripDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
-  const [editDialog, setEditDialog] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
@@ -99,8 +98,22 @@ export default function TripDetail() {
         image: trip.image || "",
       });
       setImagePreview(trip.image || "");
-      setEditDialog(true);
+      setIsEditMode(true);
     }
+  };
+
+  const handleEditCancel = () => {
+    setIsEditMode(false);
+    setEditForm({
+      title: "",
+      description: "",
+      destination: "",
+      region: "",
+      category: "",
+      cost: "free" as const,
+      image: "",
+    });
+    setImagePreview("");
   };
 
   const handleEditSave = () => {
@@ -115,6 +128,7 @@ export default function TripDetail() {
       cost: editForm.cost,
       image: editForm.image || undefined,
     });
+    setIsEditMode(false);
   };
 
   const handleDeleteTrip = () => {
@@ -187,11 +201,24 @@ export default function TripDetail() {
         {/* Title Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
           <div className="w-full p-8">
-            <h1 className="text-4xl font-bold text-white mb-2">{trip.title}</h1>
-            <div className="flex items-center gap-2 text-white/90">
-              <MapPin className="w-5 h-5" />
-              <span>{trip.destination}</span>
-            </div>
+            {isEditMode ? (
+              <>
+                <Input
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  placeholder={t("tripDetail.titlePlaceholder")}
+                  className="text-4xl font-bold text-white mb-2 bg-black/40 border-white/30 placeholder-white/50"
+                />
+              </>
+            ) : (
+              <>
+                <h1 className="text-4xl font-bold text-white mb-2">{trip.title}</h1>
+                <div className="flex items-center gap-2 text-white/90">
+                  <MapPin className="w-5 h-5" />
+                  <span>{trip.destination}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -232,24 +259,48 @@ export default function TripDetail() {
           </Button>
           {canEdit && (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEditOpen}
-                className="gap-2"
-              >
-                <Edit className="w-4 h-4" />
-                {t("tripDetail.edit")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDeleteTrip}
-                className="gap-2 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-                {t("tripDetail.delete")}
-              </Button>
+              {isEditMode ? (
+                <>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleEditSave}
+                    disabled={updateTripMutation.isPending}
+                    className="gap-2"
+                  >
+                    {updateTripMutation.isPending ? t("tripDetail.saving") : t("tripDetail.save")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditCancel}
+                    className="gap-2"
+                  >
+                    {t("tripDetail.cancel")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEditOpen}
+                    className="gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    {t("tripDetail.edit")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDeleteTrip}
+                    className="gap-2 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {t("tripDetail.delete")}
+                  </Button>
+                </>
+              )}
             </>
           )}
         </div>
@@ -266,9 +317,18 @@ export default function TripDetail() {
                 <h2 className="text-2xl font-bold">{t("tripDetail.description")}</h2>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {trip.description}
-                </p>
+                {isEditMode ? (
+                  <Textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    placeholder={t("tripDetail.descriptionPlaceholder")}
+                    rows={4}
+                  />
+                ) : (
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {trip.description}
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -297,20 +357,41 @@ export default function TripDetail() {
             />
 
             {/* Nice to Know Section */}
-            {trip.category || trip.region ? (
+            {trip.category || trip.region || isEditMode ? (
               <Card>
                 <CardHeader>
                   <h2 className="text-xl font-bold">{t("tripDetail.worthKnowing")}</h2>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {trip.category && (
-                      <Badge variant="secondary">{trip.category}</Badge>
-                    )}
-                    {trip.region && (
-                      <Badge variant="outline">{trip.region}</Badge>
-                    )}
-                  </div>
+                <CardContent className="space-y-4">
+                  {isEditMode ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">{t("tripDetail.category")}</label>
+                        <Input
+                          value={editForm.category}
+                          onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                          placeholder={t("tripDetail.categoryPlaceholder")}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">{t("tripDetail.region")}</label>
+                        <Input
+                          value={editForm.region}
+                          onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
+                          placeholder={t("tripDetail.regionPlaceholder")}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {trip.category && (
+                        <Badge variant="secondary">{trip.category}</Badge>
+                      )}
+                      {trip.region && (
+                        <Badge variant="outline">{trip.region}</Badge>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : null}
@@ -318,52 +399,78 @@ export default function TripDetail() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Countdown Timer */}
-            <CountdownTimer
-              startDate={trip.startDate}
-              endDate={trip.endDate}
-              tripTitle={trip.title}
-            />
-
             {/* Information Card */}
             <Card>
               <CardHeader>
                 <h3 className="font-bold text-lg">{t("tripDetail.information")}</h3>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Cost */}
-                <div className="flex items-center justify-between pb-4 border-b">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <DollarSign className="w-5 h-5" />
-                    <span className="text-sm">{t("tripDetail.cost")}</span>
-                  </div>
-                  <Badge variant="default" className="bg-primary">
-                    {COST_LABELS[trip.cost] || t("tripDetail.costNA")}
-                  </Badge>
-                </div>
+                {isEditMode ? (
+                  <>
+                    {/* Editable Cost */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.cost")}</label>
+                      <Select value={editForm.cost} onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">{t("tripDetail.costFree")}</SelectItem>
+                          <SelectItem value="low">CHF •</SelectItem>
+                          <SelectItem value="medium">CHF ••</SelectItem>
+                          <SelectItem value="high">CHF •••</SelectItem>
+                          <SelectItem value="very_high">CHF ••••</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Category */}
-                {trip.category && (
-                  <div className="pb-4 border-b">
-                    <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.category")}</div>
-                    <div className="font-medium">{trip.category}</div>
-                  </div>
-                )}
+                    {/* Editable Destination */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.destination")}</label>
+                      <Input
+                        value={editForm.destination}
+                        onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
+                        placeholder={t("tripDetail.destinationPlaceholder")}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Cost */}
+                    <div className="flex items-center justify-between pb-4 border-b">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <DollarSign className="w-5 h-5" />
+                        <span className="text-sm">{t("tripDetail.cost")}</span>
+                      </div>
+                      <Badge variant="default" className="bg-primary">
+                        {COST_LABELS[trip.cost] || t("tripDetail.costNA")}
+                      </Badge>
+                    </div>
 
-                {/* Region */}
-                {trip.region && (
-                  <div className="pb-4 border-b">
-                    <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.region")}</div>
-                    <div className="font-medium">{trip.region}</div>
-                  </div>
-                )}
+                    {/* Category */}
+                    {trip.category && (
+                      <div className="pb-4 border-b">
+                        <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.category")}</div>
+                        <div className="font-medium">{trip.category}</div>
+                      </div>
+                    )}
 
-                {/* Destination */}
-                {trip.destination && (
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.destination")}</div>
-                    <div className="font-medium">{trip.destination}</div>
-                  </div>
+                    {/* Region */}
+                    {trip.region && (
+                      <div className="pb-4 border-b">
+                        <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.region")}</div>
+                        <div className="font-medium">{trip.region}</div>
+                      </div>
+                    )}
+
+                    {/* Destination */}
+                    {trip.destination && (
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.destination")}</div>
+                        <div className="font-medium">{trip.destination}</div>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -460,113 +567,40 @@ export default function TripDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
-      <Dialog open={editDialog} onOpenChange={setEditDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("tripDetail.editTrip")}</DialogTitle>
-            <DialogDescription>
-              {t("tripDetail.editTripDesc")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">{t("tripDetail.title")}</label>
-              <Input
-                value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                placeholder={t("tripDetail.titlePlaceholder")}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">{t("tripDetail.destination")}</label>
-              <Input
-                value={editForm.destination}
-                onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
-                placeholder={t("tripDetail.destinationPlaceholder")}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+      {/* Inline Edit Form - shown when isEditMode is true */}
+      {isEditMode && (
+        <div className="bg-card border-b">
+          <div className="container mx-auto px-4 py-6 max-w-2xl">
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">{t("tripDetail.region")}</label>
-                <Input
-                  value={editForm.region}
-                  onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
-                  placeholder={t("tripDetail.regionPlaceholder")}
+                <label className="block text-sm font-medium mb-2">{t("tripDetail.uploadImage")}</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("tripDetail.imageFormats")}
+                </p>
+                {imagePreview && (
+                  <div className="mt-3">
+                    <p className="text-xs text-muted-foreground mb-2">{t("tripDetail.preview")}:</p>
+                    <img
+                      src={imagePreview}
+                      alt={t("tripDetail.imagePreview")}
+                      className="w-full h-32 object-cover rounded-md border"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t("tripDetail.category")}</label>
-                <Input
-                  value={editForm.category}
-                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                  placeholder={t("tripDetail.categoryPlaceholder")}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">{t("tripDetail.cost")}</label>
-              <Select value={editForm.cost} onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">{t("tripDetail.costFree")}</SelectItem>
-                  <SelectItem value="low">CHF •</SelectItem>
-                  <SelectItem value="medium">CHF ••</SelectItem>
-                  <SelectItem value="high">CHF •••</SelectItem>
-                  <SelectItem value="very_high">CHF ••••</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">{t("tripDetail.description")}</label>
-              <Textarea
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                placeholder={t("tripDetail.descriptionPlaceholder")}
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">{t("tripDetail.uploadImage")}</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("tripDetail.imageFormats")}
-              </p>
-              {imagePreview && (
-                <div className="mt-3">
-                  <p className="text-xs text-muted-foreground mb-2">{t("tripDetail.preview")}:</p>
-                  <img
-                    src={imagePreview}
-                    alt={t("tripDetail.imagePreview")}
-                    className="w-full h-32 object-cover rounded-md border"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialog(false)}>
-              {t("tripDetail.cancel")}
-            </Button>
-            <Button
-              onClick={handleEditSave}
-              disabled={updateTripMutation.isPending}
-            >
-              {updateTripMutation.isPending ? t("tripDetail.saving") : t("tripDetail.save")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }
