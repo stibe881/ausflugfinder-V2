@@ -147,6 +147,9 @@ export default function TripDetail() {
     window.print();
   };
 
+  // Get the primary photo for the hero section
+  const primaryPhoto = photos.find((p) => p.isPrimary === 1);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* Header */}
@@ -163,7 +166,13 @@ export default function TripDetail() {
 
       {/* Hero Section */}
       <div className="relative w-full h-96 bg-gradient-to-b from-primary/20 to-background overflow-hidden">
-        {trip.image ? (
+        {primaryPhoto ? (
+          <img
+            src={primaryPhoto.photoUrl}
+            alt={trip.title}
+            className="w-full h-full object-cover"
+          />
+        ) : trip.image ? (
           <img
             src={trip.image}
             alt={trip.title}

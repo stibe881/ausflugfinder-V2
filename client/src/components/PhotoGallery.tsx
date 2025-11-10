@@ -80,8 +80,8 @@ export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
     }
   };
 
-  const primaryPhoto = photos.find((p) => p.isPrimary === 1);
-  const otherPhotos = photos.filter((p) => p.isPrimary === 0);
+  // Only show non-primary photos in the gallery
+  const galleryPhotos = photos.filter((p) => p.isPrimary === 0);
 
   return (
     <Card>
@@ -92,40 +92,12 @@ export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Primary Photo */}
-        {primaryPhoto && (
+        {/* Photos Grid */}
+        {galleryPhotos.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">Titelbild</h4>
-            <div className="relative group overflow-hidden rounded-lg">
-              <img
-                src={primaryPhoto.photoUrl}
-                alt={primaryPhoto.caption || "Trip photo"}
-                className="w-full h-48 object-cover"
-              />
-              {primaryPhoto.caption && (
-                <p className="p-2 bg-gradient-to-t from-black/50 to-transparent text-white text-sm">
-                  {primaryPhoto.caption}
-                </p>
-              )}
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => deletePhotoMutation.mutate({ id: primaryPhoto.id })}
-                disabled={deletePhotoMutation.isPending}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Other Photos Grid */}
-        {otherPhotos.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold">Weitere Fotos</h4>
+            <h4 className="text-sm font-semibold">Fotos</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {otherPhotos.map((photo) => (
+              {galleryPhotos.map((photo) => (
                 <div key={photo.id} className="relative group overflow-hidden rounded-lg">
                   <img
                     src={photo.photoUrl}
@@ -157,7 +129,7 @@ export function PhotoGallery({ tripId, photos, onRefresh }: PhotoGalleryProps) {
         )}
 
         {/* No Photos */}
-        {photos.length === 0 && (
+        {galleryPhotos.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <ImageOff className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>Noch keine Fotos</p>
