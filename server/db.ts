@@ -465,6 +465,7 @@ export async function getPublicTrips(pagination?: { page?: number; limit?: numbe
   const [data, countResult] = await Promise.all([
     db.select()
       .from(trips)
+      .leftJoin(tripPhotos, eq(trips.id, tripPhotos.tripId))
       .where(eq(trips.isPublic, 1))
       .orderBy(trips.createdAt)
       .limit(limit)
@@ -476,8 +477,14 @@ export async function getPublicTrips(pagination?: { page?: number; limit?: numbe
 
   const total = countResult[0]?.value || 0;
 
+  // Map results to combine trip with primary photo
+  const mappedData = data.map((row: any) => ({
+    ...row.trips,
+    image: row.tripPhotos?.photoUrl || null
+  }));
+
   return {
-    data,
+    data: mappedData,
     pagination: {
       page,
       limit,

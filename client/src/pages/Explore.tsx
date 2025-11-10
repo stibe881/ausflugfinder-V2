@@ -209,6 +209,32 @@ export default function Explore() {
 
   // Filter trips by distance and attributes
   const filteredTrips = (trips?.data?.filter(trip => {
+    // Search keyword filter
+    if (keyword) {
+      const searchLower = keyword.toLowerCase();
+      const matches =
+        trip.title?.toLowerCase().includes(searchLower) ||
+        trip.description?.toLowerCase().includes(searchLower) ||
+        trip.destination?.toLowerCase().includes(searchLower) ||
+        trip.category?.toLowerCase().includes(searchLower);
+      if (!matches) return false;
+    }
+
+    // Region filter
+    if (region && trip.region !== region) {
+      return false;
+    }
+
+    // Category filter
+    if (category && trip.category !== category) {
+      return false;
+    }
+
+    // Cost filter
+    if (cost && trip.cost !== cost) {
+      return false;
+    }
+
     // Distance filter
     if (nearbyOnly && userLocation) {
       if (!trip.latitude || !trip.longitude) return false;
