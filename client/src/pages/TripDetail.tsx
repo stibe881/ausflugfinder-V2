@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { OpenWeatherWidget } from "@/components/OpenWeatherWidget";
 import { PhotoGallery } from "@/components/PhotoGallery";
 
 export default function TripDetail() {
@@ -445,7 +446,10 @@ export default function TripDetail() {
 
             {/* Weather Widget */}
             {trip.latitude && trip.longitude && (
-              <WeatherWidget latitude={parseFloat(trip.latitude)} longitude={parseFloat(trip.longitude)} />
+              <>
+                <OpenWeatherWidget latitude={parseFloat(trip.latitude)} longitude={parseFloat(trip.longitude)} />
+                <WeatherWidget latitude={parseFloat(trip.latitude)} longitude={parseFloat(trip.longitude)} />
+              </>
             )}
 
             {/* Photo Gallery */}
