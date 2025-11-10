@@ -176,7 +176,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
             </Button>
             {!isLoading && !canEdit && (
               <p className="text-xs text-muted-foreground text-center">
-                Du musst der Ersteller dieses Ausflugs sein, um Fotos hochzuladen.
+                Du musst angemeldet sein, um Fotos hochzuladen.
               </p>
             )}
           </div>

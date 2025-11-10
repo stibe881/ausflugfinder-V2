@@ -62,7 +62,14 @@ export default function TripDetail() {
   });
   const [imagePreview, setImagePreview] = useState<string>("");
 
-  const canEdit = user && trip && (user.id === trip.userId || user.role === "admin");
+  // Determine edit permissions
+  // canEditTrip: Only trip owner or admin can edit/delete trip details
+  const canEditTrip = user && trip && (user.id === trip.userId || user.role === "admin");
+  // canUploadPhotos: Any authenticated user can upload photos (collaborative trips)
+  const canUploadPhotos = !!user;
+
+  // For backward compatibility
+  const canEdit = canEditTrip;
 
   const COST_LABELS: Record<string, string> = {
     free: t("tripDetail.costFree"),
@@ -423,7 +430,7 @@ export default function TripDetail() {
               tripId={trip.id}
               photos={photos}
               onRefresh={() => refetchPhotos()}
-              canEdit={canEdit}
+              canEdit={canUploadPhotos}
               isLoading={userLoading}
             />
 
