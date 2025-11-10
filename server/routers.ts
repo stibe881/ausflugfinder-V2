@@ -14,6 +14,7 @@ import {
 } from "./_core/validation";
 import { getWeatherForecast, getHourlyWeatherForecast } from "./_core/weather";
 import { generateICalendar, generatePDFContent } from "./_core/export";
+import { parseImportFile } from "./_core/importParser";
 import {
   createTrip, deleteTrip, getAllTrips, getTripById, getUserTrips, updateTrip,
   createDestination, getUserDestinations, getDestinationById, updateDestination, deleteDestination,
@@ -1175,6 +1176,80 @@ export const appRouter = router({
           return { success: true };
         } catch (error) {
           const appError = handleError(error, "videos.delete");
+          throw toTRPCError(appError);
+        }
+      }),
+  }),
+
+  admin: router({
+    importExcursions: adminProcedure
+      .input(
+        z.object({
+          fileContent: z.string().min(1),
+          filename: z.string().min(1),
+          userId: z.number().optional(), // Admin can import for specific user
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        try {
+          // Parse the file
+          const parseResult = parseImportFile(input.fileContent, input.filename);
+
+          if (parseResult.success === 0 && parseResult.failed > 0) {
+            throw new ValidationError(
+              `All ${parseResult.failed} rows failed to parse: ${parseResult.errors.slice(0, 3).join("; ")}`
+            );
+          }
+
+          const targetUserId = input.userId || ctx.user.id;
+          const importedTrips = [];
+          const failedImports = [];
+
+          // Import each excursion as a trip
+          for (const exc of parseResult.excursions) {
+            try {
+              const today = new Date();
+              await createTrip({
+                userId: targetUserId,
+                title: exc.name,
+                description: exc.description || "",
+                destination: exc.destination || exc.address || "",
+                startDate: today,
+                endDate: today,
+                participants: 1,
+                status: "planned" as const,
+                cost: exc.cost || "free",
+                category: exc.category || "",
+                region: exc.region || "",
+                address: exc.address || "",
+                websiteUrl: exc.website_url || "",
+                latitude: exc.latitude || "",
+                longitude: exc.longitude || "",
+                ageRecommendation: undefined,
+                routeType: "location" as const,
+              });
+
+              importedTrips.push(exc.name);
+            } catch (error) {
+              failedImports.push({
+                name: exc.name,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+          }
+
+          return {
+            success: true,
+            imported: importedTrips.length,
+            failed: failedImports.length,
+            parseErrors: parseResult.errors,
+            failedImports,
+            message: `Successfully imported ${importedTrips.length} excursions. ${
+              failedImports.length > 0 ? `${failedImports.length} failed to import.` : ""
+            }`,
+          };
+        } catch (error) {
+          const appError = handleError(error, "admin.importExcursions");
           throw toTRPCError(appError);
         }
       }),

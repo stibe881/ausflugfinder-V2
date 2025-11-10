@@ -1,19 +1,21 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/contexts/i18nContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Users, Activity, MapPin, BarChart3, Trash2, Edit, Lock, Unlock } from "lucide-react";
+import { ArrowLeft, Users, Activity, MapPin, BarChart3, Trash2, Edit, Lock, Unlock, Upload } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
+import ImportExcursions from "@/components/ImportExcursions";
 
 export default function Admin() {
   const { t } = useI18n();
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+  const [showImport, setShowImport] = useState(false);
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -140,6 +142,23 @@ export default function Admin() {
                 </Card>
               </div>
             )}
+          </div>
+
+          {/* Import Section */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold">{t("admin.import") || "Import Excursions"}</h2>
+              <Button
+                variant={showImport ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowImport(!showImport)}
+                className="gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                {showImport ? "Hide" : "Show"} Import
+              </Button>
+            </div>
+            {showImport && <ImportExcursions />}
           </div>
 
           {/* Trips Management */}
