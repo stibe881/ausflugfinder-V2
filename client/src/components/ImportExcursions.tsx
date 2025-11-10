@@ -8,7 +8,11 @@ import { trpc } from "@/lib/trpc";
 import { Upload, CheckCircle, AlertCircle, FileJson, FileText, Loader } from "lucide-react";
 import { toast } from "sonner";
 
-export default function ImportExcursions() {
+interface ImportExcursionsProps {
+  onImportSuccess?: () => void;
+}
+
+export default function ImportExcursions({ onImportSuccess }: ImportExcursionsProps) {
   const [fileContent, setFileContent] = useState<string>("");
   const [filename, setFilename] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
@@ -19,6 +23,10 @@ export default function ImportExcursions() {
     onSuccess: (data) => {
       toast.success(`Imported ${data.imported} excursions!`);
       resetForm();
+      // Notify parent component to refetch trips
+      if (onImportSuccess) {
+        onImportSuccess();
+      }
     },
     onError: (error) => {
       toast.error(`Import failed: ${error.message}`);

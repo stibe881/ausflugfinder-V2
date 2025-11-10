@@ -16,6 +16,7 @@ export default function Admin() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [showImport, setShowImport] = useState(false);
+  const utils = trpc.useUtils();
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -25,7 +26,14 @@ export default function Admin() {
   }, [authLoading, user, setLocation]);
 
   const { data: stats } = trpc.trips.statistics.useQuery();
-  const { data: allTrips } = trpc.trips.publicTrips.useQuery();
+  const { data: allTrips, refetch: refetchTrips } = trpc.trips.publicTrips.useQuery();
+
+  // Refetch trips when import section is hidden (to refresh after import)
+  useEffect(() => {
+    if (!showImport) {
+      refetchTrips();
+    }
+  }, [showImport, refetchTrips]);
 
   if (authLoading) {
     return (
@@ -158,7 +166,13 @@ export default function Admin() {
                 {showImport ? "Hide Import" : "Show Import"}
               </Button>
             </div>
-            {showImport && <ImportExcursions />}
+            {showImport && (
+              <ImportExcursions
+                onImportSuccess={() => {
+                  refetchTrips();
+                }}
+              />
+            )}
           </div>
 
           {/* Trips Management */}
