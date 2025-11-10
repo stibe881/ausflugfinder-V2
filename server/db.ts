@@ -160,8 +160,18 @@ export async function getTripCategories(tripId: number) {
   if (!db) {
     throw new Error("Database not available");
   }
-  const result = await db.select().from(tripCategories).where(eq(tripCategories.tripId, tripId)).orderBy(tripCategories.createdAt);
-  return result.map((r) => r.category);
+  try {
+    const result = await db.select().from(tripCategories).where(eq(tripCategories.tripId, tripId)).orderBy(tripCategories.createdAt);
+    return result.map((r) => r.category);
+  } catch (error) {
+    // If table doesn't exist yet, return empty array
+    // This allows the app to function while the migration is pending
+    if (error instanceof Error && (error.message.includes("Unknown table") || error.message.includes("doesn't exist"))) {
+      console.warn("[Database] tripCategories table does not exist yet, returning empty array");
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function updateTrip(id: number, userId: number, data: Partial<InsertTrip>) {
@@ -831,7 +841,16 @@ export async function addJournalEntry(entry: InsertTripJournalEntry) {
 export async function getTripJournalEntries(tripId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(tripJournal).where(eq(tripJournal.tripId, tripId)).orderBy(tripJournal.entryDate);
+  try {
+    return await db.select().from(tripJournal).where(eq(tripJournal.tripId, tripId)).orderBy(tripJournal.entryDate);
+  } catch (error) {
+    // If table doesn't exist yet, return empty array
+    if (error instanceof Error && (error.message.includes("Unknown table") || error.message.includes("doesn't exist"))) {
+      console.warn("[Database] tripJournal table does not exist yet, returning empty array");
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function updateJournalEntry(id: number, data: Partial<Omit<InsertTripJournalEntry, 'id' | 'tripId' | 'userId'>>) {
@@ -856,7 +875,16 @@ export async function addVideo(video: InsertTripVideo) {
 export async function getTripVideos(tripId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(tripVideos).where(eq(tripVideos.tripId, tripId)).orderBy(tripVideos.createdAt);
+  try {
+    return await db.select().from(tripVideos).where(eq(tripVideos.tripId, tripId)).orderBy(tripVideos.createdAt);
+  } catch (error) {
+    // If table doesn't exist yet, return empty array
+    if (error instanceof Error && (error.message.includes("Unknown table") || error.message.includes("doesn't exist"))) {
+      console.warn("[Database] tripVideos table does not exist yet, returning empty array");
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function deleteVideo(id: number) {
