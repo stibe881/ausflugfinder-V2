@@ -106,8 +106,7 @@ tmp/
 temp/
 
 # Uploaded files (user-generated content)
-uploads/
-!uploads/.gitkeep
+
 
 # Database
 *.db
