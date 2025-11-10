@@ -30,6 +30,9 @@ var import_promise = __toESM(require("mysql2/promise"), 1);
 (0, import_dotenv.config)();
 function imagePathToUrl(imagePath) {
   if (!imagePath) return "";
+  if (imagePath.startsWith("uploads/") || imagePath.startsWith("/uploads")) {
+    return imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  }
   const fileName = imagePath.split("\\").pop() || imagePath;
   return `/uploads/images/${fileName}`;
 }

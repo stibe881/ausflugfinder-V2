@@ -20,6 +20,10 @@ interface ImportData {
 // Convert image path to URL
 function imagePathToUrl(imagePath: string): string {
   if (!imagePath) return "";
+  // If already starts with uploads/ or /uploads, return as-is
+  if (imagePath.startsWith("uploads/") || imagePath.startsWith("/uploads")) {
+    return imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  }
   // Convert Windows path to URL format
   const fileName = imagePath.split("\\").pop() || imagePath;
   return `/uploads/images/${fileName}`;
