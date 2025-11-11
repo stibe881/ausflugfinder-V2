@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { Plane, MapPin, Users, Compass, Mountain, Sun, Moon, Globe } from "lucide-react";
+import { Calendar, MapPin, Users, Compass, Mountain, Sun, Moon, Globe } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -325,7 +325,7 @@ export default function Home() {
                 link: "/explore"
               },
               {
-                icon: Plane,
+                icon: Calendar,
                 titleKey: "home.planTrips",
                 descKey: "home.planTripsDesc",
                 color: "text-primary",
