@@ -86,7 +86,7 @@
               draggable="false"
             />
           </div>
-          <div class="mascot-hint">Klick mich! 👆</div>
+
         </div>
       `;
 
