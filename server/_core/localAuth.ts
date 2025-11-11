@@ -11,10 +11,15 @@ export function registerLocalAuthRoutes(app: Express) {
   // Register a new user
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      const { username, password, name, email } = req.body;
+      const { email, password, name } = req.body;
 
-      if (!username || !password) {
-        res.status(400).json({ error: "Username and password are required" });
+      if (!email || !password) {
+        res.status(400).json({ error: "Email and password are required" });
+        return;
+      }
+
+      if (!name) {
+        res.status(400).json({ error: "Name is required" });
         return;
       }
 
@@ -24,15 +29,15 @@ export function registerLocalAuthRoutes(app: Express) {
         return;
       }
 
-      // Check if user already exists
+      // Check if user already exists by email
       const existingUser = await db
         .select()
         .from(users)
-        .where(eq(users.username, username))
+        .where(eq(users.email, email))
         .limit(1);
 
       if (existingUser.length > 0) {
-        res.status(400).json({ error: "Username already exists" });
+        res.status(400).json({ error: "Email already registered" });
         return;
       }
 
@@ -40,14 +45,13 @@ export function registerLocalAuthRoutes(app: Express) {
       const passwordHash = await bcrypt.hash(password, 10);
 
       // Create user - use a pseudo-openId for local users
-      const pseudoOpenId = `local_${username}_${Date.now()}`;
+      const pseudoOpenId = `local_${email}_${Date.now()}`;
 
       await db.insert(users).values({
         openId: pseudoOpenId,
-        username,
         passwordHash,
-        name: name || username,
-        email: email || null,
+        name,
+        email,
         loginMethod: "local",
       });
 
@@ -61,13 +65,13 @@ export function registerLocalAuthRoutes(app: Express) {
     }
   });
 
-  // Login with username and password
+  // Login with email and password
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { username, password } = req.body;
+      const { email, password } = req.body;
 
-      if (!username || !password) {
-        res.status(400).json({ error: "Username and password are required" });
+      if (!email || !password) {
+        res.status(400).json({ error: "Email and password are required" });
         return;
       }
 
@@ -77,22 +81,22 @@ export function registerLocalAuthRoutes(app: Express) {
         return;
       }
 
-      // Find user
+      // Find user by email
       const userResult = await db
         .select()
         .from(users)
-        .where(eq(users.username, username))
+        .where(eq(users.email, email))
         .limit(1);
 
       if (userResult.length === 0) {
-        res.status(401).json({ error: "Invalid username or password" });
+        res.status(401).json({ error: "Invalid email or password" });
         return;
       }
 
       const user = userResult[0];
 
       if (!user.passwordHash) {
-        res.status(401).json({ error: "Invalid username or password" });
+        res.status(401).json({ error: "Invalid email or password" });
         return;
       }
 
@@ -100,7 +104,7 @@ export function registerLocalAuthRoutes(app: Express) {
       const passwordValid = await bcrypt.compare(password, user.passwordHash);
 
       if (!passwordValid) {
-        res.status(401).json({ error: "Invalid username or password" });
+        res.status(401).json({ error: "Invalid email or password" });
         return;
       }
 
@@ -117,7 +121,7 @@ export function registerLocalAuthRoutes(app: Express) {
       const sessionToken = await new SignJWT({
         openId: user.openId,
         appId: process.env.VITE_APP_ID || "ausflug-manager",
-        name: user.name || user.username,
+        name: user.name,
       })
         .setProtectedHeader({ alg: "HS256", typ: "JWT" })
         .setExpirationTime(expirationSeconds)

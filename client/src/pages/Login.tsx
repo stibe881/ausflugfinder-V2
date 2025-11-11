@@ -14,10 +14,9 @@ type AuthMode = "login" | "register";
 export default function Login() {
   const { t } = useI18n();
   const [mode, setMode] = useState<AuthMode>("login");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const { refresh } = useAuth();
   const [location, setLocation] = useLocation();
@@ -27,7 +26,7 @@ export default function Login() {
     if (e) e.preventDefault?.();
     if (e) e.stopPropagation?.();
 
-    if (!username || !password) {
+    if (!email || !password) {
       toast.error(t("auth.errorRequired"));
       return;
     }
@@ -37,9 +36,14 @@ export default function Login() {
       return;
     }
 
+    if (mode === "register" && !email) {
+      toast.error(t("auth.emailRequired"));
+      return;
+    }
+
     setLoading(true);
     try {
-      console.log("Submitting form with mode:", mode, { username, password, name, email });
+      console.log("Submitting form with mode:", mode, { email, password, name });
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
       const response = await fetch(endpoint, {
         method: "POST",
@@ -49,8 +53,8 @@ export default function Login() {
         credentials: "include",
         body: JSON.stringify(
           mode === "login"
-            ? { username, password }
-            : { username, password, name, email: email || undefined }
+            ? { email, password }
+            : { email, password, name }
         ),
       });
 
@@ -130,13 +134,13 @@ export default function Login() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-2">{t("login.username")}</label>
+              <label className="block text-sm font-medium mb-2">{t("login.email")}</label>
               <Input
-                type="text"
-                name="username"
-                placeholder={t("login.usernamePlaceholder")}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                name="email"
+                placeholder={t("login.emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
                 className="border-border/50"
@@ -156,21 +160,6 @@ export default function Login() {
                 className="border-border/50"
               />
             </div>
-
-            {mode === "register" && (
-              <div>
-                <label className="block text-sm font-medium mb-2">{t("login.email")}</label>
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder={t("login.emailPlaceholder")}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  className="border-border/50"
-                />
-              </div>
-            )}
 
             <Button
               disabled={loading}
