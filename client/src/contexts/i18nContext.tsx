@@ -53,7 +53,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.destinations": "Ausflüge",
     "home.destinationsDesc": "Entdecke spannende Orte und speichere deine Lieblingsziele",
     "home.friends": "Freunde",
-    "home.friendsDesc": "Verwalte deine Freunde und teile Ausflüge mit ihnen",
+    "home.friendsDesc": "Verwalte deine Freunde und teile Ausflüge mit ihnen. Erlebt Gemeinsam Freude.",
     "home.ctaTitle": "Bereit für dein nächstes Abenteuer?",
     "home.ctaSubtitle": "Starte jetzt und plane unvergessliche Ausflüge mit Familie und Freunden",
     "home.registerBtn": "Kostenlos registrieren",
