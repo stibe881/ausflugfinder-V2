@@ -87,8 +87,8 @@ export function applySecurity(app: Express) {
   // Security headers should be applied first
   app.use(securityHeaders);
 
-  // CORS middleware
-  app.use(cors(corsOptions));
+  // CORS middleware - only apply to API routes to avoid blocking static assets
+  app.use("/api", cors(corsOptions));
 
   // General API rate limiting (apply to all /api routes)
   app.use("/api", apiLimiter);
