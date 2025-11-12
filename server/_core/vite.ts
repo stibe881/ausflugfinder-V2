@@ -97,11 +97,22 @@ export function serveStatic(app: Express) {
     next();
   });
 
-  // Serve static files
-  app.use(express.static(distPath));
+  // Serve static files with proper fallback handling
+  app.use(express.static(distPath, {
+    index: false, // Don't serve index.html automatically
+    fallthrough: true // Allow requests to fall through if file not found
+  }));
 
-  // Fall through to index.html for SPA routing
-  app.use("*", (_req, res) => {
+  // Fall through to index.html for SPA routing (but NOT for asset requests)
+  app.use("*", (req, res) => {
+    // Don't serve HTML for asset requests - let them 404 properly
+    const ext = path.extname(req.path);
+    if (ext && !['.html'].includes(ext)) {
+      // This is an asset request that wasn't found - return 404
+      res.status(404).send('Not Found');
+      return;
+    }
+
     if (!cachedHtml) {
       try {
         let html = fs.readFileSync(indexPath, "utf-8");
