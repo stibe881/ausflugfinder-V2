@@ -50,4 +50,9 @@
     <!-- Compass ring decorations -->
     <circle cx="0" cy="0" r="19" fill="none" stroke="#cbd5e1" stroke-width="1"/>
   </g>
+
+  <!-- Optional: Text -->
+  <text x="100" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0ea5e9">
+    AusflugFinder
+  </text>
 </svg>
