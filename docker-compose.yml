@@ -3,6 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
+        - VITE_APP_ID=${VITE_APP_ID}
+        - VITE_APP_TITLE=${VITE_APP_TITLE}
+        - VITE_APP_LOGO=${VITE_APP_LOGO}
     container_name: ausflug-manager-app
     ports:
       - "3000:3000"
