@@ -73,7 +73,11 @@ export default function Profile() {
                 {t("profile.back")}
               </Button>
             </Link>
-            <h1 className="text-xl font-bold text-gray-800">{APP_TITLE}</h1>
+            <div className="flex items-center gap-3">
+              <img src="/icon-mountain.png" alt="Mountain" className="w-5 h-5" />
+              <img src="/icon-sun.png" alt="Sun" className="w-5 h-5" />
+              <img src="/icon-compass.png" alt="Compass" className="w-5 h-5" />
+            </div>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               {t("profile.logout")}
