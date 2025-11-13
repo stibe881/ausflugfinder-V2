@@ -538,6 +538,47 @@ export default function Explore() {
                   <MapView
                     onMapReady={(map) => {
                       const bounds = new window.google.maps.LatLngBounds();
+                      const markers: google.maps.Marker[] = [];
+
+                      // Add user location marker with geolocation
+                      if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                          (position) => {
+                            const userPos = {
+                              lat: position.coords.latitude,
+                              lng: position.coords.longitude,
+                            };
+
+                            // Create user location marker with blue dot
+                            new window.google.maps.Marker({
+                              position: userPos,
+                              map,
+                              title: "Dein Standort",
+                              icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: "#4285F4",
+                                fillOpacity: 1,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 3,
+                              },
+                              zIndex: 1000,
+                            });
+
+                            // Center map on user location with appropriate zoom
+                            map.setCenter(userPos);
+                            map.setZoom(10);
+                            bounds.extend(userPos);
+                          },
+                          (error) => {
+                            console.error("Geolocation error:", error);
+                          }
+                        );
+                      }
+
+                      // Simple clustering: group nearby markers
+                      const clusterDistance = 0.05; // ~5km at this scale
+                      const clusters: { position: google.maps.LatLngLiteral; trips: typeof trips.data }[] = [];
 
                       trips.data.forEach((trip) => {
                         if (trip.latitude && trip.longitude) {
@@ -545,11 +586,35 @@ export default function Explore() {
                           const lng = parseFloat(trip.longitude);
                           const position = { lat, lng };
 
+                          // Find existing cluster nearby
+                          const nearbyCluster = clusters.find(cluster => {
+                            const distance = Math.sqrt(
+                              Math.pow(cluster.position.lat - lat, 2) +
+                              Math.pow(cluster.position.lng - lng, 2)
+                            );
+                            return distance < clusterDistance;
+                          });
+
+                          if (nearbyCluster) {
+                            nearbyCluster.trips.push(trip);
+                          } else {
+                            clusters.push({ position, trips: [trip] });
+                          }
+                        }
+                      });
+
+                      // Create markers for clusters
+                      clusters.forEach(cluster => {
+                        if (cluster.trips.length === 1) {
+                          // Single marker
+                          const trip = cluster.trips[0];
                           const marker = new window.google.maps.Marker({
-                            position,
+                            position: cluster.position,
                             map,
                             title: trip.title,
                           });
+
+                          markers.push(marker);
 
                           const infoWindow = new window.google.maps.InfoWindow({
                             content: `
@@ -567,13 +632,63 @@ export default function Explore() {
                           marker.addListener("click", () => {
                             infoWindow.open(map, marker);
                           });
+                        } else {
+                          // Cluster marker
+                          const marker = new window.google.maps.Marker({
+                            position: cluster.position,
+                            map,
+                            label: {
+                              text: cluster.trips.length.toString(),
+                              color: "white",
+                              fontSize: "14px",
+                              fontWeight: "bold",
+                            },
+                            icon: {
+                              path: window.google.maps.SymbolPath.CIRCLE,
+                              scale: 20,
+                              fillColor: "#22c55e",
+                              fillOpacity: 0.9,
+                              strokeColor: "#ffffff",
+                              strokeWeight: 2,
+                            },
+                          });
 
-                          bounds.extend(position);
+                          markers.push(marker);
+
+                          const clusterContent = cluster.trips.map(trip => `
+                            <div style="padding: 4px; border-bottom: 1px solid #eee;">
+                              <a href="/trips/${trip.id}" style="color: #22c55e; text-decoration: none; font-weight: bold;">${trip.title}</a>
+                              <p style="color: #666; font-size: 12px; margin: 2px 0;">${trip.destination}</p>
+                            </div>
+                          `).join('');
+
+                          const infoWindow = new window.google.maps.InfoWindow({
+                            content: `
+                              <div style="padding: 8px; max-width: 300px; max-height: 300px; overflow-y: auto;">
+                                <h3 style="font-weight: bold; margin-bottom: 8px;">${cluster.trips.length} Ausflüge in dieser Gegend</h3>
+                                ${clusterContent}
+                              </div>
+                            `,
+                          });
+
+                          marker.addListener("click", () => {
+                            infoWindow.open(map, marker);
+                          });
                         }
+
+                        bounds.extend(cluster.position);
                       });
 
-                      if (!bounds.isEmpty()) {
+                      // Fit bounds if we have markers (but not if we only have user location)
+                      if (!bounds.isEmpty() && clusters.length > 0) {
                         map.fitBounds(bounds);
+
+                        // Don't zoom in too much for single markers
+                        google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+                          if (map.getZoom()! > 15) {
+                            map.setZoom(15);
+                          }
+                        });
                       }
                     }}
                   />
