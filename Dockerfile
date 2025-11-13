@@ -16,6 +16,18 @@ COPY . .
 ARG CACHE_BUST=1
 RUN echo "Building with cache bust: $CACHE_BUST"
 
+# Build arguments for Vite environment variables
+ARG VITE_GOOGLE_MAPS_API_KEY
+ARG VITE_APP_ID
+ARG VITE_APP_TITLE
+ARG VITE_APP_LOGO
+
+# Set environment variables for build
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_APP_ID=$VITE_APP_ID
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
+ENV VITE_APP_LOGO=$VITE_APP_LOGO
+
 # Remove any cached build artifacts to ensure fresh build
 RUN rm -rf dist .turbo
 
