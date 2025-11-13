@@ -33,6 +33,9 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Trust proxy - required when running behind nginx reverse proxy
+  app.set('trust proxy', true);
+
   // Apply security middleware first (headers, CORS, rate limiting)
   applySecurity(app);
 
