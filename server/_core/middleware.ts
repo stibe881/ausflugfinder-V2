@@ -13,6 +13,7 @@ export const apiLimiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  validate: { trustProxy: false }, // Disable trust proxy validation since we're behind nginx
   skip: (req: Request) => {
     // Skip rate limiting for health checks and static assets
     return req.path === "/health" || req.path.startsWith("/public");
@@ -27,6 +28,7 @@ export const authLimiter = rateLimit({
   skipSuccessfulRequests: true, // Don't count successful requests
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false }, // Disable trust proxy validation since we're behind nginx
 });
 
 // CORS Configuration
