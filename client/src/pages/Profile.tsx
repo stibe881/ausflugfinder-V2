@@ -73,7 +73,7 @@ export default function Profile() {
                 {t("profile.back")}
               </Button>
             </Link>
-            <h1 className="text-xl font-bold text-gray-800">Mein Profil</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Mein Profil</h1>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               {t("profile.logout")}
