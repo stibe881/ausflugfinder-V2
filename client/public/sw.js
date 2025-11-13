@@ -1,5 +1,5 @@
 // Service Worker for Ausflug Manager PWA
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `ausflug-manager-${CACHE_VERSION}`;
 const API_CACHE = `ausflug-api-${CACHE_VERSION}`;
 
@@ -56,9 +56,10 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           if (response.ok) {
-            // Cache successful API responses
+            // Clone the response before caching
+            const responseToCache = response.clone();
             caches.open(API_CACHE).then((cache) => {
-              cache.put(request, response.clone());
+              cache.put(request, responseToCache);
             });
           }
           return response;
@@ -93,8 +94,10 @@ self.addEventListener('fetch', (event) => {
           fetch(request)
             .then((response) => {
               if (response.ok) {
-                const cache = caches.open(CACHE_NAME);
-                cache.then((c) => c.put(request, response.clone()));
+                const responseToCache = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(request, responseToCache);
+                });
               }
               return response;
             })
@@ -119,8 +122,9 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           if (response.ok) {
+            const responseToCache = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, response.clone());
+              cache.put(request, responseToCache);
             });
           }
           return response;
@@ -137,8 +141,9 @@ self.addEventListener('fetch', (event) => {
     fetch(request)
       .then((response) => {
         if (response.ok) {
+          const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, response.clone());
+            cache.put(request, responseToCache);
           });
         }
         return response;

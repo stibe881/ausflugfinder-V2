@@ -135,6 +135,7 @@ export function MapView({
       zoomControl: true,
       streetViewControl: true,
       mapId: "DEMO_MAP_ID",
+      gestureHandling: "greedy", // Enable scroll zoom without Ctrl key
     });
     if (onMapReady) {
       onMapReady(map.current);
