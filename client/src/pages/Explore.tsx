@@ -263,9 +263,11 @@ export default function Explore() {
                 {t("explore.back")}
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              {t("explore.header")}
-            </h1>
+            <div className="flex items-center gap-3">
+              <img src="/icon-mountain.png" alt="Mountain" className="w-6 h-6" />
+              <img src="/icon-sun.png" alt="Sun" className="w-6 h-6" />
+              <img src="/icon-compass.png" alt="Compass" className="w-6 h-6" />
+            </div>
             {user && (
               <Button
                 onClick={() => setIsCreateTripOpen(true)}
