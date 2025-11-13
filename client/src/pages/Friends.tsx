@@ -222,7 +222,7 @@ export default function Friends() {
                   {t("friends.back")}
                 </Button>
               </Link>
-              <h1 className="text-xl font-bold text-gray-800">Meine Freunde</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Meine Freunde</h1>
             </div>
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
