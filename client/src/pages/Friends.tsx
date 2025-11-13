@@ -222,12 +222,7 @@ export default function Friends() {
                   {t("friends.back")}
                 </Button>
               </Link>
-              <div className="flex items-center gap-2">
-                <Users className="w-6 h-6 text-primary" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {t("friends.pageTitle")}
-                </h1>
-              </div>
+              <h1 className="text-xl font-bold text-gray-800">Meine Freunde</h1>
             </div>
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
