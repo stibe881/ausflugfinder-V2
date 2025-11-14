@@ -78,21 +78,24 @@ async function startServer() {
   }
 
   // Global error handler - must be last middleware
+  // Only catch errors that weren't already handled by tRPC
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-    console.error('[Error Handler] Unhandled error:', err);
-
-    // Don't send error response if response has already been sent
+    // Skip if response already sent
     if (res.headersSent) {
-      return next(err);
+      console.error('[Error Handler] Response already sent, skipping:', err.message);
+      return;
     }
 
-    // Always send JSON for API errors
-    const statusCode = err.status || err.statusCode || 500;
-    res.status(statusCode).json({
-      code: err.code || 'INTERNAL_SERVER_ERROR',
-      message: err.message || 'Internal server error',
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-    });
+    // Only handle non-tRPC errors (tRPC handles its own errors)
+    if (!req.path.includes('/api/trpc')) {
+      console.error('[Error Handler] Unhandled error:', err);
+      const statusCode = err.status || err.statusCode || 500;
+      res.status(statusCode).json({
+        code: err.code || 'INTERNAL_SERVER_ERROR',
+        message: err.message || 'Internal server error',
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+      });
+    }
   });
 
   const preferredPort = parseInt(process.env.PORT || "3000");
