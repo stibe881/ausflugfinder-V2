@@ -385,7 +385,7 @@ export default function Home() {
       </section>
 
       {/* Mascot Widget Container */}
-      <div id="ausflugfinder-mascot"></div>
+      <div id="ausflugfinder-mascot" data-username={user?.name || ""}></div>
     </div>
   );
 }
