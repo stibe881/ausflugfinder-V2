@@ -186,9 +186,9 @@
   
       // Initial greeting
       const username = widget.dataset.username;
-      let greeting = `Hallo! Ich bin Lumo, dein persönliches Murmeltier-Maskottchen. Ich helfe dir, spannende Ausflüge zu finden und zu planen. Klick mich an, um mehr zu erfahren!`;
+      let greeting = `Hallo! Ich bin Lumi, dein persönliches Murmeltier-Maskottchen. Ich helfe dir, spannende Ausflüge zu finden und zu planen. Klick mich an, um mehr zu erfahren!`;
       if (username) {
-        greeting = `Hallo ${username}! Ich bin Lumo, dein persönliches Murmeltier-Maskottchen. Ich helfe dir, spannende Ausflüge zu finden und zu planen. Klick mich an, um mehr zu erfahren!`;
+        greeting = `Hallo ${username}! Ich bin Lumi, dein persönliches Murmeltier-Maskottchen. Ich helfe dir, spannende Ausflüge zu finden und zu planen. Klick mich an, um mehr zu erfahren!`;
       }
       showSpeechBubble(greeting);
   
