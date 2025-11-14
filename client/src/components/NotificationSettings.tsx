@@ -111,14 +111,19 @@ export const NotificationSettings = () => {
   const handleSubscribePush = async () => {
     setIsSaving(true);
     try {
+      console.log('Attempting to subscribe to push notifications...');
       const success = await subscribe();
+      console.log('Subscribe result:', success);
+
       if (success) {
         toast.success('Push-Benachrichtigungen aktiviert');
       } else {
         toast.error('Fehler beim Aktivieren von Push-Benachrichtigungen');
       }
     } catch (err) {
-      toast.error('Fehler beim Aktivieren von Push-Benachrichtigungen');
+      console.error('Error in handleSubscribePush:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Unbekannter Fehler';
+      toast.error(`Fehler: ${errorMsg}`);
     } finally {
       setIsSaving(false);
     }
@@ -143,21 +148,31 @@ export const NotificationSettings = () => {
   const handleLocationTracking = async (enabled: boolean) => {
     setIsSaving(true);
     try {
+      console.log('Toggling location tracking:', enabled);
+
       if (enabled) {
+        console.log('Starting location tracking...');
         const success = await startTracking(60000); // 60 second interval
+        console.log('startTracking result:', success);
+
         if (success) {
+          console.log('Updating settings to enable location tracking...');
           await updateSettings({ locationTrackingEnabled: true });
           toast.success('Standort-Tracking gestartet');
         } else {
           toast.error('Fehler beim Starten des Standort-Tracking');
         }
       } else {
+        console.log('Stopping location tracking...');
         stopTracking();
+        console.log('Updating settings to disable location tracking...');
         await updateSettings({ locationTrackingEnabled: false });
         toast.success('Standort-Tracking gestoppt');
       }
     } catch (err) {
-      toast.error('Fehler beim Ändern des Standort-Tracking');
+      console.error('Error in handleLocationTracking:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Unbekannter Fehler';
+      toast.error(`Fehler: ${errorMsg}`);
     } finally {
       setIsSaving(false);
     }
