@@ -26,6 +26,7 @@ export const useInstallPrompt = () => {
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      console.log('beforeinstallprompt event fired');
       const promptEvent = e as BeforeInstallPromptEvent;
       setInstallPrompt(promptEvent);
     };
