@@ -536,85 +536,10 @@ export default function Explore() {
               {viewMode === "map" ? (
                 <div className="h-[600px] w-full rounded-lg overflow-hidden border">
                   <MapView
-                    onMapReady={(map) => {
+                    onMapReady={async (map) => {
                       const bounds = new window.google.maps.LatLngBounds();
                       let userLocation: { lat: number; lng: number } | null = null;
-
-                      // Haversine formula for accurate distance calculation
-                      const getDistanceKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-                        const R = 6371; // Earth's radius in km
-                        const dLat = (lat2 - lat1) * Math.PI / 180;
-                        const dLng = (lng2 - lng1) * Math.PI / 180;
-                        const a =
-                          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                          Math.sin(dLng / 2) * Math.sin(dLng / 2);
-                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                        return R * c;
-                      };
-
-                      // Improved clustering algorithm
-                      const createClusters = () => {
-                        interface ClusterData {
-                          position: google.maps.LatLngLiteral;
-                          trips: typeof trips.data;
-                          centerLat: number;
-                          centerLng: number;
-                        }
-
-                        const CLUSTER_RADIUS_KM = 3; // 3km radius for clustering
-                        const clusters: ClusterData[] = [];
-                        const unclusteredTrips = [...(trips.data || [])];
-
-                        // Sort by latitude to improve clustering efficiency
-                        unclusteredTrips.sort((a, b) => {
-                          const latA = parseFloat(a.latitude || '0');
-                          const latB = parseFloat(b.latitude || '0');
-                          return latA - latB;
-                        });
-
-                        while (unclusteredTrips.length > 0) {
-                          const trip = unclusteredTrips.shift();
-                          if (!trip?.latitude || !trip?.longitude) continue;
-
-                          const lat = parseFloat(trip.latitude);
-                          const lng = parseFloat(trip.longitude);
-
-                          const clusterTrips = [trip];
-                          let sumLat = lat;
-                          let sumLng = lng;
-
-                          // Find all trips within radius
-                          for (let i = unclusteredTrips.length - 1; i >= 0; i--) {
-                            const otherTrip = unclusteredTrips[i];
-                            if (!otherTrip.latitude || !otherTrip.longitude) continue;
-
-                            const otherLat = parseFloat(otherTrip.latitude);
-                            const otherLng = parseFloat(otherTrip.longitude);
-                            const distance = getDistanceKm(lat, lng, otherLat, otherLng);
-
-                            if (distance <= CLUSTER_RADIUS_KM) {
-                              clusterTrips.push(otherTrip);
-                              sumLat += otherLat;
-                              sumLng += otherLng;
-                              unclusteredTrips.splice(i, 1);
-                            }
-                          }
-
-                          // Calculate cluster center
-                          const centerLat = sumLat / clusterTrips.length;
-                          const centerLng = sumLng / clusterTrips.length;
-
-                          clusters.push({
-                            position: { lat: centerLat, lng: centerLng },
-                            trips: clusterTrips,
-                            centerLat,
-                            centerLng,
-                          });
-                        }
-
-                        return clusters;
-                      };
+                      const markers: google.maps.Marker[] = [];
 
                       // Add user location marker
                       if (navigator.geolocation) {
@@ -625,18 +550,18 @@ export default function Explore() {
                               lng: position.coords.longitude,
                             };
 
-                            // Create user location marker with blue dot
+                            // Create modern user location marker
                             new window.google.maps.Marker({
                               position: userLocation,
                               map,
                               title: "Dein Standort",
                               icon: {
                                 path: window.google.maps.SymbolPath.CIRCLE,
-                                scale: 8,
-                                fillColor: "#4285F4",
+                                scale: 10,
+                                fillColor: "#3b82f6",
                                 fillOpacity: 1,
                                 strokeColor: "#ffffff",
-                                strokeWeight: 2,
+                                strokeWeight: 3,
                               },
                               zIndex: 1000,
                             });
@@ -652,104 +577,107 @@ export default function Explore() {
                         );
                       }
 
-                      // Create and render clusters
-                      const clusters = createClusters();
+                      // Create markers for each trip
+                      (trips.data || []).forEach((trip) => {
+                        if (!trip.latitude || !trip.longitude) return;
 
-                      clusters.forEach((cluster) => {
-                        bounds.extend(cluster.position);
+                        const lat = parseFloat(trip.latitude);
+                        const lng = parseFloat(trip.longitude);
+                        const position = { lat, lng };
 
-                        if (cluster.trips.length === 1) {
-                          // Single marker
-                          const trip = cluster.trips[0];
-                          const marker = new window.google.maps.Marker({
-                            position: cluster.position,
-                            map,
-                            title: trip.title,
-                            icon: {
-                              path: window.google.maps.SymbolPath.CIRCLE,
-                              scale: 12,
-                              fillColor: "#0ea5e9",
-                              fillOpacity: 0.95,
-                              strokeColor: "#ffffff",
-                              strokeWeight: 2,
-                            },
-                          });
+                        // Create modern marker with custom styling
+                        const marker = new window.google.maps.Marker({
+                          position,
+                          title: trip.title,
+                          icon: {
+                            path: window.google.maps.SymbolPath.CIRCLE,
+                            scale: 11,
+                            fillColor: "#10b981",
+                            fillOpacity: 0.95,
+                            strokeColor: "#ffffff",
+                            strokeWeight: 2.5,
+                          },
+                        });
 
-                          const infoWindow = new window.google.maps.InfoWindow({
-                            content: `
-                              <div style="padding: 10px; max-width: 280px; font-family: system-ui;">
-                                <h3 style="font-weight: 600; margin: 0 0 6px 0; font-size: 15px;">${trip.title}</h3>
-                                <p style="color: #666; font-size: 13px; margin: 0 0 8px 0; line-height: 1.4;">${trip.description?.substring(0, 100) || 'Keine Beschreibung'}...</p>
-                                <p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">
-                                  <strong>📍 ${trip.destination}</strong> • ${COST_LABELS[trip.cost]}
-                                </p>
-                                <a href="/trips/${trip.id}" style="color: #10b981; text-decoration: none; font-size: 13px; font-weight: 500;">→ Details ansehen</a>
+                        // Create info window
+                        const infoWindow = new window.google.maps.InfoWindow({
+                          content: `
+                            <div style="padding: 12px; max-width: 300px; font-family: system-ui;">
+                              <h3 style="font-weight: 600; margin: 0 0 8px 0; font-size: 15px; color: #1f2937;">${trip.title}</h3>
+                              <p style="color: #6b7280; font-size: 13px; margin: 0 0 10px 0; line-height: 1.5;">${trip.description?.substring(0, 120) || 'Keine Beschreibung'}...</p>
+                              <div style="display: flex; gap: 8px; margin-bottom: 10px; font-size: 12px;">
+                                <span style="color: #6b7280;">📍 ${trip.destination}</span>
+                                <span style="color: #6b7280;">•</span>
+                                <span style="color: #6b7280;">${COST_LABELS[trip.cost]}</span>
                               </div>
-                            `,
-                          });
-
-                          marker.addListener("click", () => {
-                            infoWindow.open(map, marker);
-                          });
-                        } else {
-                          // Cluster marker with count
-                          const marker = new window.google.maps.Marker({
-                            position: cluster.position,
-                            map,
-                            icon: {
-                              path: window.google.maps.SymbolPath.CIRCLE,
-                              scale: 24,
-                              fillColor: "#f59e0b",
-                              fillOpacity: 0.9,
-                              strokeColor: "#ffffff",
-                              strokeWeight: 3,
-                            },
-                            label: {
-                              text: cluster.trips.length.toString(),
-                              color: "white",
-                              fontSize: "14px",
-                              fontWeight: "bold",
-                            },
-                            title: `${cluster.trips.length} Ausflüge`,
-                          });
-
-                          const clusterContent = cluster.trips
-                            .slice(0, 10) // Show max 10 in popup
-                            .map(
-                              (trip) => `
-                            <div style="padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
-                              <a href="/trips/${trip.id}" style="color: #10b981; text-decoration: none; font-weight: 500; font-size: 13px;">${trip.title}</a>
-                              <p style="color: #666; font-size: 12px; margin: 2px 0 0 0;">📍 ${trip.destination} • ${COST_LABELS[trip.cost]}</p>
+                              <a href="/trips/${trip.id}" style="display: inline-block; color: #fff; background: #10b981; text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 4px;">Details →</a>
                             </div>
-                          `
-                            )
-                            .join('');
+                          `,
+                        });
 
-                          const infoWindow = new window.google.maps.InfoWindow({
-                            content: `
-                              <div style="padding: 10px; max-width: 320px; font-family: system-ui; max-height: 350px; overflow-y: auto;">
-                                <h3 style="font-weight: 600; margin: 0 0 10px 0; font-size: 15px;">🎯 ${cluster.trips.length} Ausflüge in dieser Gegend</h3>
-                                ${clusterContent}
-                                ${cluster.trips.length > 10 ? `<p style="text-align: center; color: #888; font-size: 12px; margin-top: 8px; font-style: italic;">... und ${cluster.trips.length - 10} weitere</p>` : ''}
-                              </div>
-                            `,
-                          });
+                        marker.addListener("click", () => {
+                          infoWindow.open(map, marker);
+                        });
 
-                          marker.addListener("click", () => {
-                            infoWindow.open(map, marker);
-                          });
-                        }
+                        markers.push(marker);
+                        bounds.extend(position);
                       });
 
+                      // Initialize MarkerClusterer with modern styling
+                      try {
+                        const { MarkerClusterer } = await import('@googlemaps/markerclustererplus');
+
+                        // Custom renderer for clusters
+                        const renderer = {
+                          render: (cluster: any) => {
+                            const { count, position } = cluster;
+                            const size = count < 10 ? 40 : count < 100 ? 50 : 60;
+                            const color = count < 10 ? "#f59e0b" : count < 100 ? "#ef4444" : "#7c3aed";
+
+                            return new window.google.maps.Marker({
+                              position,
+                              icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: size / 2,
+                                fillColor: color,
+                                fillOpacity: 0.9,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 3,
+                              },
+                              label: {
+                                text: count.toString(),
+                                color: "white",
+                                fontSize: count < 100 ? "14px" : "16px",
+                                fontWeight: "bold",
+                              },
+                              title: `${count} Ausflüge`,
+                              zIndex: 999,
+                            });
+                          },
+                        };
+
+                        new MarkerClusterer({
+                          markers,
+                          map,
+                          renderer,
+                          maxZoom: 15,
+                          algorithm: { distance: 80 },
+                        });
+                      } catch (err) {
+                        console.log('MarkerClusterer Library Error:', err);
+                        // Fallback: just add all markers without clustering
+                        markers.forEach(marker => marker.setMap(map));
+                      }
+
                       // Fit map to bounds with padding
-                      if (!bounds.isEmpty() && clusters.length > 0) {
+                      if (!bounds.isEmpty() && markers.length > 0) {
                         map.fitBounds(bounds, 80);
 
                         // Adjust zoom to reasonable level
                         google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
                           const zoom = map.getZoom();
-                          if (zoom !== undefined && zoom > 16) {
-                            map.setZoom(16);
+                          if (zoom !== undefined && zoom > 15) {
+                            map.setZoom(15);
                           }
                         });
                       }
