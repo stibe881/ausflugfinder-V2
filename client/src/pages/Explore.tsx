@@ -633,30 +633,72 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Define cluster icon styles for different zoom levels
+                        // Helper function to generate circle marker images as data URIs
+                        const generateCircleImage = (color: string, size: number): string => {
+                          const canvas = document.createElement('canvas');
+                          canvas.width = size;
+                          canvas.height = size;
+                          const ctx = canvas.getContext('2d');
+                          if (!ctx) return '';
+
+                          // Draw circle
+                          ctx.fillStyle = color;
+                          ctx.beginPath();
+                          ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
+                          ctx.fill();
+
+                          // Draw border
+                          ctx.strokeStyle = '#ffffff';
+                          ctx.lineWidth = 2;
+                          ctx.stroke();
+
+                          return canvas.toDataURL('image/png');
+                        };
+
+                        // Pre-generate cluster marker images
+                        const clusterImages = {
+                          small: generateCircleImage('#f59e0b', 40),
+                          medium: generateCircleImage('#ef4444', 50),
+                          large: generateCircleImage('#7c3aed', 60),
+                        };
+
+                        console.log('[MapDebug] Generated cluster images');
+
+                        // Custom calculator function to style clusters based on marker count
+                        const clusterCalculator = (clusterMarkers: google.maps.Marker[]) => {
+                          const count = clusterMarkers.length;
+
+                          return {
+                            text: count.toString(),
+                            index: count < 10 ? 0 : count < 100 ? 1 : 2,
+                            title: `${count} Ausflüge`,
+                          };
+                        };
+
+                        // Define cluster icon styles with generated images
                         const styles = [
                           {
                             textColor: '#ffffff',
-                            url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="23" fill="%23f59e0b" stroke="%23ffffff" stroke-width="2"/></svg>',
-                            height: 50,
-                            width: 50,
-                            anchor: [25, 25],
+                            url: clusterImages.small,
+                            height: 40,
+                            width: 40,
+                            anchor: [20, 20],
                             textSize: 12,
                           },
                           {
                             textColor: '#ffffff',
-                            url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="%23ef4444" stroke="%23ffffff" stroke-width="2"/></svg>',
-                            height: 60,
-                            width: 60,
-                            anchor: [30, 30],
+                            url: clusterImages.medium,
+                            height: 50,
+                            width: 50,
+                            anchor: [25, 25],
                             textSize: 14,
                           },
                           {
                             textColor: '#ffffff',
-                            url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70"><circle cx="35" cy="35" r="33" fill="%237c3aed" stroke="%23ffffff" stroke-width="2"/></svg>',
-                            height: 70,
-                            width: 70,
-                            anchor: [35, 35],
+                            url: clusterImages.large,
+                            height: 60,
+                            width: 60,
+                            anchor: [30, 30],
                             textSize: 16,
                           },
                         ];
@@ -666,10 +708,11 @@ export default function Explore() {
                           maxZoom: 15,
                           gridSize: 80,
                           minimumClusterSize: 2,
+                          calculator: clusterCalculator,
                           clusterIconStyles: styles,
                         });
                         console.log('[MapDebug] MarkerClusterer instance created successfully:', clusterer);
-                        console.log('[MapDebug] Clusterer has', clusterer.getTotalMarkers(), 'total markers');
+                        console.log('[MapDebug] Clusterer has', markers.length, 'total markers');
                       } catch (err) {
                         console.error('[MapDebug] MarkerClusterer Library Error:', err);
                         console.log('[MapDebug] Falling back to non-clustered markers. Adding', markers.length, 'markers to map...');
