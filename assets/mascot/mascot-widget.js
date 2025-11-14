@@ -174,6 +174,13 @@ class AusflugFinderMascot {
     this.speechBubble = widget.querySelector('.mascot-speech-bubble');
     this.speechText = widget.querySelector('.mascot-speech-text');
 
+    console.log('→ DOM-Elemente referenziert:', {
+      container: !!this.container,
+      image: !!this.image,
+      speechBubble: !!this.speechBubble,
+      speechText: !!this.speechText
+    });
+
     widget.addEventListener('click', this.handleClick);
 
     this.loadFacts();
