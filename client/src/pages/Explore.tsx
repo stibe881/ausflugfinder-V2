@@ -18,6 +18,10 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { FilterBottomSheet } from "@/components/FilterBottomSheet";
 import { CreateTripWizard } from "@/components/CreateTripWizard";
 import { useAuth } from "@/_core/hooks/useAuth";
+// Import cluster icons to ensure they're bundled by Vite
+import clusterSmallIcon from "@/../../public/icons/cluster/cluster-small.png";
+import clusterMediumIcon from "@/../../public/icons/cluster/cluster-medium.png";
+import clusterLargeIcon from "@/../../public/icons/cluster/cluster-large.png";
 
 const CATEGORIES = [
   "Abenteuerweg",
@@ -665,14 +669,14 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Use pre-generated PNG cluster icons from public directory
+                        // Use pre-generated PNG cluster icons imported and bundled by Vite
                         const clusterImages = {
-                          small: '/icons/cluster/cluster-small.png',
-                          medium: '/icons/cluster/cluster-medium.png',
-                          large: '/icons/cluster/cluster-large.png',
+                          small: clusterSmallIcon,
+                          medium: clusterMediumIcon,
+                          large: clusterLargeIcon,
                         };
 
-                        console.log('[MapDebug] Loaded cluster icon URLs:', clusterImages);
+                        console.log('[MapDebug] Loaded cluster icons:', clusterImages);
 
                         // Custom calculator function to style clusters based on marker count
                         const clusterCalculator = (clusterMarkers: google.maps.Marker[]) => {
