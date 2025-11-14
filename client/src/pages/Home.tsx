@@ -239,7 +239,7 @@ export default function Home() {
               <Sun className="w-10 h-10 text-secondary animate-pulse" style={{ animationDelay: '0.5s' }} />
               <Compass className="w-12 h-12 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
             </div>
-            <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg pb-2">
+            <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg pb-4">
               AusflugFinder
             </h1>
             <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium mt-4">
@@ -286,7 +286,7 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-24 relative bg-gradient-to-b from-background to-muted/30">
         <div className="container">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent pb-2">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent pb-4">
             {t("home.featuresTitle")}
           </h2>
           <p className="text-center text-muted-foreground text-lg mb-8 max-w-2xl mx-auto mt-4">
