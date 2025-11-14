@@ -49,11 +49,24 @@ export const appRouter = router({
     }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
       try {
-        console.log('[Auth Logout] Clearing session cookie:', COOKIE_NAME);
+        console.log('[Auth Logout] Starting logout...');
+
+        // Get cookie options for clearing the cookie with the same settings
         const cookieOptions = getSessionCookieOptions(ctx.req);
-        console.log('[Auth Logout] Cookie options:', { ...cookieOptions, maxAge: -1 });
-        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-        console.log('[Auth Logout] Cookie cleared successfully');
+        console.log('[Auth Logout] Cookie options:', cookieOptions);
+
+        // Clear the session cookie by setting maxAge to 0 (immediately expires)
+        // Use exact same options as when setting to ensure proper deletion
+        ctx.res.clearCookie(COOKIE_NAME, {
+          path: cookieOptions.path,
+          httpOnly: cookieOptions.httpOnly,
+          secure: cookieOptions.secure,
+          sameSite: cookieOptions.sameSite,
+        });
+
+        console.log('[Auth Logout] Cookie cleared, returning success response');
+
+        // Return success response
         return {
           success: true,
         } as const;

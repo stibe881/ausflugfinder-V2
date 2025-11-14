@@ -34,18 +34,30 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logout = useCallback(async () => {
     try {
-      await logoutMutation.mutateAsync();
+      console.log('[Auth] Starting logout...');
+      const result = await Promise.race([
+        logoutMutation.mutateAsync(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Logout timeout after 10s')), 10000)
+        ),
+      ]);
+      console.log('[Auth] Logout completed:', result);
     } catch (error: unknown) {
+      console.error('[Auth] Logout error:', error);
       if (
         error instanceof TRPCClientError &&
         error.data?.code === "UNAUTHORIZED"
       ) {
-        return;
+        console.log('[Auth] Logout unauthorized error, continuing anyway');
+        // Continue with logout even if unauthorized
+      } else {
+        console.error('[Auth] Logout failed:', error);
       }
-      throw error;
     } finally {
+      console.log('[Auth] Clearing auth state...');
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
+      console.log('[Auth] Auth state cleared');
     }
   }, [logoutMutation, utils]);
 
