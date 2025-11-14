@@ -33,32 +33,37 @@ export function useAuth(options?: UseAuthOptions) {
   });
 
   const logout = useCallback(async () => {
+    console.log('[Auth] Starting logout...');
+
     try {
-      console.log('[Auth] Starting logout...');
-      const result = await Promise.race([
+      // Try to call logout endpoint with a timeout
+      // Don't wait more than 5 seconds for the server
+      console.log('[Auth] Calling logout mutation...');
+      await Promise.race([
         logoutMutation.mutateAsync(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Logout timeout after 10s')), 10000)
+          setTimeout(() => reject(new Error('Logout timeout')), 5000)
         ),
       ]);
-      console.log('[Auth] Logout completed:', result);
+      console.log('[Auth] Logout mutation completed successfully');
     } catch (error: unknown) {
-      console.error('[Auth] Logout error:', error);
-      if (
-        error instanceof TRPCClientError &&
-        error.data?.code === "UNAUTHORIZED"
-      ) {
-        console.log('[Auth] Logout unauthorized error, continuing anyway');
-        // Continue with logout even if unauthorized
-      } else {
-        console.error('[Auth] Logout failed:', error);
-      }
-    } finally {
-      console.log('[Auth] Clearing auth state...');
-      utils.auth.me.setData(undefined, null);
-      await utils.auth.me.invalidate();
-      console.log('[Auth] Auth state cleared');
+      // Log the error but continue anyway - we'll clear session locally
+      console.warn('[Auth] Logout mutation failed (continuing anyway):', error instanceof Error ? error.message : error);
     }
+
+    // Always clear local auth state regardless of mutation result
+    console.log('[Auth] Clearing local auth state...');
+    utils.auth.me.setData(undefined, null);
+    await utils.auth.me.invalidate();
+
+    // Clear tokens from storage
+    localStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_token');
+    localStorage.removeItem('manus-runtime-user-info');
+
+    console.log('[Auth] Logout complete, redirecting to login...');
+    // Redirect to login page
+    window.location.href = '/login';
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
