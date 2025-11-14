@@ -21,6 +21,24 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
+
+  // Serve dynamic config as JavaScript in dev mode
+  app.get("/api/config.js", (req, res) => {
+    const config: Record<string, string> = {};
+
+    // Collect all VITE_* environment variables
+    for (const [key, value] of Object.entries(process.env)) {
+      if (key.startsWith("VITE_")) {
+        config[key] = value || "";
+      }
+    }
+
+    // Send as JavaScript that sets window.__CONFIG__
+    const configScript = `window.__CONFIG__ = ${JSON.stringify(config)};`;
+    res.set({ "Content-Type": "application/javascript" });
+    res.send(configScript);
+  });
+
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
@@ -63,6 +81,23 @@ export function serveStatic(app: Express) {
     process.exit(1);
   }
   let cachedHtml: string | null = null;
+
+  // Serve dynamic config as JavaScript
+  app.get("/api/config.js", (req, res) => {
+    const config: Record<string, string> = {};
+
+    // Collect all VITE_* environment variables
+    for (const [key, value] of Object.entries(process.env)) {
+      if (key.startsWith("VITE_")) {
+        config[key] = value || "";
+      }
+    }
+
+    // Send as JavaScript that sets window.__CONFIG__
+    const configScript = `window.__CONFIG__ = ${JSON.stringify(config)};`;
+    res.set({ "Content-Type": "application/javascript" });
+    res.send(configScript);
+  });
 
   app.use((req, res, next) => {
     // Only process requests for index.html or root path for SPA routing
