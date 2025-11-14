@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { Express, Request, Response, NextFunction } from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -78,7 +78,7 @@ async function startServer() {
   }
 
   // Global error handler - must be last middleware
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('[Error Handler] Unhandled error:', err);
 
     // Don't send error response if response has already been sent
@@ -87,7 +87,8 @@ async function startServer() {
     }
 
     // Always send JSON for API errors
-    res.status(err.status || err.statusCode || 500).json({
+    const statusCode = err.status || err.statusCode || 500;
+    res.status(statusCode).json({
       code: err.code || 'INTERNAL_SERVER_ERROR',
       message: err.message || 'Internal server error',
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
