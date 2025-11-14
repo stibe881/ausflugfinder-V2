@@ -1,7 +1,8 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { I18nProvider } from "./contexts/i18nContext";
@@ -15,6 +16,10 @@ import Planner from "./pages/Planner";
 import PlannerDetail from "./pages/PlannerDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import { InstallPromptDialog } from "./components/InstallPromptDialog";
+import { AutoLogoutDialog } from "./components/AutoLogoutDialog";
+import { useInstallPrompt } from "./hooks/useInstallPrompt";
+import { useAutoLogout } from "./hooks/useAutoLogout";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -42,7 +47,34 @@ function Router() {
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
-function App() {
+function AppContent() {
+  const [location] = useLocation();
+  const [showAutoLogoutDialog, setShowAutoLogoutDialog] = useState(false);
+  const { showPrompt, handleInstallClick, handleDismiss, isAppInstalled } = useInstallPrompt();
+
+  // Handle auto-logout
+  const handleAutoLogout = () => {
+    setShowAutoLogoutDialog(true);
+  };
+
+  const { isAutoLogoutDisabled, setAutoLogoutDisabled } = useAutoLogout(
+    handleAutoLogout,
+    isAppInstalled
+  );
+
+  // Handle logout action
+  const handleLogout = () => {
+    // Clear auth tokens
+    localStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_token');
+
+    // Redirect to login
+    window.location.href = '/login';
+  };
+
+  // Don't show auto-logout dialog on login page
+  const isLoginPage = location === '/login';
+
   return (
     <ErrorBoundary>
       <I18nProvider defaultLanguage="de">
@@ -53,11 +85,33 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Router />
+
+            {/* Install Prompt Dialog */}
+            <InstallPromptDialog
+              open={showPrompt}
+              onInstall={handleInstallClick}
+              onDismiss={handleDismiss}
+            />
+
+            {/* Auto-Logout Dialog */}
+            {!isLoginPage && (
+              <AutoLogoutDialog
+                open={showAutoLogoutDialog}
+                onLogout={handleLogout}
+                onStayLoggedIn={() => setShowAutoLogoutDialog(false)}
+                isAppInstalled={isAppInstalled}
+                onDisableAutoLogout={setAutoLogoutDisabled}
+              />
+            )}
           </TooltipProvider>
         </ThemeProvider>
       </I18nProvider>
     </ErrorBoundary>
   );
+}
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;
