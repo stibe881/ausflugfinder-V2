@@ -77,6 +77,23 @@ async function startServer() {
     serveStatic(app);
   }
 
+  // Global error handler - must be last middleware
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[Error Handler] Unhandled error:', err);
+
+    // Don't send error response if response has already been sent
+    if (res.headersSent) {
+      return next(err);
+    }
+
+    // Always send JSON for API errors
+    res.status(err.status || err.statusCode || 500).json({
+      code: err.code || 'INTERNAL_SERVER_ERROR',
+      message: err.message || 'Internal server error',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    });
+  });
+
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
 
