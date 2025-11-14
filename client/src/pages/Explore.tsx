@@ -538,50 +538,10 @@ export default function Explore() {
                   <MapView
                     onMapReady={(map) => {
                       const bounds = new window.google.maps.LatLngBounds();
-                      const markers: google.maps.Marker[] = [];
+                      let userLocation: { lat: number; lng: number } | null = null;
 
-                      // Add user location marker with geolocation
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                          (position) => {
-                            const userPos = {
-                              lat: position.coords.latitude,
-                              lng: position.coords.longitude,
-                            };
-
-                            // Create user location marker with blue dot
-                            new window.google.maps.Marker({
-                              position: userPos,
-                              map,
-                              title: "Dein Standort",
-                              icon: {
-                                path: window.google.maps.SymbolPath.CIRCLE,
-                                scale: 10,
-                                fillColor: "#4285F4",
-                                fillOpacity: 1,
-                                strokeColor: "#ffffff",
-                                strokeWeight: 3,
-                              },
-                              zIndex: 1000,
-                            });
-
-                            // Center map on user location with appropriate zoom
-                            map.setCenter(userPos);
-                            map.setZoom(10);
-                            bounds.extend(userPos);
-                          },
-                          (error) => {
-                            console.error("Geolocation error:", error);
-                          }
-                        );
-                      }
-
-                      // Simple clustering: group nearby markers using Haversine distance
-                      const clusterDistanceKm = 5; // 5km cluster radius
-                      const clusters: { position: google.maps.LatLngLiteral; trips: typeof trips.data }[] = [];
-
-                      // Haversine formula to calculate distance between two points
-                      const getDistanceKm = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+                      // Haversine formula for accurate distance calculation
+                      const getDistanceKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
                         const R = 6371; // Earth's radius in km
                         const dLat = (lat2 - lat1) * Math.PI / 180;
                         const dLng = (lng2 - lng1) * Math.PI / 180;
@@ -593,33 +553,111 @@ export default function Explore() {
                         return R * c;
                       };
 
-                      trips.data.forEach((trip) => {
-                        if (trip.latitude && trip.longitude) {
+                      // Improved clustering algorithm
+                      const createClusters = () => {
+                        interface ClusterData {
+                          position: google.maps.LatLngLiteral;
+                          trips: typeof trips.data;
+                          centerLat: number;
+                          centerLng: number;
+                        }
+
+                        const CLUSTER_RADIUS_KM = 3; // 3km radius for clustering
+                        const clusters: ClusterData[] = [];
+                        const unclusteredTrips = [...(trips.data || [])];
+
+                        // Sort by latitude to improve clustering efficiency
+                        unclusteredTrips.sort((a, b) => {
+                          const latA = parseFloat(a.latitude || '0');
+                          const latB = parseFloat(b.latitude || '0');
+                          return latA - latB;
+                        });
+
+                        while (unclusteredTrips.length > 0) {
+                          const trip = unclusteredTrips.shift();
+                          if (!trip?.latitude || !trip?.longitude) continue;
+
                           const lat = parseFloat(trip.latitude);
                           const lng = parseFloat(trip.longitude);
-                          const position = { lat, lng };
 
-                          // Find existing cluster nearby using Haversine distance
-                          const nearbyCluster = clusters.find(cluster => {
-                            const distance = getDistanceKm(
-                              cluster.position.lat,
-                              cluster.position.lng,
-                              lat,
-                              lng
-                            );
-                            return distance < clusterDistanceKm;
-                          });
+                          const clusterTrips = [trip];
+                          let sumLat = lat;
+                          let sumLng = lng;
 
-                          if (nearbyCluster) {
-                            nearbyCluster.trips.push(trip);
-                          } else {
-                            clusters.push({ position, trips: [trip] });
+                          // Find all trips within radius
+                          for (let i = unclusteredTrips.length - 1; i >= 0; i--) {
+                            const otherTrip = unclusteredTrips[i];
+                            if (!otherTrip.latitude || !otherTrip.longitude) continue;
+
+                            const otherLat = parseFloat(otherTrip.latitude);
+                            const otherLng = parseFloat(otherTrip.longitude);
+                            const distance = getDistanceKm(lat, lng, otherLat, otherLng);
+
+                            if (distance <= CLUSTER_RADIUS_KM) {
+                              clusterTrips.push(otherTrip);
+                              sumLat += otherLat;
+                              sumLng += otherLng;
+                              unclusteredTrips.splice(i, 1);
+                            }
                           }
-                        }
-                      });
 
-                      // Create markers for clusters
-                      clusters.forEach(cluster => {
+                          // Calculate cluster center
+                          const centerLat = sumLat / clusterTrips.length;
+                          const centerLng = sumLng / clusterTrips.length;
+
+                          clusters.push({
+                            position: { lat: centerLat, lng: centerLng },
+                            trips: clusterTrips,
+                            centerLat,
+                            centerLng,
+                          });
+                        }
+
+                        return clusters;
+                      };
+
+                      // Add user location marker
+                      if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                          (position) => {
+                            userLocation = {
+                              lat: position.coords.latitude,
+                              lng: position.coords.longitude,
+                            };
+
+                            // Create user location marker with blue dot
+                            new window.google.maps.Marker({
+                              position: userLocation,
+                              map,
+                              title: "Dein Standort",
+                              icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: 8,
+                                fillColor: "#4285F4",
+                                fillOpacity: 1,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 2,
+                              },
+                              zIndex: 1000,
+                            });
+
+                            // Center map on user location
+                            map.setCenter(userLocation);
+                            map.setZoom(11);
+                            bounds.extend(userLocation);
+                          },
+                          (error) => {
+                            console.log("Geolocation permission denied or unavailable:", error.code);
+                          }
+                        );
+                      }
+
+                      // Create and render clusters
+                      const clusters = createClusters();
+
+                      clusters.forEach((cluster) => {
+                        bounds.extend(cluster.position);
+
                         if (cluster.trips.length === 1) {
                           // Single marker
                           const trip = cluster.trips[0];
@@ -627,19 +665,25 @@ export default function Explore() {
                             position: cluster.position,
                             map,
                             title: trip.title,
+                            icon: {
+                              path: window.google.maps.SymbolPath.CIRCLE,
+                              scale: 12,
+                              fillColor: "#0ea5e9",
+                              fillOpacity: 0.95,
+                              strokeColor: "#ffffff",
+                              strokeWeight: 2,
+                            },
                           });
-
-                          markers.push(marker);
 
                           const infoWindow = new window.google.maps.InfoWindow({
                             content: `
-                              <div style="padding: 8px; max-width: 250px;">
-                                <h3 style="font-weight: bold; margin-bottom: 4px;">${trip.title}</h3>
-                                <p style="color: #666; font-size: 14px; margin-bottom: 8px;">${trip.description?.substring(0, 100) || ''}...</p>
-                                <p style="font-size: 12px; color: #888;">
-                                  <strong>${trip.destination}</strong> • ${COST_LABELS[trip.cost]}
+                              <div style="padding: 10px; max-width: 280px; font-family: system-ui;">
+                                <h3 style="font-weight: 600; margin: 0 0 6px 0; font-size: 15px;">${trip.title}</h3>
+                                <p style="color: #666; font-size: 13px; margin: 0 0 8px 0; line-height: 1.4;">${trip.description?.substring(0, 100) || 'Keine Beschreibung'}...</p>
+                                <p style="font-size: 12px; color: #888; margin: 0 0 8px 0;">
+                                  <strong>📍 ${trip.destination}</strong> • ${COST_LABELS[trip.cost]}
                                 </p>
-                                <a href="/trips/${trip.id}" style="color: #22c55e; text-decoration: none; font-size: 14px;">Details ansehen →</a>
+                                <a href="/trips/${trip.id}" style="color: #10b981; text-decoration: none; font-size: 13px; font-weight: 500;">→ Details ansehen</a>
                               </div>
                             `,
                           });
@@ -648,40 +692,45 @@ export default function Explore() {
                             infoWindow.open(map, marker);
                           });
                         } else {
-                          // Cluster marker
+                          // Cluster marker with count
                           const marker = new window.google.maps.Marker({
                             position: cluster.position,
                             map,
+                            icon: {
+                              path: window.google.maps.SymbolPath.CIRCLE,
+                              scale: 24,
+                              fillColor: "#f59e0b",
+                              fillOpacity: 0.9,
+                              strokeColor: "#ffffff",
+                              strokeWeight: 3,
+                            },
                             label: {
                               text: cluster.trips.length.toString(),
                               color: "white",
                               fontSize: "14px",
                               fontWeight: "bold",
                             },
-                            icon: {
-                              path: window.google.maps.SymbolPath.CIRCLE,
-                              scale: 20,
-                              fillColor: "#22c55e",
-                              fillOpacity: 0.9,
-                              strokeColor: "#ffffff",
-                              strokeWeight: 2,
-                            },
+                            title: `${cluster.trips.length} Ausflüge`,
                           });
 
-                          markers.push(marker);
-
-                          const clusterContent = cluster.trips.map(trip => `
-                            <div style="padding: 4px; border-bottom: 1px solid #eee;">
-                              <a href="/trips/${trip.id}" style="color: #22c55e; text-decoration: none; font-weight: bold;">${trip.title}</a>
-                              <p style="color: #666; font-size: 12px; margin: 2px 0;">${trip.destination}</p>
+                          const clusterContent = cluster.trips
+                            .slice(0, 10) // Show max 10 in popup
+                            .map(
+                              (trip) => `
+                            <div style="padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+                              <a href="/trips/${trip.id}" style="color: #10b981; text-decoration: none; font-weight: 500; font-size: 13px;">${trip.title}</a>
+                              <p style="color: #666; font-size: 12px; margin: 2px 0 0 0;">📍 ${trip.destination} • ${COST_LABELS[trip.cost]}</p>
                             </div>
-                          `).join('');
+                          `
+                            )
+                            .join('');
 
                           const infoWindow = new window.google.maps.InfoWindow({
                             content: `
-                              <div style="padding: 8px; max-width: 300px; max-height: 300px; overflow-y: auto;">
-                                <h3 style="font-weight: bold; margin-bottom: 8px;">${cluster.trips.length} Ausflüge in dieser Gegend</h3>
+                              <div style="padding: 10px; max-width: 320px; font-family: system-ui; max-height: 350px; overflow-y: auto;">
+                                <h3 style="font-weight: 600; margin: 0 0 10px 0; font-size: 15px;">🎯 ${cluster.trips.length} Ausflüge in dieser Gegend</h3>
                                 ${clusterContent}
+                                ${cluster.trips.length > 10 ? `<p style="text-align: center; color: #888; font-size: 12px; margin-top: 8px; font-style: italic;">... und ${cluster.trips.length - 10} weitere</p>` : ''}
                               </div>
                             `,
                           });
@@ -690,18 +739,17 @@ export default function Explore() {
                             infoWindow.open(map, marker);
                           });
                         }
-
-                        bounds.extend(cluster.position);
                       });
 
-                      // Fit bounds if we have markers (but not if we only have user location)
+                      // Fit map to bounds with padding
                       if (!bounds.isEmpty() && clusters.length > 0) {
-                        map.fitBounds(bounds);
+                        map.fitBounds(bounds, 80);
 
-                        // Don't zoom in too much for single markers
+                        // Adjust zoom to reasonable level
                         google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-                          if (map.getZoom()! > 15) {
-                            map.setZoom(15);
+                          const zoom = map.getZoom();
+                          if (zoom !== undefined && zoom > 16) {
+                            map.setZoom(16);
                           }
                         });
                       }
