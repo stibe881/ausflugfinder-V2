@@ -57,9 +57,12 @@ function AppContent() {
     setShowAutoLogoutDialog(true);
   };
 
+  // Don't enable auto-logout on login page
+  const isLoginPage = location === '/login';
+
   const { isAutoLogoutDisabled, setAutoLogoutDisabled } = useAutoLogout(
     handleAutoLogout,
-    isAppInstalled
+    isAppInstalled && !isLoginPage // Only enable auto-logout when NOT on login page
   );
 
   // Handle logout action
@@ -71,9 +74,6 @@ function AppContent() {
     // Redirect to login
     window.location.href = '/login';
   };
-
-  // Don't show auto-logout dialog on login page
-  const isLoginPage = location === '/login';
 
   return (
     <ErrorBoundary>
