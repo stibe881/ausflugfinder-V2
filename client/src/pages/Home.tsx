@@ -286,7 +286,7 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
             {t("home.featuresTitle")}
           </h2>
-          <p className="text-center text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-center text-muted-foreground text-lg mb-8 max-w-2xl mx-auto mt-4">
             {t("home.featuresSubtitle")}
           </p>
           
