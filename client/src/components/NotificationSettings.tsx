@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { usePushNotifications, type PushNotificationSettings } from '@/hooks/usePushNotifications';
 import { useLocation } from '@/hooks/useLocation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,15 +37,29 @@ export const NotificationSettings = () => {
   const { isTracking, startTracking, stopTracking } = useLocation();
 
   const [isSaving, setIsSaving] = useState(false);
-  const [localSettings, setLocalSettings] = useState(settings);
+
+  const defaultSettings: PushNotificationSettings = {
+    notificationsEnabled: true,
+    friendRequestNotifications: true,
+    friendRequestAcceptedNotifications: true,
+    nearbyTripNotifications: true,
+    nearbyTripDistance: 5000,
+    locationTrackingEnabled: true,
+  };
+
+  const [localSettings, setLocalSettings] = useState<PushNotificationSettings>(
+    settings || defaultSettings
+  );
 
   // Sync local settings with fetched settings
   useEffect(() => {
-    setLocalSettings(settings);
+    if (settings) {
+      setLocalSettings(settings);
+    }
   }, [settings]);
 
   const handleToggleSetting = async (
-    key: keyof typeof settings,
+    key: 'notificationsEnabled' | 'friendRequestNotifications' | 'friendRequestAcceptedNotifications' | 'nearbyTripNotifications' | 'locationTrackingEnabled',
     value: boolean
   ) => {
     setLocalSettings((prev) => ({
