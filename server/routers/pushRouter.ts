@@ -47,8 +47,12 @@ export const pushRouter = router({
     .input(PushSubscriptionSchema)
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");
@@ -111,8 +115,12 @@ export const pushRouter = router({
     .input(z.object({ endpoint: z.string() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");
@@ -147,8 +155,12 @@ export const pushRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");
@@ -207,8 +219,12 @@ export const pushRouter = router({
   // Get user settings
   getSettings: protectedProcedure.query(async ({ ctx }) => {
     try {
-      const db = getDb();
+      const db = await getDb();
       const userId = ctx.user?.id;
+
+      if (!db) {
+        throw new Error("Database not available");
+      }
 
       if (!userId) {
         throw new Error("User not authenticated");
@@ -260,8 +276,12 @@ export const pushRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");
@@ -332,8 +352,12 @@ export const pushRouter = router({
     .input(z.object({ limit: z.number().default(20), unreadOnly: z.boolean().default(false) }))
     .query(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");
@@ -372,8 +396,12 @@ export const pushRouter = router({
     .input(z.object({ notificationId: z.number() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");
@@ -412,8 +440,12 @@ export const pushRouter = router({
     .input(z.object({ toUserId: z.number() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const fromUserId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!fromUserId) {
           throw new Error("User not authenticated");
@@ -473,8 +505,12 @@ export const pushRouter = router({
     .input(z.object({ fromUserId: z.number() }))
     .mutation(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const toUserId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!toUserId) {
           throw new Error("User not authenticated");
@@ -519,8 +555,12 @@ export const pushRouter = router({
     .input(z.object({ status: z.enum(["pending", "accepted", "blocked"]).default("accepted") }))
     .query(async ({ input, ctx }) => {
       try {
-        const db = getDb();
+        const db = await getDb();
         const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
 
         if (!userId) {
           throw new Error("User not authenticated");

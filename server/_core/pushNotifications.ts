@@ -44,7 +44,12 @@ export async function sendPushNotificationToUser(
   notificationType: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'system' = 'system'
 ): Promise<boolean> {
   try {
-    const db = getDb();
+    const db = await getDb();
+
+    if (!db) {
+      console.error('Database not available in sendPushNotificationToUser');
+      return false;
+    }
 
     // Check if user has notifications enabled
     const userSettings_ = await db
@@ -132,7 +137,12 @@ export async function sendFriendRequestNotification(
   toUserId: number
 ): Promise<boolean> {
   try {
-    const db = getDb();
+    const db = await getDb();
+
+    if (!db) {
+      console.error('Database not available in sendFriendRequestNotification');
+      return false;
+    }
 
     // Get sender's name
     const sender = await db
@@ -171,7 +181,12 @@ export async function sendFriendAcceptedNotification(
   toUserId: number
 ): Promise<boolean> {
   try {
-    const db = getDb();
+    const db = await getDb();
+
+    if (!db) {
+      console.error('Database not available in sendFriendAcceptedNotification');
+      return false;
+    }
 
     // Get sender's name
     const sender = await db
@@ -211,7 +226,12 @@ export async function sendNearbyTripNotification(
   distanceInMeters: number
 ): Promise<boolean> {
   try {
-    const db = getDb();
+    const db = await getDb();
+
+    if (!db) {
+      console.error('Database not available in sendNearbyTripNotification');
+      return false;
+    }
 
     // Get trip details
     const trip = await db
@@ -270,7 +290,12 @@ export function calculateDistance(
  */
 export async function checkAndSendNearbyTripNotifications(userId: number): Promise<void> {
   try {
-    const db = getDb();
+    const db = await getDb();
+
+    if (!db) {
+      console.error('Database not available in checkAndSendNearbyTripNotifications');
+      return;
+    }
 
     // Get user's current location
     const userLocation = await db
