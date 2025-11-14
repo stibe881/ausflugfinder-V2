@@ -6,11 +6,12 @@ import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useTheme } from "@/contexts/ThemeContext";
+import { InstallButton } from "@/components/InstallButton";
 import { useI18n, type Language } from "@/contexts/i18nContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Home() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -187,6 +188,8 @@ export default function Home() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <InstallButton />
       </header>
 
       {/* Hero Section with Video Background */}

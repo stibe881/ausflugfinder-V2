@@ -28,7 +28,6 @@ export const useInstallPrompt = () => {
       e.preventDefault();
       const promptEvent = e as BeforeInstallPromptEvent;
       setInstallPrompt(promptEvent);
-      setShowPrompt(true);
     };
 
     // Listen for app installed
@@ -69,11 +68,16 @@ export const useInstallPrompt = () => {
     setShowPrompt(false);
   };
 
+  const showInstallPrompt = () => {
+    setShowPrompt(true);
+  };
+
   return {
     installPrompt,
     isAppInstalled,
     showPrompt,
     handleInstallClick,
     handleDismiss,
+    showInstallPrompt,
   };
 };
