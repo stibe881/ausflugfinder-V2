@@ -20,20 +20,20 @@ import { CreateTripWizard } from "@/components/CreateTripWizard";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const CATEGORIES = [
+  "Abenteuerweg",
   "Aktion & Sport",
   "Badewelt",
   "Freizeitpark",
   "Innenspielplatz",
+  "Kugelbahn",
   "Kultur",
+  "Museum",
   "Pumptrack",
   "Restaurant",
   "Schnitzeljagd",
   "Spielplatz",
   "Tierpark/Zoo",
   "Wanderweg",
-  "Abenteuerweg",
-  "Kugelbahn",
-  "Museum",
 ];
 
 const REGIONS = [
@@ -66,9 +66,9 @@ const REGIONS = [
   "Zürich",
   // Nachbarländer
   "Deutschland",
-  "Österreich",
   "Frankreich",
   "Italien",
+  "Österreich",
 ];
 
 const COST_LABELS: Record<string, string> = {
