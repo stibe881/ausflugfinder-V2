@@ -84,6 +84,7 @@ declare global {
   interface Window {
     google?: typeof google;
     __VITE_GOOGLE_MAPS_API_KEY?: string;
+    __CONFIG__?: Record<string, string>;
   }
 }
 
@@ -91,11 +92,19 @@ function getApiKey(): string {
   // Try build-time environment variable first
   const buildTimeKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   if (buildTimeKey) {
+    console.debug('[Map] Using build-time API key');
     return buildTimeKey;
   }
 
-  // Fall back to runtime injection via window object
+  // Try runtime config from server
+  if (typeof window !== 'undefined' && window.__CONFIG__?.VITE_GOOGLE_MAPS_API_KEY) {
+    console.debug('[Map] Using runtime API key from config');
+    return window.__CONFIG__.VITE_GOOGLE_MAPS_API_KEY;
+  }
+
+  // Legacy fallback to window object injection
   if (typeof window !== 'undefined' && window.__VITE_GOOGLE_MAPS_API_KEY) {
+    console.debug('[Map] Using legacy window injection');
     return window.__VITE_GOOGLE_MAPS_API_KEY;
   }
 
