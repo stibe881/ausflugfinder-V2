@@ -665,37 +665,14 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Helper function to generate circle marker images with encoded SVG
-                        const generateCircleImage = (color: string, size: number): string => {
-                          // Create inline SVG with proper encoding for MarkerClusterer compatibility
-                          const svgString = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}' width='${size}' height='${size}'>
-                            <defs>
-                              <filter id='shadow'>
-                                <feDropShadow dx='0' dy='1' stdDeviation='2' floodOpacity='0.3'/>
-                              </filter>
-                            </defs>
-                            <circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='${color}' stroke='white' stroke-width='2' filter='url(#shadow)'/>
-                            <circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='none' stroke='${color}' stroke-width='0.5' opacity='0.5'/>
-                          </svg>`;
-
-                          // Encode SVG for data URI with proper charset
-                          const encodedSvg = encodeURIComponent(svgString)
-                            .replace(/'/g, '%27')
-                            .replace(/"/g, '%22');
-                          const dataUri = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
-
-                          console.log('[MapDebug] Generated SVG data URI for cluster image (', size, 'px)');
-                          return dataUri;
-                        };
-
-                        // Pre-generate cluster marker images
+                        // Use pre-generated PNG cluster icons from public directory
                         const clusterImages = {
-                          small: generateCircleImage('#f59e0b', 40),
-                          medium: generateCircleImage('#ef4444', 50),
-                          large: generateCircleImage('#7c3aed', 60),
+                          small: '/icons/cluster/cluster-small.png',
+                          medium: '/icons/cluster/cluster-medium.png',
+                          large: '/icons/cluster/cluster-large.png',
                         };
 
-                        console.log('[MapDebug] Generated cluster images');
+                        console.log('[MapDebug] Loaded cluster icon URLs:', clusterImages);
 
                         // Custom calculator function to style clusters based on marker count
                         const clusterCalculator = (clusterMarkers: google.maps.Marker[]) => {
