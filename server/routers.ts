@@ -49,12 +49,16 @@ export const appRouter = router({
     }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
       try {
+        console.log('[Auth Logout] Clearing session cookie:', COOKIE_NAME);
         const cookieOptions = getSessionCookieOptions(ctx.req);
+        console.log('[Auth Logout] Cookie options:', { ...cookieOptions, maxAge: -1 });
         ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+        console.log('[Auth Logout] Cookie cleared successfully');
         return {
           success: true,
         } as const;
       } catch (error) {
+        console.error('[Auth Logout] Error during logout:', error);
         const appError = handleError(error, "auth.logout");
         throw toTRPCError(appError);
       }
