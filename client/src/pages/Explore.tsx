@@ -576,9 +576,22 @@ export default function Explore() {
                         );
                       }
 
-                      // Simple clustering: group nearby markers
-                      const clusterDistance = 0.05; // ~5km at this scale
+                      // Simple clustering: group nearby markers using Haversine distance
+                      const clusterDistanceKm = 5; // 5km cluster radius
                       const clusters: { position: google.maps.LatLngLiteral; trips: typeof trips.data }[] = [];
+
+                      // Haversine formula to calculate distance between two points
+                      const getDistanceKm = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+                        const R = 6371; // Earth's radius in km
+                        const dLat = (lat2 - lat1) * Math.PI / 180;
+                        const dLng = (lng2 - lng1) * Math.PI / 180;
+                        const a =
+                          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLng / 2) * Math.sin(dLng / 2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        return R * c;
+                      };
 
                       trips.data.forEach((trip) => {
                         if (trip.latitude && trip.longitude) {
@@ -586,13 +599,15 @@ export default function Explore() {
                           const lng = parseFloat(trip.longitude);
                           const position = { lat, lng };
 
-                          // Find existing cluster nearby
+                          // Find existing cluster nearby using Haversine distance
                           const nearbyCluster = clusters.find(cluster => {
-                            const distance = Math.sqrt(
-                              Math.pow(cluster.position.lat - lat, 2) +
-                              Math.pow(cluster.position.lng - lng, 2)
+                            const distance = getDistanceKm(
+                              cluster.position.lat,
+                              cluster.position.lng,
+                              lat,
+                              lng
                             );
-                            return distance < clusterDistance;
+                            return distance < clusterDistanceKm;
                           });
 
                           if (nearbyCluster) {
