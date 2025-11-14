@@ -7,6 +7,7 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
+import { registerSW } from "virtual:pwa-register";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,9 @@ const trpcClient = trpc.createClient({
     }),
   ],
 });
+
+// Register Service Worker for PWA with auto-update capability
+registerSW({ immediate: true });
 
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
