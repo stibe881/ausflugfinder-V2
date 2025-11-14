@@ -599,24 +599,56 @@ export default function Explore() {
                           },
                         });
 
-                        // Create info window
+                        // Create info window with image and map selection
                         const infoWindow = new window.google.maps.InfoWindow({
                           content: `
-                            <div style="padding: 12px; max-width: 300px; font-family: system-ui;">
-                              <h3 style="font-weight: 600; margin: 0 0 8px 0; font-size: 15px; color: #1f2937;">${trip.title}</h3>
-                              <p style="color: #6b7280; font-size: 13px; margin: 0 0 10px 0; line-height: 1.5;">${trip.description?.substring(0, 120) || 'Keine Beschreibung'}...</p>
-                              <div style="display: flex; gap: 8px; margin-bottom: 10px; font-size: 12px;">
-                                <span style="color: #6b7280;">📍 ${trip.destination}</span>
-                                <span style="color: #6b7280;">•</span>
-                                <span style="color: #6b7280;">${COST_LABELS[trip.cost]}</span>
+                            <div style="padding: 0; max-width: 320px; font-family: system-ui; border-radius: 8px; overflow: hidden;">
+                              ${trip.image ? `<img src="${trip.image}" alt="${trip.title}" style="width: 100%; height: 150px; object-fit: cover; display: block;">` : `<div style="width: 100%; height: 150px; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center;"><span style="color: #9ca3af; font-size: 12px;">Kein Bild vorhanden</span></div>`}
+                              <div style="padding: 12px; background: white;">
+                                <h3 style="font-weight: 600; margin: 0 0 8px 0; font-size: 15px; color: #1f2937;">${trip.title}</h3>
+                                <p style="color: #6b7280; font-size: 13px; margin: 0 0 10px 0; line-height: 1.5;">${trip.description?.substring(0, 120) || 'Keine Beschreibung'}...</p>
+                                <div style="display: flex; gap: 8px; margin-bottom: 12px; font-size: 12px;">
+                                  <span style="color: #6b7280;">📍 ${trip.destination}</span>
+                                  <span style="color: #6b7280;">•</span>
+                                  <span style="color: #6b7280;">${COST_LABELS[trip.cost]}</span>
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                  <button class="map-button-apple" data-lat="${trip.latitude}" data-lng="${trip.longitude}" data-name="${trip.destination}" style="flex: 1; color: #fff; background: #000; border: none; font-size: 12px; font-weight: 500; padding: 6px 8px; border-radius: 4px; cursor: pointer;">Apple Maps</button>
+                                  <button class="map-button-google" data-lat="${trip.latitude}" data-lng="${trip.longitude}" data-name="${trip.destination}" style="flex: 1; color: #fff; background: #4285f4; border: none; font-size: 12px; font-weight: 500; padding: 6px 8px; border-radius: 4px; cursor: pointer;">Google Maps</button>
+                                </div>
+                                <a href="/trips/${trip.id}" style="display: inline-block; color: #fff; background: #10b981; text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 4px;">Details →</a>
                               </div>
-                              <a href="/trips/${trip.id}" style="display: inline-block; color: #fff; background: #10b981; text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 4px;">Details →</a>
                             </div>
                           `,
                         });
 
                         marker.addListener("click", () => {
                           infoWindow.open(map, marker);
+                          // Attach map button listeners after infoWindow opens
+                          setTimeout(() => {
+                            const appleBtn = document.querySelector(`.map-button-apple[data-lat="${trip.latitude}"]`);
+                            const googleBtn = document.querySelector(`.map-button-google[data-lat="${trip.latitude}"]`);
+
+                            if (appleBtn) {
+                              appleBtn.addEventListener('click', () => {
+                                const lat = appleBtn.getAttribute('data-lat');
+                                const lng = appleBtn.getAttribute('data-lng');
+                                const name = appleBtn.getAttribute('data-name');
+                                const mapsUrl = `maps://maps.apple.com/?address=${encodeURIComponent(name)}&q=${encodeURIComponent(name)}&sll=${lat},${lng}`;
+                                window.location.href = mapsUrl;
+                              });
+                            }
+
+                            if (googleBtn) {
+                              googleBtn.addEventListener('click', () => {
+                                const lat = googleBtn.getAttribute('data-lat');
+                                const lng = googleBtn.getAttribute('data-lng');
+                                const name = googleBtn.getAttribute('data-name');
+                                const mapsUrl = `https://maps.google.com/?q=${lat},${lng}(${encodeURIComponent(name)})`;
+                                window.open(mapsUrl, '_blank');
+                              });
+                            }
+                          }, 100);
                         });
 
                         markers.push(marker);
