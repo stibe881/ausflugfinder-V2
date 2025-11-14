@@ -665,13 +665,33 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Helper function to generate SVG circle marker images as data URIs
+                        // Helper function to generate circle marker images as data URIs using Canvas
                         const generateCircleImage = (color: string, size: number): string => {
-                          // Create minimal SVG without extra encoding
-                          const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}'><circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='${color}' stroke='white' stroke-width='2'/></svg>`;
-                          // Use simple URL encoding
-                          const encoded = encodeURIComponent(svg);
-                          return `data:image/svg+xml;utf8,${encoded}`;
+                          // Create canvas element
+                          const canvas = document.createElement('canvas');
+                          canvas.width = size;
+                          canvas.height = size;
+                          const ctx = canvas.getContext('2d');
+
+                          if (!ctx) {
+                            console.error('[MapDebug] Failed to get canvas context');
+                            // Fallback to simple SVG
+                            return `data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}'><circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='${color}' stroke='white' stroke-width='2'/></svg>`)}`;
+                          }
+
+                          // Draw circle with fill
+                          ctx.beginPath();
+                          ctx.arc(size / 2, size / 2, size / 2 - 2, 0, 2 * Math.PI);
+                          ctx.fillStyle = color;
+                          ctx.fill();
+
+                          // Draw white stroke
+                          ctx.strokeStyle = 'white';
+                          ctx.lineWidth = 2;
+                          ctx.stroke();
+
+                          // Convert to data URL
+                          return canvas.toDataURL('image/png');
                         };
 
                         // Pre-generate cluster marker images

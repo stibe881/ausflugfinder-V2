@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -52,28 +52,28 @@ function AppContent() {
   const [showAutoLogoutDialog, setShowAutoLogoutDialog] = useState(false);
   const { showPrompt, handleInstallClick, handleDismiss, isAppInstalled } = useInstallPrompt();
 
-  // Handle auto-logout
-  const handleAutoLogout = () => {
-    setShowAutoLogoutDialog(true);
-  };
-
   // Don't enable auto-logout on login page
   const isLoginPage = location === '/login';
 
-  const { isAutoLogoutDisabled, setAutoLogoutDisabled } = useAutoLogout(
-    handleAutoLogout,
-    isAppInstalled && !isLoginPage // Only enable auto-logout when NOT on login page
-  );
-
-  // Handle logout action
-  const handleLogout = () => {
+  // Memoize logout handler to avoid creating new function every render
+  const handleLogout = useCallback(() => {
     // Clear auth tokens
     localStorage.removeItem('auth_token');
     sessionStorage.removeItem('auth_token');
 
     // Redirect to login
     window.location.href = '/login';
-  };
+  }, []);
+
+  // Memoize auto-logout handler
+  const handleAutoLogout = useCallback(() => {
+    setShowAutoLogoutDialog(true);
+  }, []);
+
+  const { isAutoLogoutDisabled, setAutoLogoutDisabled } = useAutoLogout(
+    handleAutoLogout,
+    isAppInstalled && !isLoginPage // Only enable auto-logout when NOT on login page
+  );
 
   return (
     <ErrorBoundary>
