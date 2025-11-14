@@ -18,12 +18,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { FilterBottomSheet } from "@/components/FilterBottomSheet";
 import { CreateTripWizard } from "@/components/CreateTripWizard";
 import { useAuth } from "@/_core/hooks/useAuth";
-// Cluster icon URLs from public directory
-const CLUSTER_ICONS = {
-  small: '/icons/cluster/cluster-small.png',
-  medium: '/icons/cluster/cluster-medium.png',
-  large: '/icons/cluster/cluster-large.png',
-};
+
 
 const CATEGORIES = [
   "Abenteuerweg",
@@ -671,61 +666,39 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Use pre-generated PNG cluster icons from public directory
-                        const clusterImages = {
-                          small: CLUSTER_ICONS.small,
-                          medium: CLUSTER_ICONS.medium,
-                          large: CLUSTER_ICONS.large,
+                        // Custom renderer function for modern cluster icons
+                        const renderer = {
+                          render: ({ count, position }: { count: number; position: google.maps.LatLngLiteral }) => {
+                            const scale = 20 + Math.min(count, 100) / 5; // Scale up to a certain point
+                            const fontSize = 12 + Math.min(count, 100) / 10;
+
+                            return new window.google.maps.Marker({
+                              label: {
+                                text: String(count),
+                                color: "white",
+                                fontSize: `${fontSize}px`,
+                                fontWeight: "bold",
+                              },
+                              position,
+                              icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: scale,
+                                fillColor: "#10b981", // Primary color, consistent with individual markers
+                                fillOpacity: 0.95,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 2.5,
+                              },
+                              zIndex: Number(window.google.maps.Marker.MAX_ZINDEX) + count,
+                            });
+                          },
                         };
-
-                        console.log('[MapDebug] Loaded cluster icons:', clusterImages);
-
-                        // Custom calculator function to style clusters based on marker count
-                        const clusterCalculator = (clusterMarkers: google.maps.Marker[]) => {
-                          const count = clusterMarkers.length;
-
-                          return {
-                            text: count.toString(),
-                            index: count < 10 ? 0 : count < 100 ? 1 : 2,
-                            title: `${count} Ausflüge`,
-                          };
-                        };
-
-                        // Define cluster icon styles with generated images
-                        const styles = [
-                          {
-                            textColor: '#ffffff',
-                            url: clusterImages.small,
-                            height: 40,
-                            width: 40,
-                            anchor: [20, 20],
-                            textSize: 12,
-                          },
-                          {
-                            textColor: '#ffffff',
-                            url: clusterImages.medium,
-                            height: 50,
-                            width: 50,
-                            anchor: [25, 25],
-                            textSize: 14,
-                          },
-                          {
-                            textColor: '#ffffff',
-                            url: clusterImages.large,
-                            height: 60,
-                            width: 60,
-                            anchor: [30, 30],
-                            textSize: 16,
-                          },
-                        ];
 
                         console.log('[MapDebug] Creating MarkerClusterer with gridSize=80, maxZoom=15...');
                         const clusterer = new MarkerClusterer(map, markers, {
                           maxZoom: 15,
                           gridSize: 80,
                           minimumClusterSize: 2,
-                          calculator: clusterCalculator,
-                          styles: styles,
+                          renderer: renderer,
                         });
                         console.log('[MapDebug] MarkerClusterer instance created successfully:', clusterer);
                         console.log('[MapDebug] Clusterer has', markers.length, 'total markers');
