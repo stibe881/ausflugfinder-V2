@@ -239,7 +239,7 @@ export default function Home() {
             <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent drop-shadow-lg">
               AusflugFinder
             </h1>
-            <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium">
+            <p className="text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto font-medium mt-4">
               {t("app.tagline")}
             </p>
           </div>

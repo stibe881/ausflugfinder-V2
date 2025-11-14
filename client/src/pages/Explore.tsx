@@ -613,11 +613,11 @@ export default function Explore() {
                                   <span style="color: #6b7280;">•</span>
                                   <span style="color: #6b7280;">${COST_LABELS[trip.cost]}</span>
                                 </div>
-                                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                <a href="/trips/${trip.id}" style="display: inline-block; color: #fff; background: #10b981; text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 4px; margin-bottom: 12px;">Details →</a>
+                                <div style="display: flex; gap: 8px;">
                                   <button class="map-button-apple" data-lat="${trip.latitude}" data-lng="${trip.longitude}" data-name="${trip.destination}" style="flex: 1; color: #fff; background: #000; border: none; font-size: 12px; font-weight: 500; padding: 6px 8px; border-radius: 4px; cursor: pointer;">Apple Maps</button>
                                   <button class="map-button-google" data-lat="${trip.latitude}" data-lng="${trip.longitude}" data-name="${trip.destination}" style="flex: 1; color: #fff; background: #4285f4; border: none; font-size: 12px; font-weight: 500; padding: 6px 8px; border-radius: 4px; cursor: pointer;">Google Maps</button>
                                 </div>
-                                <a href="/trips/${trip.id}" style="display: inline-block; color: #fff; background: #10b981; text-decoration: none; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 4px;">Details →</a>
                               </div>
                             </div>
                           `,
