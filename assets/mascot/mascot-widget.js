@@ -149,44 +149,51 @@
       });
   }
 
-  // Widget initialisieren
-  function initWidget() {
-    const widget = document.getElementById('ausflugfinder-mascot');
-    if (!widget) {
-      console.error('Murmeltier-Maskottchen: Element #ausflugfinder-mascot nicht gefunden');
-      return;
-    }
-
-    // Position und Größe setzen
-    widget.className = 'mascot-' + CONFIG.position + ' mascot-' + CONFIG.size;
-
-    // HTML-Struktur erstellen
-    widget.innerHTML = `
-      <div class="mascot-container">
-        <div class="mascot-speech-bubble hidden">
-          <p class="mascot-speech-text"></p>
-          <div class="mascot-speech-arrow"></div>
+      // Widget initialisieren
+    function initWidget() {
+      const widget = document.getElementById('ausflugfinder-mascot');
+      if (!widget) {
+        console.error('Murmeltier-Maskottchen: Element #ausflugfinder-mascot nicht gefunden');
+        return;
+      }
+  
+      // Position und Größe setzen
+      widget.className = 'mascot-' + CONFIG.position + ' mascot-' + CONFIG.size;
+  
+      // HTML-Struktur erstellen
+      widget.innerHTML = `
+        <div class="mascot-container">
+          <div class="mascot-speech-bubble hidden">
+            <p class="mascot-speech-text"></p>
+            <div class="mascot-speech-arrow"></div>
+          </div>
+          <img class="mascot-image" src="${getImagePath('waving')}" alt="Murmeltier-Familie" draggable="false">
+          <div class="mascot-hover-ring"></div>
         </div>
-        <img class="mascot-image" src="${getImagePath('waving')}" alt="Murmeltier-Familie" draggable="false">
-        <div class="mascot-hover-ring"></div>
-      </div>
-    `;
-
-    // Elemente referenzieren
-    container = widget.querySelector('.mascot-container');
-    image = widget.querySelector('.mascot-image');
-    speechBubble = widget.querySelector('.mascot-speech-bubble');
-    speechText = widget.querySelector('.mascot-speech-text');
-
-    // Event-Listener
-    widget.addEventListener('click', handleClick);
-
-    // Fakten laden
-    loadFacts();
-
-    console.log('Murmeltier-Maskottchen initialisiert (Saison: ' + getCurrentSeason() + ')');
-  }
-
+      `;
+  
+      // Elemente referenzieren
+      container = widget.querySelector('.mascot-container');
+      image = widget.querySelector('.mascot-image');
+      speechBubble = widget.querySelector('.mascot-speech-bubble');
+      speechText = widget.querySelector('.mascot-speech-text');
+  
+      // Event-Listener
+      widget.addEventListener('click', handleClick);
+  
+      // Fakten laden
+      loadFacts();
+  
+      // Initial greeting
+      const username = widget.dataset.username;
+      let greeting = `Hallo! Ich bin Lumo, dein persönliches Murmeltier-Maskottchen. Ich helfe dir, spannende Ausflüge zu finden und zu planen. Klick mich an, um mehr zu erfahren!`;
+      if (username) {
+        greeting = `Hallo ${username}! Ich bin Lumo, dein persönliches Murmeltier-Maskottchen. Ich helfe dir, spannende Ausflüge zu finden und zu planen. Klick mich an, um mehr zu erfahren!`;
+      }
+      showSpeechBubble(greeting);
+  
+      console.log('Murmeltier-Maskottchen initialisiert (Saison: ' + getCurrentSeason() + ')');
+    }
   // Konfiguration überschreiben (optional)
   window.MarmotMascotConfig = function(options) {
     if (options.position) CONFIG.position = options.position;
