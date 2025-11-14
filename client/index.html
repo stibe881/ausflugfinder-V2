@@ -28,6 +28,13 @@
 
   <body>
     <div id="root"></div>
+
+    <!-- Inject Google Maps API Key at runtime -->
+    <script>
+      // Set Google Maps API key from environment or .env file
+      window.__VITE_GOOGLE_MAPS_API_KEY = '%VITE_GOOGLE_MAPS_API_KEY%';
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
 
     <!-- Service Worker Registration for PWA -->

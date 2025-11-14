@@ -83,23 +83,41 @@ import { cn } from "@/lib/utils";
 declare global {
   interface Window {
     google?: typeof google;
+    __VITE_GOOGLE_MAPS_API_KEY?: string;
   }
 }
 
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+function getApiKey(): string {
+  // Try build-time environment variable first
+  const buildTimeKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  if (buildTimeKey) {
+    return buildTimeKey;
+  }
+
+  // Fall back to runtime injection via window object
+  if (typeof window !== 'undefined' && window.__VITE_GOOGLE_MAPS_API_KEY) {
+    return window.__VITE_GOOGLE_MAPS_API_KEY;
+  }
+
+  console.warn('[Map] Google Maps API key not found. Map may show watermark.');
+  return '';
+}
 
 function loadMapScript() {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
+    const apiKey = getApiKey();
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&libraries=marker,places,geocoding,geometry`;
     script.async = true;
+    script.defer = true;
     script.crossOrigin = "anonymous";
     script.onload = () => {
       resolve(null);
-      script.remove(); // Clean up immediately
     };
     script.onerror = () => {
-      console.error("Failed to load Google Maps script");
+      const error = 'Failed to load Google Maps script';
+      console.error(`[Map] ${error}`);
+      reject(new Error(error));
     };
     document.head.appendChild(script);
   });
