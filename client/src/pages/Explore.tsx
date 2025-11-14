@@ -665,33 +665,27 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Helper function to generate circle marker images as data URIs using Canvas
+                        // Helper function to generate circle marker images with encoded SVG
                         const generateCircleImage = (color: string, size: number): string => {
-                          // Create canvas element
-                          const canvas = document.createElement('canvas');
-                          canvas.width = size;
-                          canvas.height = size;
-                          const ctx = canvas.getContext('2d');
+                          // Create inline SVG with proper encoding for MarkerClusterer compatibility
+                          const svgString = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}' width='${size}' height='${size}'>
+                            <defs>
+                              <filter id='shadow'>
+                                <feDropShadow dx='0' dy='1' stdDeviation='2' floodOpacity='0.3'/>
+                              </filter>
+                            </defs>
+                            <circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='${color}' stroke='white' stroke-width='2' filter='url(#shadow)'/>
+                            <circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='none' stroke='${color}' stroke-width='0.5' opacity='0.5'/>
+                          </svg>`;
 
-                          if (!ctx) {
-                            console.error('[MapDebug] Failed to get canvas context');
-                            // Fallback to simple SVG
-                            return `data:image/svg+xml;base64,${btoa(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}'><circle cx='${size/2}' cy='${size/2}' r='${size/2 - 2}' fill='${color}' stroke='white' stroke-width='2'/></svg>`)}`;
-                          }
+                          // Encode SVG for data URI with proper charset
+                          const encodedSvg = encodeURIComponent(svgString)
+                            .replace(/'/g, '%27')
+                            .replace(/"/g, '%22');
+                          const dataUri = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
 
-                          // Draw circle with fill
-                          ctx.beginPath();
-                          ctx.arc(size / 2, size / 2, size / 2 - 2, 0, 2 * Math.PI);
-                          ctx.fillStyle = color;
-                          ctx.fill();
-
-                          // Draw white stroke
-                          ctx.strokeStyle = 'white';
-                          ctx.lineWidth = 2;
-                          ctx.stroke();
-
-                          // Convert to data URL
-                          return canvas.toDataURL('image/png');
+                          console.log('[MapDebug] Generated SVG data URI for cluster image (', size, 'px)');
+                          return dataUri;
                         };
 
                         // Pre-generate cluster marker images
