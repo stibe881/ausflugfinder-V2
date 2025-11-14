@@ -818,10 +818,10 @@ export default function Explore() {
                 {filteredTrips?.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
                     <Card
-                      className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group flex flex-row"
+                      className="overflow-visible cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group flex flex-row gap-4 p-4"
                     >
                       {/* Image Section - Top Third */}
-                      <div className="w-40 h-40 flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-muted to-muted/50">
+                      <div className="w-40 h-40 flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-muted to-muted/50 rounded-lg">
                         {trip.image ? (
                           <>
                             <img
@@ -852,7 +852,7 @@ export default function Explore() {
                       </div>
 
                       {/* Content Section */}
-                      <div className="flex-1 flex flex-col justify-between p-4">
+                      <div className="flex-1 flex flex-col justify-between">
                         {/* Header */}
                         <div className="space-y-2">
                           <div className="flex justify-between items-start gap-2">
