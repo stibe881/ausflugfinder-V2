@@ -624,49 +624,58 @@ export default function Explore() {
                       });
 
                       // Initialize MarkerClusterer with modern styling
+                      console.log('[MapDebug] Starting MarkerClusterer initialization...');
+                      console.log('[MapDebug] Number of markers:', markers.length);
+                      console.log('[MapDebug] Map object:', map);
+
                       try {
-                        const { MarkerClusterer } = await import('@googlemaps/markerclustererplus');
+                        console.log('[MapDebug] Importing MarkerClusterer...');
+                        const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
+                        console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Custom renderer for clusters
-                        const renderer = {
-                          render: (cluster: any) => {
-                            const { count, position } = cluster;
-                            const size = count < 10 ? 40 : count < 100 ? 50 : 60;
-                            const color = count < 10 ? "#f59e0b" : count < 100 ? "#ef4444" : "#7c3aed";
-
-                            return new window.google.maps.Marker({
-                              position,
-                              icon: {
-                                path: window.google.maps.SymbolPath.CIRCLE,
-                                scale: size / 2,
-                                fillColor: color,
-                                fillOpacity: 0.9,
-                                strokeColor: "#ffffff",
-                                strokeWeight: 3,
-                              },
-                              label: {
-                                text: count.toString(),
-                                color: "white",
-                                fontSize: count < 100 ? "14px" : "16px",
-                                fontWeight: "bold",
-                              },
-                              title: `${count} Ausflüge`,
-                              zIndex: 999,
-                            });
+                        // Define cluster icon styles for different zoom levels
+                        const styles = [
+                          {
+                            textColor: '#ffffff',
+                            url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="23" fill="%23f59e0b" stroke="%23ffffff" stroke-width="2"/></svg>',
+                            height: 50,
+                            width: 50,
+                            anchor: [25, 25],
+                            textSize: 12,
                           },
-                        };
+                          {
+                            textColor: '#ffffff',
+                            url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="%23ef4444" stroke="%23ffffff" stroke-width="2"/></svg>',
+                            height: 60,
+                            width: 60,
+                            anchor: [30, 30],
+                            textSize: 14,
+                          },
+                          {
+                            textColor: '#ffffff',
+                            url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70"><circle cx="35" cy="35" r="33" fill="%237c3aed" stroke="%23ffffff" stroke-width="2"/></svg>',
+                            height: 70,
+                            width: 70,
+                            anchor: [35, 35],
+                            textSize: 16,
+                          },
+                        ];
 
-                        new MarkerClusterer({
-                          markers,
-                          map,
-                          renderer,
+                        console.log('[MapDebug] Creating MarkerClusterer with gridSize=80, maxZoom=15...');
+                        const clusterer = new MarkerClusterer(map, markers, {
                           maxZoom: 15,
-                          algorithm: { distance: 80 },
+                          gridSize: 80,
+                          minimumClusterSize: 2,
+                          clusterIconStyles: styles,
                         });
+                        console.log('[MapDebug] MarkerClusterer instance created successfully:', clusterer);
+                        console.log('[MapDebug] Clusterer has', clusterer.getTotalMarkers(), 'total markers');
                       } catch (err) {
-                        console.log('MarkerClusterer Library Error:', err);
+                        console.error('[MapDebug] MarkerClusterer Library Error:', err);
+                        console.log('[MapDebug] Falling back to non-clustered markers. Adding', markers.length, 'markers to map...');
                         // Fallback: just add all markers without clustering
                         markers.forEach(marker => marker.setMap(map));
+                        console.log('[MapDebug] Fallback markers added to map');
                       }
 
                       // Fit map to bounds with padding
