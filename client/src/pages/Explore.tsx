@@ -635,10 +635,16 @@ export default function Explore() {
 
                         // Helper function to generate SVG circle marker images as data URIs
                         const generateCircleImage = (color: string, size: number): string => {
-                          const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
-                            <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-                          </svg>`;
-                          return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+                          // Create SVG with minimal encoding for better compatibility
+                          const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="white" stroke-width="2"/></svg>`;
+                          // Manually encode only necessary characters for URL safety
+                          const encoded = svg
+                            .replace(/</g, '%3C')
+                            .replace(/>/g, '%3E')
+                            .replace(/#/g, '%23')
+                            .replace(/"/g, "'")
+                            .replace(/%20/g, ' ');
+                          return `data:image/svg+xml,${encoded}`;
                         };
 
                         // Pre-generate cluster marker images
