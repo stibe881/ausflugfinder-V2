@@ -661,27 +661,43 @@ export default function Explore() {
                       console.log('[MapDebug] Number of markers:', markers.length);
                       console.log('[MapDebug] Map object:', map);
 
-                      try {
+                        try {
                         console.log('[MapDebug] Importing MarkerClusterer...');
-                        const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
+                        const { MarkerClusterer } = await import('@googlemaps/markerclusterer');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
                         // Custom renderer function for modern cluster icons
                         const renderer = {
                           render: ({ count, position }: { count: number; position: google.maps.LatLngLiteral }) => {
+                            const scale = 20 + Math.min(count, 100) / 5; // Scale up to a certain point
+                            const fontSize = 12 + Math.min(count, 100) / 10;
+
                             return new window.google.maps.Marker({
-                              label: String(count),
+                              label: {
+                                text: String(count),
+                                color: "white",
+                                fontSize: `${fontSize}px`,
+                                fontWeight: "bold",
+                              },
                               position,
+                              icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: scale,
+                                fillColor: "#10b981", // Primary color, consistent with individual markers
+                                fillOpacity: 0.95,
+                                strokeColor: "#ffffff",
+                                strokeWeight: 2.5,
+                              },
+                              zIndex: Number(window.google.maps.Marker.MAX_ZINDEX) + count,
                             });
                           },
                         };
 
                         console.log('[MapDebug] Creating MarkerClusterer with gridSize=80, maxZoom=15...');
-                        const clusterer = new MarkerClusterer(map, markers, {
-                          maxZoom: 15,
-                          gridSize: 80,
-                          minimumClusterSize: 2,
-                          renderer: renderer,
+                        const clusterer = new MarkerClusterer({
+                          map,
+                          markers,
+                          renderer,
                         });
                         console.log('[MapDebug] MarkerClusterer instance created successfully:', clusterer);
                         console.log('[MapDebug] Clusterer has', markers.length, 'total markers');
