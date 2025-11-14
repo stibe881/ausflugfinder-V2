@@ -669,26 +669,9 @@ export default function Explore() {
                         // Custom renderer function for modern cluster icons
                         const renderer = {
                           render: ({ count, position }: { count: number; position: google.maps.LatLngLiteral }) => {
-                            const scale = 20 + Math.min(count, 100) / 5; // Scale up to a certain point
-                            const fontSize = 12 + Math.min(count, 100) / 10;
-
                             return new window.google.maps.Marker({
-                              label: {
-                                text: String(count),
-                                color: "white",
-                                fontSize: `${fontSize}px`,
-                                fontWeight: "bold",
-                              },
+                              label: String(count),
                               position,
-                              icon: {
-                                path: window.google.maps.SymbolPath.CIRCLE,
-                                scale: scale,
-                                fillColor: "#10b981", // Primary color, consistent with individual markers
-                                fillOpacity: 0.95,
-                                strokeColor: "#ffffff",
-                                strokeWeight: 2.5,
-                              },
-                              zIndex: Number(window.google.maps.Marker.MAX_ZINDEX) + count,
                             });
                           },
                         };
