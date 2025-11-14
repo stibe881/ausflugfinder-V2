@@ -725,7 +725,7 @@ export default function Explore() {
                           gridSize: 80,
                           minimumClusterSize: 2,
                           calculator: clusterCalculator,
-                          clusterIconStyles: styles,
+                          styles: styles,
                         });
                         console.log('[MapDebug] MarkerClusterer instance created successfully:', clusterer);
                         console.log('[MapDebug] Clusterer has', markers.length, 'total markers');
