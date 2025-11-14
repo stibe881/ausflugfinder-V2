@@ -18,9 +18,9 @@ const plugins = [
     includeAssets: [
       "favicon.ico",
       "robots.txt",
+      "apple-touch-icon.png",
       "/icons/**/*.png",
       "/icons/**/*.svg",
-      "@assets/logos/favicon/apple-touch-icon-72x72.png",
     ],
     manifest: {
       name: "AusflugFinder",
