@@ -633,26 +633,12 @@ export default function Explore() {
                         const { default: MarkerClusterer } = await import('@googlemaps/markerclustererplus');
                         console.log('[MapDebug] MarkerClusterer imported:', MarkerClusterer);
 
-                        // Helper function to generate circle marker images as data URIs
+                        // Helper function to generate SVG circle marker images as data URIs
                         const generateCircleImage = (color: string, size: number): string => {
-                          const canvas = document.createElement('canvas');
-                          canvas.width = size;
-                          canvas.height = size;
-                          const ctx = canvas.getContext('2d');
-                          if (!ctx) return '';
-
-                          // Draw circle
-                          ctx.fillStyle = color;
-                          ctx.beginPath();
-                          ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
-                          ctx.fill();
-
-                          // Draw border
-                          ctx.strokeStyle = '#ffffff';
-                          ctx.lineWidth = 2;
-                          ctx.stroke();
-
-                          return canvas.toDataURL('image/png');
+                          const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">
+                            <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+                          </svg>`;
+                          return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
                         };
 
                         // Pre-generate cluster marker images
