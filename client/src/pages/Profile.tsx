@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft } from "lucide-react";
+import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Bell } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
+import { NotificationSettings } from "@/components/NotificationSettings";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Profile() {
   const { t } = useI18n();
@@ -127,8 +129,19 @@ export default function Profile() {
             </Card>
           </div>
 
-          {/* Statistics */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* Content with Tabs */}
+          <div className="lg:col-span-2">
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="overview">Übersicht</TabsTrigger>
+                <TabsTrigger value="notifications" className="flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  Benachrichtigungen
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-4">{t("profile.statistics")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -241,6 +254,13 @@ export default function Profile() {
                 </CardContent>
               </Card>
             )}
+              </TabsContent>
+
+              {/* Notifications Tab */}
+              <TabsContent value="notifications" className="space-y-6">
+                <NotificationSettings />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>

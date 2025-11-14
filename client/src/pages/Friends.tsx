@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useI18n } from "@/contexts/i18nContext";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Users, Plus, Trash2, ArrowLeft, Loader2, UserPlus, MapPin, Plane, Mail, MessageCircle } from "lucide-react";
+import { Users, Plus, Trash2, ArrowLeft, Loader2, UserPlus, MapPin, Plane, Mail, MessageCircle, Check, X } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 
@@ -19,47 +20,29 @@ export default function Friends() {
   const [newFriendEmail, setNewFriendEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Demo friends data - accepted friends
-  const [friends, setFriends] = useState([
-    {
-      id: 1,
-      name: "Max Müller",
-      email: "max.mueller@example.com",
-      shared_trips: 3,
-      shared_destinations: 5,
-      avatar: "👨"
-    },
-    {
-      id: 2,
-      name: "Anna Schmidt",
-      email: "anna.schmidt@example.com",
-      shared_trips: 2,
-      shared_destinations: 4,
-      avatar: "👩"
-    },
-    {
-      id: 3,
-      name: "Peter Weber",
-      email: "peter.weber@example.com",
-      shared_trips: 1,
-      shared_destinations: 2,
-      avatar: "👨‍🦱"
-    }
-  ]);
+  // Fetch accepted friends
+  const { data: acceptedFriendsData, isLoading: isLoadingAccepted } = trpc.push.getFriends.useQuery(
+    { status: "accepted" },
+    { enabled: isAuthenticated }
+  );
 
-  // Pending friend requests RECEIVED (from other users)
-  const [pendingRequests, setPendingRequests] = useState([
-    {
-      id: 101,
-      name: "Julia Keller",
-      email: "julia.keller@example.com",
-      avatar: "👩‍🦰",
-      requestedAt: "2024-11-06"
-    }
-  ]);
+  // Fetch pending requests (received)
+  const { data: pendingRequestsData, isLoading: isLoadingPending } = trpc.push.getFriends.useQuery(
+    { status: "pending" },
+    { enabled: isAuthenticated }
+  );
 
-  // Pending friend invitations SENT (to other users)
-  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
+  // tRPC mutations
+  const sendFriendRequestMutation = trpc.push.sendFriendRequest.useMutation();
+  const acceptFriendRequestMutation = trpc.push.acceptFriendRequest.useMutation();
+
+  const friends = acceptedFriendsData?.friends || [];
+  const pendingRequests = (pendingRequestsData?.friends || []).filter(
+    (f: any) => f.requestedBy !== user?.id
+  );
+  const pendingInvitations = (pendingRequestsData?.friends || []).filter(
+    (f: any) => f.requestedBy === user?.id
+  );
 
   // Demo friend details
   const friendDetails: Record<number, { trips: any[]; destinations: any[] }> = {
@@ -109,21 +92,23 @@ export default function Friends() {
 
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // For now, we need to get the user ID from email
+      // This would require a lookup endpoint - for demo, we'll show an error
+      // In production, you'd have a user search/lookup feature
 
-      const newInvitation = {
-        id: Math.max(...pendingInvitations.map(i => i.id), 200) + 1,
-        name: newFriendEmail.split("@")[0],
-        email: newFriendEmail,
-        avatar: "👤",
-        sentAt: new Date().toISOString().split('T')[0]
-      };
+      toast.error("Benutzersuche nach E-Mail ist nicht implementiert. Verwende bitte die Friend-ID oder einen anderen Mechanismus.");
 
-      setPendingInvitations([...pendingInvitations, newInvitation]);
-      toast.success(t("friends.requestSent"));
-      setNewFriendEmail("");
-      setIsAddOpen(false);
+      /* TODO: Implement proper user lookup by email
+      const response = await sendFriendRequestMutation.mutateAsync({
+        toUserId: userId
+      });
+
+      if (response.success) {
+        toast.success(t("friends.requestSent"));
+        setNewFriendEmail("");
+        setIsAddOpen(false);
+      }
+      */
     } catch (error) {
       toast.error(t("friends.addError"));
     } finally {
@@ -133,29 +118,25 @@ export default function Friends() {
 
   const handleDeleteFriend = (id: number) => {
     if (confirm(t("friends.deleteConfirm"))) {
-      setFriends(friends.filter(f => f.id !== id));
-      if (selectedFriend?.id === id) {
-        setSelectedFriend(null);
-      }
-      toast.success(t("friends.deleteSuccess"));
+      // TODO: Implement friend deletion via API
+      toast.error("Freund löschen ist noch nicht implementiert");
     }
   };
 
-  const handleAcceptRequest = (requestId: number, requestData: any) => {
-    // Move from pending to accepted friends
-    const acceptedFriend = {
-      ...requestData,
-      shared_trips: 0,
-      shared_destinations: 0
-    };
-    setFriends([...friends, acceptedFriend]);
-    setPendingRequests(pendingRequests.filter(r => r.id !== requestId));
-    toast.success(t("friends.requestAccepted"));
+  const handleAcceptRequest = async (requestFromUserId: number) => {
+    try {
+      await acceptFriendRequestMutation.mutateAsync({
+        fromUserId: requestFromUserId
+      });
+      toast.success(t("friends.requestAccepted"));
+    } catch (error) {
+      toast.error("Fehler beim Akzeptieren der Anfrage");
+    }
   };
 
-  const handleDeclineRequest = (requestId: number) => {
-    setPendingRequests(pendingRequests.filter(r => r.id !== requestId));
-    toast.success(t("friends.requestDeclined"));
+  const handleDeclineRequest = async (requestFromUserId: number) => {
+    // TODO: Implement decline functionality
+    toast.error("Anfrage ablehnen ist noch nicht implementiert");
   };
 
   const handleInviteViaEmail = (friendEmail: string) => {
@@ -347,50 +328,35 @@ export default function Friends() {
                   <CardContent className="p-3 md:p-4">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3 flex-1 w-full">
-                        <span className="text-2xl flex-shrink-0">{request.avatar}</span>
+                        <span className="text-2xl flex-shrink-0">👤</span>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm md:text-base truncate">{request.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{request.email}</p>
+                          <p className="font-semibold text-sm md:text-base truncate">Benutzer #{request.friendId}</p>
+                          <p className="text-xs text-muted-foreground truncate">Freundschaftsanfrage erhalten</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-start sm:justify-end">
                         <Button
-                          onClick={() => handleInviteViaEmail(request.email)}
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs md:text-sm"
-                          title="Send invitation via email"
-                        >
-                          <Mail className="w-4 h-4 flex-shrink-0" />
-                          <span className="hidden md:inline">{t("friends.inviteEmail")}</span>
-                        </Button>
-                        <Button
-                          onClick={() => handleInviteViaWhatsApp(request.email)}
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs md:text-sm"
-                          title="Send invitation via WhatsApp"
-                        >
-                          <MessageCircle className="w-4 h-4 flex-shrink-0" />
-                          <span className="hidden md:inline">{t("friends.inviteWhatsApp")}</span>
-                        </Button>
-                        <Button
-                          onClick={() => handleAcceptRequest(request.id, request)}
+                          onClick={() => handleAcceptRequest(request.friendId)}
+                          disabled={acceptFriendRequestMutation.isPending}
                           variant="default"
                           size="sm"
                           className="gap-1 text-xs md:text-sm bg-green-600 hover:bg-green-700"
                         >
-                          <Plane className="w-4 h-4" />
+                          {acceptFriendRequestMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
                           <span className="hidden md:inline">{t("friends.accept")}</span>
                         </Button>
                         <Button
-                          onClick={() => handleDeclineRequest(request.id)}
+                          onClick={() => handleDeclineRequest(request.friendId)}
                           variant="destructive"
                           size="sm"
                           className="gap-1 text-xs md:text-sm"
                           title="Decline"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>

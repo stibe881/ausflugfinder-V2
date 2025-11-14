@@ -160,6 +160,8 @@ self.addEventListener('sync', (event) => {
 
   if (event.tag === 'sync-trips') {
     event.waitUntil(syncTrips());
+  } else if (event.tag === 'location-sync') {
+    event.waitUntil(syncLocation());
   }
 });
 
@@ -185,38 +187,156 @@ async function syncTrips() {
   }
 }
 
+// Background location sync
+async function syncLocation() {
+  try {
+    console.log('[Service Worker] Syncing location data...');
+
+    // Get pending location from IndexedDB (if available)
+    const db = await openIndexedDB();
+    if (!db) {
+      console.warn('[Service Worker] IndexedDB not available');
+      return;
+    }
+
+    const pendingLocations = await getPendingLocations(db);
+    if (pendingLocations.length === 0) {
+      console.log('[Service Worker] No pending locations to sync');
+      return;
+    }
+
+    for (const location of pendingLocations) {
+      try {
+        const response = await fetch('/trpc/push.updateLocation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: location.latitude,
+            longitude: location.longitude,
+            accuracy: location.accuracy,
+          }),
+        });
+
+        if (response.ok) {
+          await removePendingLocation(db, location.id);
+          console.log('[Service Worker] Location synced successfully');
+        }
+      } catch (error) {
+        console.error('[Service Worker] Failed to sync location:', error);
+      }
+    }
+  } catch (error) {
+    console.error('[Service Worker] Location sync error:', error);
+  }
+}
+
+// IndexedDB helpers for location caching
+async function openIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('ausflug-manager', 1);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('pending-locations')) {
+        db.createObjectStore('pending-locations', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+  });
+}
+
+async function getPendingLocations(db) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['pending-locations'], 'readonly');
+    const store = transaction.objectStore('pending-locations');
+    const request = store.getAll();
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+  });
+}
+
+async function removePendingLocation(db, id) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(['pending-locations'], 'readwrite');
+    const store = transaction.objectStore('pending-locations');
+    const request = store.delete(id);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+}
+
 // Push notifications
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
+  console.log('[Service Worker] Push notification received');
+
+  if (!event.data) {
+    console.warn('[Service Worker] Push event has no data');
+    return;
+  }
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch (e) {
+    console.warn('[Service Worker] Failed to parse push payload as JSON');
+    payload = {
+      title: 'Ausflug Manager',
+      message: event.data.text(),
+    };
+  }
 
   const options = {
-    body: event.data.text(),
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    body: payload.message || 'Neue Benachrichtigung',
+    title: payload.title || 'Ausflug Manager',
+    icon: payload.icon || '/icons/icon-192.png',
+    badge: payload.badge || '/icons/icon-192.png',
+    tag: payload.tag || 'notification',
     vibrate: [100, 50, 100],
+    data: payload.data || {},
   };
 
+  console.log('[Service Worker] Showing notification:', options);
+
   event.waitUntil(
-    self.registration.showNotification('Ausflug Manager', options)
+    self.registration.showNotification(options.title, options)
   );
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Notification clicked:', event.notification.tag);
+
   event.notification.close();
+
+  // Get the URL from notification data
+  const url = event.notification.data?.url || '/';
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // Check if there is already a window/tab open with the target URL
+      // Check if there is already a window/tab open
       for (let i = 0; i < windowClients.length; i++) {
         const client = windowClients[i];
-        if (client.url === '/' && 'focus' in client) {
+        if (client.url === new URL(url, self.location.origin).href && 'focus' in client) {
+          console.log('[Service Worker] Focusing existing window');
           return client.focus();
         }
       }
       // If not, open a new window/tab with the target URL
       if (clients.openWindow) {
-        return clients.openWindow('/');
+        console.log('[Service Worker] Opening new window:', url);
+        return clients.openWindow(url);
       }
     })
   );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+  console.log('[Service Worker] Notification closed:', event.notification.tag);
 });
