@@ -333,3 +333,108 @@ export const tripCategories = mysqlTable("tripCategories", {
 
 export type TripCategory = typeof tripCategories.$inferSelect;
 export type InsertTripCategory = typeof tripCategories.$inferInsert;
+
+/**
+ * Push subscriptions table for storing Web Push API subscriptions.
+ * Each subscription allows sending push notifications to a specific device/browser.
+ */
+export const pushSubscriptions = mysqlTable("pushSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  endpoint: varchar("endpoint", { length: 2048 }).notNull(),
+  auth: varchar("auth", { length: 255 }).notNull(),
+  p256dh: varchar("p256dh", { length: 255 }).notNull(),
+  userAgent: text("userAgent"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("push_subscriptions_user_id_idx").on(table.userId),
+  endpointIdx: index("push_subscriptions_endpoint_idx").on(table.endpoint),
+}));
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+/**
+ * User notification settings table for managing notification preferences.
+ * Controls which types of notifications a user wants to receive.
+ */
+export const userSettings = mysqlTable("userSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  notificationsEnabled: int("notificationsEnabled").default(1).notNull(), // 1 = true, 0 = false
+  friendRequestNotifications: int("friendRequestNotifications").default(1).notNull(),
+  friendRequestAcceptedNotifications: int("friendRequestAcceptedNotifications").default(1).notNull(),
+  nearbyTripNotifications: int("nearbyTripNotifications").default(1).notNull(),
+  nearbyTripDistance: int("nearbyTripDistance").default(5000).notNull(), // in meters
+  locationTrackingEnabled: int("locationTrackingEnabled").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_settings_user_id_idx").on(table.userId),
+}));
+
+export type UserSettings = typeof userSettings.$inferSelect;
+export type InsertUserSettings = typeof userSettings.$inferInsert;
+
+/**
+ * Friendships table for managing friend connections between users.
+ * Bidirectional relationships with pending/accepted/blocked status.
+ */
+export const friendships = mysqlTable("friendships", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  friendId: int("friendId").notNull(),
+  status: mysqlEnum("status", ["pending", "accepted", "blocked"]).default("pending").notNull(),
+  requestedBy: int("requestedBy").notNull(), // Which user sent the request
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("friendships_user_id_idx").on(table.userId),
+  friendIdIdx: index("friendships_friend_id_idx").on(table.friendId),
+  statusIdx: index("friendships_status_idx").on(table.status),
+}));
+
+export type Friendship = typeof friendships.$inferSelect;
+export type InsertFriendship = typeof friendships.$inferInsert;
+
+/**
+ * User locations table for tracking user GPS coordinates.
+ * Updated periodically when location tracking is enabled.
+ */
+export const userLocations = mysqlTable("userLocations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  latitude: varchar("latitude", { length: 50 }).notNull(),
+  longitude: varchar("longitude", { length: 50 }).notNull(),
+  accuracy: varchar("accuracy", { length: 50 }),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_locations_user_id_idx").on(table.userId),
+  updatedAtIdx: index("user_locations_updated_at_idx").on(table.updatedAt),
+}));
+
+export type UserLocation = typeof userLocations.$inferSelect;
+export type InsertUserLocation = typeof userLocations.$inferInsert;
+
+/**
+ * Notifications table for storing in-app notifications history.
+ * Allows users to view notification history in the app.
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: mysqlEnum("type", ["friend_request", "friend_accepted", "nearby_trip", "system"]).default("system").notNull(),
+  relatedId: int("relatedId"), // ID of related entity (userId for friend, tripId for nearby trip, etc.)
+  isRead: int("isRead").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("notifications_user_id_idx").on(table.userId),
+  isReadIdx: index("notifications_is_read_idx").on(table.isRead),
+  createdAtIdx: index("notifications_created_at_idx").on(table.createdAt),
+}));
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
