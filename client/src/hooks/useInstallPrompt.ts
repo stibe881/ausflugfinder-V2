@@ -61,20 +61,27 @@ export const useInstallPrompt = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!installPrompt) return;
+    if (!installPrompt) {
+      console.warn('⚠ Kein beforeinstallprompt Event verfügbar');
+      return;
+    }
 
     try {
+      console.log('→ Zeige Install-Prompt...');
       await installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
+      console.log(`✓ User response to the install prompt: ${outcome}`);
 
       if (outcome === 'accepted') {
+        console.log('✓ Installation akzeptiert');
         setIsAppInstalled(true);
+      } else {
+        console.log('→ Installation abgelehnt');
       }
       setShowPrompt(false);
       setInstallPrompt(null);
     } catch (error) {
-      console.error('Install prompt failed:', error);
+      console.error('✗ Install prompt failed:', error);
     }
   };
 
@@ -82,8 +89,16 @@ export const useInstallPrompt = () => {
     setShowPrompt(false);
   };
 
-  const showInstallPrompt = () => {
-    setShowPrompt(true);
+  const showInstallPrompt = async () => {
+    console.log('→ Install Button geklickt');
+    if (installPrompt) {
+      console.log('→ beforeinstallprompt Event vorhanden, starte Installation...');
+      await handleInstallClick();
+    } else {
+      console.log('⚠ Kein beforeinstallprompt Event - zeige Installationsanleitung oder Browser-Anleitung');
+      // In einem echten Szenario könnte hier ein Modal mit Anleitung gezeigt werden
+      alert('Um die App zu installieren:\n\n1. Klicke auf das Menü (⋯) oder Adressleiste\n2. Wähle "App installieren" oder "Zum Startbildschirm hinzufügen"\n3. Bestätige die Installation');
+    }
   };
 
   return {
