@@ -20,20 +20,20 @@ import { CreateTripWizard } from "@/components/CreateTripWizard";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const CATEGORIES = [
+  "Abenteuerweg",
   "Aktion & Sport",
   "Badewelt",
   "Freizeitpark",
   "Innenspielplatz",
+  "Kugelbahn",
   "Kultur",
+  "Museum",
   "Pumptrack",
   "Restaurant",
   "Schnitzeljagd",
   "Spielplatz",
   "Tierpark/Zoo",
   "Wanderweg",
-  "Abenteuerweg",
-  "Kugelbahn",
-  "Museum",
 ];
 
 const REGIONS = [
@@ -66,9 +66,9 @@ const REGIONS = [
   "Zürich",
   // Nachbarländer
   "Deutschland",
-  "Österreich",
   "Frankreich",
   "Italien",
+  "Österreich",
 ];
 
 const COST_LABELS: Record<string, string> = {
@@ -832,68 +832,81 @@ export default function Explore() {
                 {filteredTrips?.map((trip) => (
                   <Link key={trip.id} href={`/trips/${trip.id}`}>
                     <Card
-                      className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group relative h-48"
-                      style={{
-                        backgroundImage: trip.image ? `url(${trip.image})` : undefined,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }}
+                      className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5 rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm group flex flex-row"
                     >
-                      {/* Background Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 opacity-80 group-hover:opacity-70 transition-opacity duration-300" />
+                      {/* Image Section - Top Third */}
+                      <div className="w-40 h-40 flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-muted to-muted/50">
+                        {trip.image ? (
+                          <>
+                            <img
+                              src={trip.image}
+                              alt={trip.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5">
+                            <MapPin className="w-8 h-8 text-muted-foreground/40" />
+                          </div>
+                        )}
 
-                      {/* Fallback when no image */}
-                      {!trip.image && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                          <MapPin className="w-8 h-8 text-muted-foreground/40" />
+                        {/* Favorite Badge - Top Left */}
+                        {trip.isFavorite === 1 && (
+                          <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-sm p-1.5 rounded-full shadow-md">
+                            <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                          </div>
+                        )}
+
+                        {/* Cost Badge - Bottom Right */}
+                        <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full shadow-md">
+                          <span className="text-xs font-bold text-primary">{COST_LABELS[trip.cost]}</span>
                         </div>
-                      )}
+                      </div>
 
-                      {/* Content - Overlaid on background */}
-                      <div className="relative z-10 h-full flex flex-col justify-between p-5">
+                      {/* Content Section */}
+                      <div className="flex-1 flex flex-col justify-between p-4">
                         {/* Header */}
                         <div className="space-y-2">
-                          <div className="flex justify-between items-start gap-3">
+                          <div className="flex justify-between items-start gap-2">
                             <div className="flex-1">
-                              <h3 className="font-bold text-lg line-clamp-2 text-white group-hover:text-white transition-colors drop-shadow-md">
+                              <h3 className="font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">
                                 {trip.title}
                               </h3>
-                              <div className="flex items-center gap-1.5 text-sm text-white/90 mt-1.5 drop-shadow">
-                                <MapPin className="w-4 h-4 flex-shrink-0" />
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+                                <MapPin className="w-4 h-4 flex-shrink-0 text-primary/70" />
                                 <span className="line-clamp-1">{trip.destination}</span>
                               </div>
                             </div>
-                            {trip.isFavorite === 1 && (
-                              <Heart className="w-6 h-6 fill-red-500 text-red-500 flex-shrink-0 mt-0.5 drop-shadow-md" />
-                            )}
                           </div>
 
                           {trip.description && (
-                            <p className="text-sm text-white/80 line-clamp-1 leading-relaxed drop-shadow">
+                            <p className="text-sm text-muted-foreground line-clamp-1 leading-relaxed">
                               {trip.description}
                             </p>
                           )}
                         </div>
 
                         {/* Badges */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 pt-2">
                           {trip.category && (
                             <Badge className="bg-primary/90 hover:bg-primary text-white text-xs font-medium">
                               {trip.category}
                             </Badge>
                           )}
                           {trip.region && (
-                            <Badge variant="outline" className="text-xs bg-white/20 hover:bg-white/30 border-white/40 text-white font-medium">
+                            <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
                               {trip.region}
                             </Badge>
                           )}
                           {trip.ageRecommendation && (
-                            <Badge variant="outline" className="text-xs bg-white/20 hover:bg-white/30 border-white/40 text-white font-medium">
+                            <Badge variant="outline" className="text-xs bg-background/40 hover:bg-background/60 border-border/60">
                               {trip.ageRecommendation}
                             </Badge>
                           )}
                           {trip.isDone === 1 && (
-                            <Badge className="bg-green-500/80 text-white text-xs gap-1 border border-green-400/50">
+                            <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs gap-1 border border-green-500/30">
                               <CheckCircle2 className="w-3 h-3" />
                               {t("explore.visited")}
                             </Badge>
