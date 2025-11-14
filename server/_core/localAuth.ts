@@ -60,8 +60,12 @@ export function registerLocalAuthRoutes(app: Express) {
         message: "User registered successfully. You can now login.",
       });
     } catch (error) {
-      console.error("[Auth] Register failed", error);
-      res.status(500).json({ error: "Registration failed" });
+      console.error("[Auth] Register failed:", error instanceof Error ? error.message : error);
+      console.error("[Auth] Register error stack:", error instanceof Error ? error.stack : "No stack trace");
+      res.status(500).json({
+        error: "Registration failed",
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+      });
     }
   });
 
@@ -138,8 +142,12 @@ export function registerLocalAuthRoutes(app: Express) {
         message: "Login successful",
       });
     } catch (error) {
-      console.error("[Auth] Login failed", error);
-      res.status(500).json({ error: "Login failed" });
+      console.error("[Auth] Login failed:", error instanceof Error ? error.message : error);
+      console.error("[Auth] Login error stack:", error instanceof Error ? error.stack : "No stack trace");
+      res.status(500).json({
+        error: "Login failed",
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+      });
     }
   });
 }
