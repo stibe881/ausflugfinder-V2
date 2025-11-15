@@ -776,6 +776,35 @@ export const pushRouter = router({
       throw toTRPCError(appError);
     }
   }),
+
+  // Test endpoint: Send a test Web Push API notification to current user
+  sendTestWebPushNotification: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      const userId = ctx.user.id;
+      const success = await sendPushNotificationToUser(userId, {
+        title: "Web Push Test",
+        message: "Dies ist eine Test-Benachrichtigung über die Web Push API!",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+        data: {
+          type: "system",
+          relatedId: userId,
+          url: "/",
+        },
+      });
+
+      console.log(`📬 Test Web Push notification sent to user ${userId}: ${success}`);
+      return {
+        success,
+        message: success
+          ? "Test Web Push-Benachrichtigung gesendet! Schau auf dein Gerät."
+          : "Fehler beim Senden der Web Push-Benachrichtigung. Stelle sicher, dass du Push-Benachrichtigungen abonniert hast und die VAPID-Schlüssel korrekt sind.",
+      };
+    } catch (error) {
+      const appError = handleError(error, "push.sendTestWebPushNotification");
+      throw toTRPCError(appError);
+    }
+  }),
 });
 
 export type PushRouter = typeof pushRouter;

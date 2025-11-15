@@ -9,6 +9,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Bell } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Alert,
   AlertDescription,
@@ -32,6 +33,8 @@ export const PushNotificationPrompt = () => {
       isSubscribed,
       permission,
     });
+
+    toast.info(`Push Status: Supported=${isSupported}, Permission=${permission}`);
 
     // Only show prompt if:
     // 1. User is logged in
