@@ -306,12 +306,8 @@ export const useLocation = () => {
   useEffect(() => {
     if (settings?.locationTrackingEnabled && !locationState.isTracking) {
       startTracking(60000); // Start with 60 second interval
-
-      return () => {
-        stopTracking();
-      };
     }
-  }, [settings?.locationTrackingEnabled]);
+  }, [settings?.locationTrackingEnabled, locationState.isTracking, startTracking]);
 
   /**
    * Cleanup on unmount
