@@ -3,9 +3,10 @@
  * Allows users to configure push notification preferences
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePushNotifications, type PushNotificationSettings } from '@/hooks/usePushNotifications';
 import { useLocation } from '@/hooks/useLocation';
+import { trpc } from '@/_core/trpc/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -37,6 +38,8 @@ export const NotificationSettings = () => {
   const { isTracking, startTracking, stopTracking } = useLocation();
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestingSending, setIsTestingSending] = useState(false);
+  const testNotificationMutation = trpc.push.sendTestNotification.useMutation();
 
   const defaultSettings: PushNotificationSettings = {
     notificationsEnabled: true,
@@ -178,6 +181,18 @@ export const NotificationSettings = () => {
       setIsSaving(false);
     }
   };
+
+  const handleSendTestNotification = useCallback(async () => {
+    setIsTestingSending(true);
+    try {
+      await testNotificationMutation.mutateAsync();
+      toast.success('Test-Benachrichtigung gesendet!');
+    } catch (error) {
+      toast.error('Fehler beim Senden der Test-Benachrichtigung');
+    } finally {
+      setIsTestingSending(false);
+    }
+  }, [testNotificationMutation]);
 
   if (isLoadingSettings) {
     return (
@@ -521,6 +536,42 @@ export const NotificationSettings = () => {
               <strong>Hintergrund:</strong> Läuft im Hintergrund wenn aktiviert
             </p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Test Notification */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-blue-600" />
+            WebSocket Test
+          </CardTitle>
+          <CardDescription>
+            Sende dir eine Test-Benachrichtigung um die WebSocket-Verbindung zu prüfen
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={handleSendTestNotification}
+            disabled={isTestingSending}
+            className="w-full"
+            variant="outline"
+          >
+            {isTestingSending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Wird gesendet...
+              </>
+            ) : (
+              <>
+                <Bell className="w-4 h-4 mr-2" />
+                Test-Benachrichtigung senden
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-muted-foreground mt-3">
+            Du solltest eine Toast-Benachrichtigung sehen, wenn die WebSocket-Verbindung aktiv ist.
+          </p>
         </CardContent>
       </Card>
     </div>

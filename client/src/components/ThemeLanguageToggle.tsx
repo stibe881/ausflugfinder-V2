@@ -14,14 +14,12 @@ import { InstallButton } from "./InstallButton"; // Import InstallButton
 
 interface ThemeLanguageToggleProps {
   isAppInstalled: boolean;
-  showInstallPromptDialog: boolean;
-  showInstallPromptInstructions: () => void;
+  handleInstallClick: () => void;
 }
 
 export function ThemeLanguageToggle({
   isAppInstalled,
-  showInstallPromptDialog,
-  showInstallPromptInstructions,
+  handleInstallClick,
 }: ThemeLanguageToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
@@ -85,8 +83,7 @@ export function ThemeLanguageToggle({
       {/* Install Button */}
       {!isAppInstalled && (
         <InstallButton
-          onInstall={showInstallPromptInstructions}
-          disabled={showInstallPromptDialog}
+          onInstall={handleInstallClick}
         />
       )}
     </div>
