@@ -6,7 +6,7 @@
 import { Server as HTTPServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import type { IncomingMessage } from 'http';
-import { verify as verifyJWT } from '@tsndr/cloudflare-worker-jwt';
+import { jwtVerify } from 'jose';
 
 interface NotificationMessage {
   type: 'notification' | 'ping' | 'pong';
@@ -53,8 +53,9 @@ export function setupWebSocketServer(server: HTTPServer, secret: string = proces
 
     let userId: number;
     try {
-      const decoded = await verifyJWT(token, secret);
-      userId = decoded.sub as number;
+      const secretBuffer = new TextEncoder().encode(secret || 'default-secret');
+      const decoded = await jwtVerify(token, secretBuffer);
+      userId = decoded.payload.sub as unknown as number;
       console.log(`✓ WebSocket user authenticated: ${userId}`);
     } catch (err) {
       console.error('✗ Token verification failed:', err);
