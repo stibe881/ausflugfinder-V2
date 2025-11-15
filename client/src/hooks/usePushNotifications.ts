@@ -112,6 +112,8 @@ export const usePushNotifications = () => {
 
   /**
    * Subscribe to push notifications
+   * Note: Permission must already be granted before calling this function
+   * PushNotificationPrompt component handles the permission request
    */
   const subscribe = useCallback(async () => {
     console.log('DEBUG: subscribe() called');
@@ -134,7 +136,7 @@ export const usePushNotifications = () => {
     }
 
     try {
-      // Request notification permission
+      // Check notification permission - should already be granted by PushNotificationPrompt
       console.log('DEBUG: Notification.permission =', Notification.permission);
 
       if (Notification.permission === 'denied') {
@@ -144,14 +146,9 @@ export const usePushNotifications = () => {
       }
 
       if (Notification.permission !== 'granted') {
-        console.log('DEBUG: Requesting notification permission...');
-        const permission = await Notification.requestPermission();
-        console.log('DEBUG: Permission result =', permission);
-        if (permission !== 'granted') {
-          console.log('DEBUG: User denied notification permission');
-          setError('Notification permission denied');
-          return false;
-        }
+        console.log('DEBUG: Permission not granted - cannot subscribe');
+        setError('Permission not granted. Please enable notifications first.');
+        return false;
       }
 
       // Get service worker registration
