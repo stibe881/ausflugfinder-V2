@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Destinations from "./pages/Destinations";
 import Friends from "./pages/Friends";
 import TripDetail from "./pages/TripDetail";
+import Trips from "./pages/Trips";
 import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
 import Planner from "./pages/Planner";
@@ -29,6 +30,7 @@ function Router() {
       <Route path={"/login"} component={Login} />
       <Route path={"/explore"} component={Explore} />
       <Route path={"/trips/:id"} component={TripDetail} />
+      <Route path={"/mytrips"} component={Trips} />
       <Route path={"/destinations"} component={Destinations} />
       <Route path={"/friends"} component={Friends} />
       <Route path={"/profile"} component={Profile} />
