@@ -66,7 +66,15 @@ function AppContent() {
   } = useInstallPrompt();
 
   // Initialize WebSocket notifications on app load
-  useWebSocketNotifications();
+  const { isConnected, error } = useWebSocketNotifications();
+
+  // Log WebSocket status changes for debugging
+  useEffect(() => {
+    console.log('📡 WebSocket Status:', isConnected ? 'Connected' : 'Disconnected');
+    if (error) {
+      console.error('❌ WebSocket Error:', error);
+    }
+  }, [isConnected, error]);
 
   // Force Service Worker update on mount (critical for iOS PWA)
   // Delayed to allow WebSocket to connect first
