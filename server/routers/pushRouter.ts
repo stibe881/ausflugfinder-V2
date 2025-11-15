@@ -22,6 +22,7 @@ import {
   checkAndSendNearbyTripNotifications,
   getVapidPublicKey,
 } from "../_core/pushNotifications";
+import { sendWebSocketNotification } from "../_core/websocket";
 import { handleError, toTRPCError } from "../_core/errors";
 
 const PushSubscriptionSchema = z.object({
@@ -608,6 +609,108 @@ export const pushRouter = router({
       }
     }),
 
+  // Delete friend
+  deleteFriend: protectedProcedure
+    .input(z.object({ friendId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const db = await getDb();
+        const userId = ctx.user?.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
+
+        if (!userId) {
+          throw new Error("User not authenticated");
+        }
+
+        // Delete forward friendship
+        await db
+          .delete(friendships)
+          .where(
+            and(
+              eq(friendships.userId, userId),
+              eq(friendships.friendId, input.friendId)
+            )
+          );
+
+        // Delete reverse friendship
+        await db
+          .delete(friendships)
+          .where(
+            and(
+              eq(friendships.userId, input.friendId),
+              eq(friendships.friendId, userId)
+            )
+          );
+
+        console.log(`✓ Friendship deleted between ${userId} and ${input.friendId}`);
+        return { success: true, message: "Friendship deleted" };
+      } catch (error) {
+        const appError = handleError(error, "push.deleteFriend");
+        throw toTRPCError(appError);
+      }
+    }),
+
+  // Remove pending friend request (cancel invitation)
+  removeFriendRequest: protectedProcedure
+    .input(z.object({ invitationId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const db = await getDb();
+        const userId = ctx.user?.id; // The user who sent the invitation
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
+
+        if (!userId) {
+          throw new Error("User not authenticated");
+        }
+
+        // Find the invitation to verify it belongs to the current user and is pending
+        const [invitation] = await db
+          .select()
+          .from(friendships)
+          .where(
+            and(
+              eq(friendships.id, input.invitationId),
+              eq(friendships.requestedBy, userId),
+              eq(friendships.status, "pending")
+            )
+          )
+          .limit(1);
+
+        if (!invitation) {
+          throw new Error("Pending invitation not found or not authorized to delete.");
+        }
+
+        // Delete forward friendship record
+        await db
+          .delete(friendships)
+          .where(eq(friendships.id, input.invitationId));
+
+        // Delete reverse friendship record (if exists and is pending)
+        await db
+          .delete(friendships)
+          .where(
+            and(
+              eq(friendships.userId, invitation.friendId),
+              eq(friendships.friendId, invitation.userId),
+              eq(friendships.status, "pending"),
+              eq(friendships.requestedBy, userId)
+            )
+          );
+
+        console.log(`✓ Friend request (invitation ID: ${input.invitationId}) removed by user ${userId}`);
+        return { success: true, message: "Friend request removed" };
+      } catch (error) {
+        const appError = handleError(error, "push.removeFriendRequest");
+        throw toTRPCError(appError);
+      }
+    }),
+
   // Get friends list
   getFriends: protectedProcedure
     .input(z.object({ status: z.enum(["pending", "accepted", "blocked"]).default("accepted") }))
@@ -640,6 +743,30 @@ export const pushRouter = router({
         throw toTRPCError(appError);
       }
     }),
+  // Test endpoint: Send a test WebSocket notification to current user
+  sendTestNotification: protectedProcedure.mutation(async ({ ctx }) => {
+    try {
+      const userId = ctx.user.id;
+      const success = sendWebSocketNotification(userId, {
+        title: "Test-Benachrichtigung",
+        message: "Dies ist eine Test-Benachrichtigung über WebSocket!",
+        notificationType: "system",
+        relatedId: userId,
+        url: "/",
+      });
+
+      console.log(`📬 Test notification sent to user ${userId}: ${success}`);
+      return {
+        success,
+        message: success
+          ? "Test-Benachrichtigung gesendet! Schau auf dein Gerät."
+          : "Keine WebSocket-Verbindung gefunden. Stelle sicher, dass du angemeldet bist.",
+      };
+    } catch (error) {
+      const appError = handleError(error, "push.sendTestNotification");
+      throw toTRPCError(appError);
+    }
+  }),
 });
 
 export type PushRouter = typeof pushRouter;

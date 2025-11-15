@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import WeatherForecast from "@/components/WeatherForecast";
 import RouteMap from "@/components/RouteMap";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 const BUDGET_CATEGORIES = [
   "Transport",
@@ -54,6 +55,7 @@ export default function PlannerDetail() {
   const [editBudgetActualCost, setEditBudgetActualCost] = useState("");
   const [editPackingId, setEditPackingId] = useState<number | null>(null);
   const [checklistDialog, setChecklistDialog] = useState(false);
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
 
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [customTripTitle, setCustomTripTitle] = useState("");
@@ -197,9 +199,7 @@ export default function PlannerDetail() {
   };
 
   const handleDeleteDraft = () => {
-    if (confirm("Möchten Sie diese Planung wirklich löschen? Dies kann nicht rückgängig gemacht werden.")) {
-      deletePlanMutation.mutate({ id: planId });
-    }
+    setShowConfirmDeleteDialog(true);
   };
 
   const handleAddTrip = () => {
@@ -1192,6 +1192,16 @@ export default function PlannerDetail() {
           </TabsContent>
         </Tabs>
       </div>
+      <ConfirmationDialog
+        isOpen={showConfirmDeleteDialog}
+        onConfirm={() => deletePlanMutation.mutate({ id: planId })}
+        onCancel={() => setShowConfirmDeleteDialog(false)}
+        title={t("plannerDetail.deleteConfirmTitle")} // Assuming a new translation key
+        message={t("plannerDetail.deleteConfirm")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        isDestructive
+      />
     </div>
   );
 }
