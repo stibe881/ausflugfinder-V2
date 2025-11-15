@@ -101,21 +101,15 @@ function AppContent() {
         >
           <TooltipProvider>
             <Toaster />
-            <div className="fixed top-4 right-4 flex items-center gap-2">
+            <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
-                showInstallPromptDialog={showInstallPromptDialog}
-                showInstallPromptInstructions={showInstallPromptInstructions}
+                handleInstallClick={handleInstallClick}
               />
             </div>
             <Router />
 
-            {/* Install Prompt Dialog */}
-            <InstallPromptDialog
-              open={showInstallPromptDialog}
-              onInstall={handleInstallClick}
-              onDismiss={handleDismissInstallPromptDialog}
-            />
+
 
             {/* Auto-Logout Dialog */}
             {!isLoginPage && (
