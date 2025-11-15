@@ -40,10 +40,50 @@ const plugins = [
       "/icons/**/*.png",
       "/icons/**/*.svg",
     ],
-    strategies: "injectManifest",
-    injectManifest: {
-      swSrc: "client/src/sw.ts",
+    workbox: {
       globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,woff,woff2,ttf,eot}"],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: true,
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      navigateFallback: "index.html",
+      navigateFallbackDenylist: [/^\/api\//, /^\/trpc\//],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "google-fonts-cache",
+            expiration: {
+              maxEntries: 20,
+              maxAgeSeconds: 60 * 60 * 24 * 365,
+            },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "google-fonts-static-cache",
+            expiration: {
+              maxEntries: 20,
+              maxAgeSeconds: 60 * 60 * 24 * 365,
+            },
+          },
+        },
+        {
+          urlPattern: /^\/api\/.*/i,
+          handler: "NetworkFirst",
+          options: {
+            cacheName: "api-cache",
+            networkTimeoutSeconds: 10,
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24,
+            },
+          },
+        },
+      ],
     },
     manifest: {
       name: "AusflugFinder",
