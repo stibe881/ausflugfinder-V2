@@ -22,27 +22,19 @@ export const PushNotificationPrompt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alreadyTriedSubscribe, setAlreadyTriedSubscribe] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
-    const debugData = {
+    console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', {
       hasUser: !!user,
       isSupported,
       isSubscribed,
-      userEmail: user?.email || 'N/A',
-      permission: Notification.permission,
-    };
-
-    setDebugInfo(JSON.stringify(debugData, null, 2));
-
-    console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', debugData);
+    });
 
     // Only show prompt if:
     // 1. User is logged in
     // 2. Push notifications are supported
     // 3. Not already subscribed
     if (!user || !isSupported || isSubscribed) {
-      console.log('[PushNotificationPrompt] Returning early - user:', !!user, 'isSupported:', isSupported, 'isSubscribed:', isSubscribed);
       return;
     }
 
@@ -131,81 +123,67 @@ export const PushNotificationPrompt = () => {
     handleSubscribe();
   };
 
-  // Always show debug info temporarily
   return (
     <>
-      {/* Debug Info */}
-      <div className="fixed bottom-20 right-4 max-w-sm z-50 bg-yellow-100 border border-yellow-300 rounded p-2 text-xs">
-        <p className="font-bold mb-1">Debug Info:</p>
-        <pre className="whitespace-pre-wrap break-words text-yellow-900">{debugInfo}</pre>
-      </div>
-
-      {/* Main Prompt */}
-      {!showPrompt && (
-        <div className="fixed bottom-4 right-4 max-w-sm z-50 bg-gray-100 border border-gray-300 rounded p-2 text-xs">
-          <p>Prompt hidden (showPrompt=false)</p>
-        </div>
-      )}
-
       {showPrompt && (
-    <div className="fixed bottom-4 right-4 max-w-sm z-50">
-      <Alert className="border-blue-200 bg-blue-50 shadow-lg">
-        <Bell className="h-4 w-4 text-blue-600" />
-        <AlertTitle className="text-blue-900">Benachrichtigungen aktivieren?</AlertTitle>
-        <AlertDescription className="text-blue-800 mt-2">
-          Erhalte Push-Benachrichtigungen über neue Ausflüge und Freundschaftsanfragen.
-        </AlertDescription>
-        {error && (
-          <div className="flex items-start gap-2 mt-3 p-2 bg-red-100 rounded">
-            <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
-        <div className="flex gap-2 mt-4 flex-wrap">
-          {error ? (
-            <>
-              <Button
-                size="sm"
-                onClick={handleRetry}
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isLoading ? 'Versucht...' : 'Erneut versuchen'}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleDismiss}
-                disabled={isLoading}
-                className="border-blue-200 text-blue-700 hover:bg-blue-100"
-              >
-                Schließen
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                size="sm"
-                onClick={handleSubscribe}
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isLoading ? 'Lädt...' : 'Aktivieren'}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleDismiss}
-                disabled={isLoading}
-                className="border-blue-200 text-blue-700 hover:bg-blue-100"
-              >
-                Später
-              </Button>
-            </>
-          )}
+        <div className="fixed bottom-4 right-4 max-w-sm z-50">
+          <Alert className="border-blue-200 bg-blue-50 shadow-lg">
+            <Bell className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-900">Benachrichtigungen aktivieren?</AlertTitle>
+            <AlertDescription className="text-blue-800 mt-2">
+              Erhalte Push-Benachrichtigungen über neue Ausflüge und Freundschaftsanfragen.
+            </AlertDescription>
+            {error && (
+              <div className="flex items-start gap-2 mt-3 p-2 bg-red-100 rounded">
+                <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+            <div className="flex gap-2 mt-4 flex-wrap">
+              {error ? (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handleRetry}
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isLoading ? 'Versucht...' : 'Erneut versuchen'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleDismiss}
+                    disabled={isLoading}
+                    className="border-blue-200 text-blue-700 hover:bg-blue-100"
+                  >
+                    Schließen
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handleSubscribe}
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isLoading ? 'Lädt...' : 'Aktivieren'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleDismiss}
+                    disabled={isLoading}
+                    className="border-blue-200 text-blue-700 hover:bg-blue-100"
+                  >
+                    Später
+                  </Button>
+                </>
+              )}
+            </div>
+          </Alert>
         </div>
-      </Alert>
-      </div>
       )}
     </>
   );
