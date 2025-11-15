@@ -19,6 +19,7 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import WebSocketDebug from "./pages/WebSocketDebug";
 import { InstallPromptDialog } from "./components/InstallPromptDialog";
 import { AutoLogoutDialog } from "./components/AutoLogoutDialog";
 import { useInstallPrompt } from "./hooks/useInstallPrompt";
@@ -43,6 +44,7 @@ function Router() {
       <Route path={"/admin"} component={Admin} />
       <Route path={"/forgot-password"} component={ForgotPassword} />
       <Route path={"/reset-password"} component={ResetPassword} />
+      <Route path={"/ws-debug"} component={WebSocketDebug} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
