@@ -182,7 +182,7 @@ export const useWebSocketNotifications = () => {
     return () => {
       // disconnect();
     };
-  }, [user, connect, disconnect]);
+  }, [user]);
 
   return {
     isConnected,
