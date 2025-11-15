@@ -7,6 +7,7 @@ import { Server as HTTPServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import type { IncomingMessage } from 'http';
 import { sdk } from './sdk';
+import { getUserByOpenId } from '../db';
 
 interface NotificationMessage {
   type: 'notification' | 'ping' | 'pong';
@@ -98,7 +99,7 @@ export function setupWebSocketServer(server: HTTPServer) {
       }
 
       // Get user from database using openId from session
-      const user = await (await import('../db')).default.getUserByOpenId(session.openId);
+      const user = await getUserByOpenId(session.openId);
       if (!user) {
         console.log('✗ User not found in database');
         ws.close(1008, 'Unauthorized: User not found');
