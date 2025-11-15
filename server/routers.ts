@@ -327,13 +327,29 @@ export const appRouter = router({
             throw new ValidationError("End date must be after start date");
           }
           const { categories, ...tripData } = input;
+
+          // Automatically geocode destination if coordinates are not provided
+          if (input.destination && (!input.latitude || !input.longitude)) {
+            const { geocodeAddress } = await import('./geocoding');
+            const coordinates = await geocodeAddress(input.destination);
+            if (coordinates) {
+              (tripData as any).latitude = coordinates.latitude;
+              (tripData as any).longitude = coordinates.longitude;
+            }
+          }
+
           const result = await createTrip({
             userId: ctx.user.id,
             ...tripData,
           });
 
-          // Note: Categories will be handled by the frontend via separate request
-          // The trip.create endpoint in CreateTripWizard handles category assignment
+          // Add categories if provided
+          if (categories && categories.length > 0) {
+            const { addTripCategory } = await import('./db');
+            for (const category of categories) {
+              await addTripCategory(result.id, category);
+            }
+          }
 
           return { id: result.id };
         } catch (error) {
@@ -378,6 +394,17 @@ export const appRouter = router({
           if (trip.userId !== ctx.user.id && ctx.user.role !== 'admin') {
             throw new ForbiddenError("You are not authorized to update this trip");
           }
+
+          // Automatically geocode destination if it's being updated and no coordinates provided
+          if (input.destination && (!input.latitude || !input.longitude)) {
+            const { geocodeAddress } = await import('./geocoding');
+            const coordinates = await geocodeAddress(input.destination);
+            if (coordinates) {
+              data.latitude = coordinates.latitude;
+              data.longitude = coordinates.longitude;
+            }
+          }
+
           await updateTrip(id, trip.userId, data);
 
           // Update categories if provided
