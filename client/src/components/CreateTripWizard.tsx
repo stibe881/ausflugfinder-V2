@@ -208,8 +208,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
         categories: formData.categories,
         cost: formData.cost,
         image: imageUrl || undefined,
-        startDate: new Date(),
-        endDate: new Date(),
+        // Dates are optional - not collected in this wizard form
         participants: 1,
       });
     } catch (error) {
