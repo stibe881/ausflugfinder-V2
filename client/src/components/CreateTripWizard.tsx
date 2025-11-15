@@ -100,12 +100,12 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
   const uploadTripImageMutation = trpc.upload.tripImage.useMutation();
 
   const createTripMutation = trpc.trips.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success(t("tripDetail.createSuccess") || "Ausflug erstellt!");
       onOpenChange(false);
       resetForm();
-      // Navigate to my trips page
-      navigate("/mytrips");
+      // Navigate to the detail page of the newly created trip
+      navigate(`/trips/${data.id}`);
     },
     onError: (error) => {
       toast.error(error.message || t("tripDetail.createError") || "Fehler beim Erstellen");
@@ -211,7 +211,6 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
         // Dates are optional - not collected in this wizard form
         participants: 1,
       };
-      console.log("Submitting trip data:", tripData);
       createTripMutation.mutate(tripData);
     } catch (error) {
       console.error("Submit failed:", error);

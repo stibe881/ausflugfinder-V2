@@ -99,7 +99,9 @@ export async function createTrip(trip: InsertTrip) {
     throw new Error("Database not available");
   }
   const result = await db.insert(trips).values(trip);
-  return result;
+  // Drizzle's MySQL insert returns { insertId?: number }
+  // The insertId is the auto-incremented ID of the newly created row
+  return { id: result[0]?.id ?? result.insertId };
 }
 
 export async function getUserTrips(userId: number, pagination?: { page?: number; limit?: number }) {
