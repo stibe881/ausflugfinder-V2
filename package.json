@@ -6,17 +6,26 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch server/_core/index.ts",
     "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:web": "vite build",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "import:excursions": "tsx scripts/import-excursions.ts",
-    "link:images": "node scripts/link-images-compiled.cjs"
+    "link:images": "node scripts/link-images-compiled.cjs",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:build:ios": "npm run build:web && npx cap sync && npx cap open ios",
+    "cap:build:android": "npm run build:web && npx cap sync && npx cap open android"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/push-notifications": "^7.0.3",
     "@googlemaps/markerclusterer": "^2.6.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

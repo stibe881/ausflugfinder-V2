@@ -112,3 +112,15 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Capacitor files
+/ios/App/Podfile.lock
+/ios/App/Pods/
+/ios/App/.build
+/android/app/build/
+/android/.gradle/
+/android/local.properties
+/android/captures/
+/android/externalNativeBuild/
+/.capacitor/
+/native-debug.log
