@@ -56,7 +56,7 @@ export default function TripDetail() {
     description: "",
     destination: "",
     region: "",
-    category: "",
+    categories: [] as string[],
     cost: "free" as const,
     image: "",
     websiteUrl: "",
@@ -75,7 +75,7 @@ export default function TripDetail() {
   const canEdit = canEditTrip;
 
   const COST_LABELS: Record<string, string> = {
-    free: t("tripDetail.costFree"),
+    free: "Kostenlos",
     low: "CHF 🪙",
     medium: "CHF 🪙🪙",
     high: "CHF 🪙🪙🪙",
@@ -91,7 +91,7 @@ export default function TripDetail() {
         description: trip.description || "",
         destination: trip.destination || "",
         region: trip.region || "",
-        category: trip.category || "",
+        categories: trip.categories || [],
         cost: (trip.cost as "free" | "low" | "medium" | "high" | "very_high") || "free",
         image: trip.image || "",
         websiteUrl: trip.websiteUrl || "",
@@ -110,7 +110,7 @@ export default function TripDetail() {
       description: "",
       destination: "",
       region: "",
-      category: "",
+      categories: [],
       cost: "free" as const,
       image: "",
       websiteUrl: "",
@@ -134,7 +134,7 @@ export default function TripDetail() {
       description: editForm.description,
       destination: editForm.destination,
       region: editForm.region,
-      category: editForm.category,
+      categories: editForm.categories,
       cost: editForm.cost,
       image: editForm.image || undefined,
       websiteUrl: editForm.websiteUrl || undefined,
@@ -457,59 +457,6 @@ export default function TripDetail() {
               isLoading={userLoading}
             />
 
-            {/* Nice to Know Section */}
-            {trip.category || trip.region || isEditMode ? (
-              <Card>
-                <CardHeader>
-                  <h2 className="text-xl font-bold">{t("tripDetail.niceToKnow")}</h2>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {isEditMode ? (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">{t("tripDetail.category")}</label>
-                        <Select value={editForm.category} onValueChange={(value) => setEditForm({ ...editForm, category: value })}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("tripDetail.categoryPlaceholder")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
-                              <SelectItem key={cat} value={cat}>
-                                {cat}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">{t("tripDetail.region")}</label>
-                        <Select value={editForm.region} onValueChange={(value) => setEditForm({ ...editForm, region: value })}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("tripDetail.regionPlaceholder")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft", "Basel-Stadt", "Bern", "Fribourg", "Genève", "Glarus", "Graubünden", "Jura", "Luzern", "Neuchâtel", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz", "Solothurn", "St. Gallen", "Tessin", "Thurgau", "Uri", "Valais", "Vaud", "Zug", "Zürich", "Deutschland", "Österreich", "Frankreich", "Italien"].map((reg) => (
-                              <SelectItem key={reg} value={reg}>
-                                {reg}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {trip.category && (
-                        <Badge variant="secondary">{trip.category}</Badge>
-                      )}
-                      {trip.region && (
-                        <Badge variant="outline">{trip.region}</Badge>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : null}
           </div>
 
           {/* Sidebar */}
@@ -522,21 +469,14 @@ export default function TripDetail() {
               <CardContent className="space-y-4">
                 {isEditMode ? (
                   <>
-                    {/* Editable Cost */}
+                    {/* Editable Title */}
                     <div>
-                      <label className="block text-sm font-medium mb-2">{t("tripDetail.cost")}</label>
-                      <Select value={editForm.cost} onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="free">{t("tripDetail.costFree")}</SelectItem>
-                          <SelectItem value="low">CHF •</SelectItem>
-                          <SelectItem value="medium">CHF ••</SelectItem>
-                          <SelectItem value="high">CHF •••</SelectItem>
-                          <SelectItem value="very_high">CHF ••••</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.titleLabel")}</label>
+                      <Input
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        placeholder={t("tripDetail.titlePlaceholder")}
+                      />
                     </div>
 
                     {/* Editable Destination */}
@@ -547,6 +487,150 @@ export default function TripDetail() {
                         onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
                         placeholder={t("tripDetail.destinationPlaceholder")}
                       />
+                    </div>
+
+                    {/* Editable Cost */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.cost")}</label>
+                      <Select value={editForm.cost} onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Kostenlos</SelectItem>
+                          <SelectItem value="low">CHF •</SelectItem>
+                          <SelectItem value="medium">CHF ••</SelectItem>
+                          <SelectItem value="high">CHF •••</SelectItem>
+                          <SelectItem value="very_high">CHF ••••</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Editable Categories (Multiple Selection) */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.category")} (Mehrfachauswahl)</label>
+                      <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                        {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
+                          <div key={cat} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`cat-edit-${cat}`}
+                              checked={editForm.categories.includes(cat)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    categories: [...prev.categories, cat],
+                                  }));
+                                } else {
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    categories: prev.categories.filter((c) => c !== cat),
+                                  }));
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <label htmlFor={`cat-edit-${cat}`} className="text-sm cursor-pointer">
+                              {cat}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      {editForm.categories.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {editForm.categories.map((cat) => (
+                            <div
+                              key={cat}
+                              className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs flex items-center gap-1"
+                            >
+                              {cat}
+                              <button
+                                onClick={() => {
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    categories: prev.categories.filter((c) => c !== cat),
+                                  }));
+                                }}
+                                className="font-bold hover:opacity-75"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Editable Region */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.region")}</label>
+                      <Select value={editForm.region} onValueChange={(value) => setEditForm({ ...editForm, region: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("tripDetail.regionPlaceholder")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft", "Basel-Stadt", "Bern", "Fribourg", "Genève", "Glarus", "Graubünden", "Jura", "Luzern", "Neuchâtel", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz", "Solothurn", "St. Gallen", "Tessin", "Thurgau", "Uri", "Valais", "Vaud", "Zug", "Zürich", "Deutschland", "Österreich", "Frankreich", "Italien"].map((reg) => (
+                            <SelectItem key={reg} value={reg}>
+                              {reg}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Editable Route Type (only for Wanderweg/Abenteuerweg) */}
+                    {(editForm.category === "Wanderweg" || editForm.category === "Abenteuerweg") && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Routentyp</label>
+                        <Select
+                          value={editForm.routeType}
+                          onValueChange={(value: any) => setEditForm({ ...editForm, routeType: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Wähle Routentyp" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="location">Standort</SelectItem>
+                            <SelectItem value="round_trip">Rundtour</SelectItem>
+                            <SelectItem value="one_way">Von-zu</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {/* Editable Website URL */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Website URL</label>
+                      <Input
+                        placeholder="https://example.com"
+                        type="url"
+                        value={editForm.websiteUrl}
+                        onChange={(e) => setEditForm({ ...editForm, websiteUrl: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Editable Age Recommendation */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Altersempfehlung</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Alter von"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.ageRecommendationMin}
+                          onChange={(e) => setEditForm({ ...editForm, ageRecommendationMin: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Alter bis"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.ageRecommendationMax}
+                          onChange={(e) => setEditForm({ ...editForm, ageRecommendationMax: e.target.value })}
+                        />
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -562,11 +646,15 @@ export default function TripDetail() {
                       </Badge>
                     </div>
 
-                    {/* Category */}
-                    {trip.category && (
+                    {/* Categories */}
+                    {trip.categories && trip.categories.length > 0 && (
                       <div className="pb-4 border-b">
-                        <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.category")}</div>
-                        <div className="font-medium">{trip.category}</div>
+                        <div className="text-sm text-muted-foreground mb-2">{t("tripDetail.category")}</div>
+                        <div className="flex flex-wrap gap-1">
+                          {trip.categories.map((cat) => (
+                            <Badge key={cat} variant="secondary">{cat}</Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -580,7 +668,7 @@ export default function TripDetail() {
 
                     {/* Destination */}
                     {trip.destination && (
-                      <div>
+                      <div className="pb-4 border-b">
                         <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.destination")}</div>
                         <div
                           className="font-medium cursor-pointer hover:text-primary transition-colors"
@@ -595,6 +683,24 @@ export default function TripDetail() {
                         >
                           {trip.destination}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Website URL */}
+                    {trip.websiteUrl && (
+                      <div className="pb-4 border-b">
+                        <div className="text-sm text-muted-foreground mb-1">Website</div>
+                        <a href={trip.websiteUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                          {trip.websiteUrl}
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Age Recommendation */}
+                    {trip.ageRecommendation && (
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Altersempfehlung</div>
+                        <div className="font-medium">{trip.ageRecommendation} Jahre</div>
                       </div>
                     )}
                   </>
@@ -694,149 +800,6 @@ export default function TripDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Inline Edit Form - shown when isEditMode is true */}
-      {isEditMode && (
-        <div className="bg-card border-b">
-          <div className="container mx-auto px-4 py-6 max-w-2xl">
-            <div className="space-y-4">
-              <Input
-                placeholder={t("tripDetail.titleLabel")}
-                value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                className="w-full"
-              />
-              <Input
-                placeholder={t("tripDetail.destination")}
-                value={editForm.destination}
-                onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
-                className="w-full"
-              />
-              <Textarea
-                placeholder={t("tripDetail.description")}
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                className="w-full min-h-24"
-              />
-
-              {/* Region Select */}
-              <Select
-                value={editForm.region}
-                onValueChange={(value) => setEditForm({ ...editForm, region: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Wähle eine Region" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft", "Basel-Stadt", "Bern", "Fribourg", "Genève", "Glarus", "Graubünden", "Jura", "Luzern", "Neuchâtel", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz", "Solothurn", "St. Gallen", "Tessin", "Thurgau", "Uri", "Valais", "Vaud", "Zug", "Zürich", "Deutschland", "Österreich", "Frankreich", "Italien"].map((reg) => (
-                    <SelectItem key={reg} value={reg}>
-                      {reg}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Category Select */}
-              <Select
-                value={editForm.category}
-                onValueChange={(value) => setEditForm({ ...editForm, category: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Wähle eine Kategorie" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Route Type (only for Wanderweg/Abenteuerweg) */}
-              {(editForm.category === "Wanderweg" || editForm.category === "Abenteuerweg") && (
-                <Select
-                  value={editForm.routeType}
-                  onValueChange={(value: any) => setEditForm({ ...editForm, routeType: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wähle Routentyp" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="location">Standort</SelectItem>
-                    <SelectItem value="round_trip">Rundtour</SelectItem>
-                    <SelectItem value="one_way">Von-zu</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-
-              {/* Cost Select */}
-              <Select
-                value={editForm.cost}
-                onValueChange={(value: any) => setEditForm({ ...editForm, cost: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Wähle Kosten" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">Kostenlos</SelectItem>
-                  <SelectItem value="low">CHF 🪙</SelectItem>
-                  <SelectItem value="medium">CHF 🪙🪙</SelectItem>
-                  <SelectItem value="high">CHF 🪙🪙🪙</SelectItem>
-                  <SelectItem value="very_high">CHF 🪙🪙🪙🪙</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Website URL */}
-              <Input
-                placeholder="Website URL"
-                type="url"
-                value={editForm.websiteUrl}
-                onChange={(e) => setEditForm({ ...editForm, websiteUrl: e.target.value })}
-                className="w-full"
-              />
-
-              {/* Age Recommendation */}
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  placeholder="Alter von"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={editForm.ageRecommendationMin}
-                  onChange={(e) => setEditForm({ ...editForm, ageRecommendationMin: e.target.value })}
-                />
-                <Input
-                  placeholder="Alter bis"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={editForm.ageRecommendationMax}
-                  onChange={(e) => setEditForm({ ...editForm, ageRecommendationMax: e.target.value })}
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={handleEditSave}
-                  disabled={updateTripMutation.isPending}
-                  className="flex-1"
-                >
-                  {updateTripMutation.isPending ? "Wird gespeichert..." : "Speichern"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleEditCancel}
-                  disabled={updateTripMutation.isPending}
-                  className="flex-1"
-                >
-                  Abbrechen
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Map Selection Dialog */}
       <Dialog open={mapDialog} onOpenChange={setMapDialog}>
