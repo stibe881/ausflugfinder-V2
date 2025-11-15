@@ -113,14 +113,6 @@ export const useLocation = () => {
    */
   const startTracking = useCallback(
     async (intervalMs = 60000) => {
-      // Check if location tracking is enabled in settings
-      if (!settings?.locationTrackingEnabled) {
-        console.warn(
-          '⚠ Location tracking is disabled in settings'
-        );
-        return false;
-      }
-
       if (locationState.isTracking) {
         console.warn('⚠ Location tracking already active');
         return false;
@@ -157,7 +149,7 @@ export const useLocation = () => {
 
       return true;
     },
-    [locationState.isTracking, settings?.locationTrackingEnabled, requestLocation]
+    [locationState.isTracking, requestLocation]
   );
 
   /**
