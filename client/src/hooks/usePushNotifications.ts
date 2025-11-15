@@ -12,6 +12,7 @@ export interface PushNotificationSettings {
   friendRequestNotifications: boolean;
   friendRequestAcceptedNotifications: boolean;
   nearbyTripNotifications: boolean;
+  newTripNotifications: boolean;
   nearbyTripDistance: number;
   locationTrackingEnabled: boolean;
 }
@@ -21,7 +22,7 @@ export interface Notification {
   userId: number;
   title: string;
   message: string;
-  type: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'system';
+  type: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'new_trip' | 'system';
   relatedId?: number;
   isRead: boolean;
   createdAt: Date;
