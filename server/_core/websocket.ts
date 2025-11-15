@@ -6,7 +6,8 @@
 import { Server as HTTPServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import type { IncomingMessage } from 'http';
-import { jwtVerify } from 'jose';
+import { sdk } from './sdk';
+import { COOKIE_NAME } from '../shared/const';
 
 interface NotificationMessage {
   type: 'notification' | 'ping' | 'pong';
@@ -35,7 +36,23 @@ const connectedClients = new Map<number, Set<ConnectedClient>>();
 const HEARTBEAT_INTERVAL = 30000; // 30 seconds
 const HEARTBEAT_TIMEOUT = 60000; // 60 seconds
 
-export function setupWebSocketServer(server: HTTPServer, secret: string = process.env.JWT_SECRET || '') {
+/**
+ * Parse cookies from header
+ */
+function parseCookies(cookieHeader?: string): Map<string, string> {
+  const cookies = new Map<string, string>();
+  if (!cookieHeader) return cookies;
+
+  for (const cookie of cookieHeader.split(';')) {
+    const [name, value] = cookie.split('=');
+    if (name && value) {
+      cookies.set(name.trim(), decodeURIComponent(value.trim()));
+    }
+  }
+  return cookies;
+}
+
+export function setupWebSocketServer(server: HTTPServer) {
   const wss = new WebSocketServer({ server, path: '/ws' });
 
   console.log('✓ WebSocket server initialized on path /ws');
@@ -53,6 +70,7 @@ export function setupWebSocketServer(server: HTTPServer, secret: string = proces
       host: req.headers.host,
       'x-forwarded-for': req.headers['x-forwarded-for'],
       'x-forwarded-proto': req.headers['x-forwarded-proto'],
+      cookie: req.headers.cookie ? '***' : 'none',
     });
   });
 
@@ -60,25 +78,39 @@ export function setupWebSocketServer(server: HTTPServer, secret: string = proces
   wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     console.log('→ New WebSocket connection attempt');
     console.log('  URL:', req.url);
-    console.log('  Headers:', JSON.stringify(req.headers, null, 2).substring(0, 500));
 
-    // Extract and verify JWT token
-    const token = extractToken(req.url);
-    if (!token) {
-      console.log('✗ No token provided');
-      ws.close(1008, 'Unauthorized');
+    // Authenticate using session cookie
+    const cookies = parseCookies(req.headers.cookie);
+    const sessionCookie = cookies.get(COOKIE_NAME);
+
+    if (!sessionCookie) {
+      console.log(`✗ No session cookie (${COOKIE_NAME}) found`);
+      ws.close(1008, 'Unauthorized: No session cookie');
       return;
     }
 
     let userId: number;
     try {
-      const secretBuffer = new TextEncoder().encode(secret || 'default-secret');
-      const decoded = await jwtVerify(token, secretBuffer);
-      userId = decoded.payload.sub as unknown as number;
-      console.log(`✓ WebSocket user authenticated: ${userId}`);
+      const session = await sdk.verifySession(sessionCookie);
+      if (!session) {
+        console.log('✗ Session cookie verification failed');
+        ws.close(1008, 'Unauthorized: Invalid session');
+        return;
+      }
+
+      // Get user from database using openId from session
+      const user = await (await import('../db')).default.getUserByOpenId(session.openId);
+      if (!user) {
+        console.log('✗ User not found in database');
+        ws.close(1008, 'Unauthorized: User not found');
+        return;
+      }
+
+      userId = user.id;
+      console.log(`✓ WebSocket user authenticated: ${userId} (${session.name})`);
     } catch (err) {
-      console.error('✗ Token verification failed:', err);
-      ws.close(1008, 'Unauthorized');
+      console.error('✗ Session verification failed:', err);
+      ws.close(1008, 'Unauthorized: Session verification failed');
       return;
     }
 

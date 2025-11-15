@@ -58,7 +58,7 @@ export default function Friends() {
       friendshipUtils.getFriends.invalidate();
     },
     onError: (error) => {
-      toast.error(error.message || t("friends.deleteError"));
+      toast.error(String((error as any)?.message || t("friends.deleteError")));
     },
   });
 
@@ -139,7 +139,7 @@ export default function Friends() {
         setIsAddOpen(false);
       }
     } catch (error) {
-      const errorMessage = (error as any)?.message || t("friends.addError");
+      const errorMessage = String((error as any)?.message || t("friends.addError"));
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
