@@ -298,6 +298,44 @@ export const usePushNotifications = () => {
   );
 
   /**
+   * Register periodic background sync for iOS PWA
+   * This allows the Service Worker to fetch notifications every 5-10 minutes
+   * even when the app is closed
+   */
+  useEffect(() => {
+    const registerPeriodicSync = async () => {
+      if (!isSupported || !user) return;
+
+      try {
+        const reg = await navigator.serviceWorker.ready;
+
+        // Check if periodic sync is supported
+        if ('periodicSync' in reg) {
+          try {
+            // Request periodic sync every 5 minutes (minimum on most browsers)
+            await (reg as any).periodicSync.register('sync-notifications', {
+              minInterval: 5 * 60 * 1000, // 5 minutes
+            });
+            console.log('✓ Periodic sync registered for notifications (iOS PWA)');
+          } catch (err) {
+            // Periodic sync might not be available on all browsers (e.g., iOS Safari)
+            // That's okay, we still have WebSocket notifications
+            if ((err as any).name !== 'NotAllowedError') {
+              console.warn('⚠ Periodic sync registration failed:', err);
+            }
+          }
+        } else {
+          console.log('⚠ Periodic sync not supported by browser');
+        }
+      } catch (err) {
+        console.error('✗ Error registering periodic sync:', err);
+      }
+    };
+
+    registerPeriodicSync();
+  }, [isSupported, user]);
+
+  /**
    * Request geolocation from browser
    */
   const requestGeolocation = useCallback(async () => {

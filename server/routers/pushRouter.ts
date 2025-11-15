@@ -14,7 +14,7 @@ import {
   friendships,
   users,
 } from "../../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import {
   sendPushNotificationToUser,
   sendFriendRequestNotification,
@@ -805,6 +805,61 @@ export const pushRouter = router({
       throw toTRPCError(appError);
     }
   }),
+
+  // Background Sync endpoint: Get unread notifications for iOS PWA periodic sync
+  getUnreadNotifications: protectedProcedure
+    .input(z.object({
+      lastSyncTime: z.number().optional(), // Unix timestamp of last sync
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      try {
+        const db = await getDb();
+        const userId = ctx.user.id;
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
+
+        // Get unread notifications since last sync
+        let query = db
+          .select()
+          .from(notificationsTable)
+          .where(
+            and(
+              eq(notificationsTable.userId, userId),
+              eq(notificationsTable.isRead, 0)
+            )
+          );
+
+        // Filter by lastSyncTime if provided
+        if (input?.lastSyncTime) {
+          const lastSyncDate = new Date(input.lastSyncTime);
+          query = query.where(
+            sql`${notificationsTable.createdAt} > ${lastSyncDate}`
+          ) as any;
+        }
+
+        const notifications = await query.limit(10);
+
+        console.log(`[push.getUnreadNotifications] Found ${notifications.length} unread notifications for user ${userId}`);
+
+        return {
+          success: true,
+          notifications: notifications.map(n => ({
+            id: n.id,
+            title: n.title || "Neue Benachrichtigung",
+            message: n.message,
+            type: n.type,
+            url: `/trips/${n.relatedId}`, // Default URL based on type
+            createdAt: n.createdAt,
+          })),
+          count: notifications.length,
+        };
+      } catch (error) {
+        const appError = handleError(error, "push.getUnreadNotifications");
+        throw toTRPCError(appError);
+      }
+    }),
 });
 
 export type PushRouter = typeof pushRouter;

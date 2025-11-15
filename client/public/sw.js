@@ -347,3 +347,118 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('notificationclose', (event) => {
   console.log('[Service Worker] Notification closed:', event.notification.tag);
 });
+
+// Periodic background sync for iOS PWA (fetch unread notifications every 5 minutes)
+// This helps iOS devices get notifications even when app is closed
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-notifications') {
+    event.waitUntil(syncNotifications());
+  }
+});
+
+async function syncNotifications() {
+  try {
+    console.log('[Service Worker] Syncing notifications...');
+
+    // Get auth token from localStorage (won't work in SW, so use IndexedDB instead)
+    const lastSyncTime = await getLastSyncTime();
+
+    // Fetch unread notifications from backend
+    const response = await fetch('/trpc/push.getUnreadNotifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: lastSyncTime ? { lastSyncTime } : undefined,
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn('[Service Worker] Failed to fetch notifications:', response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    // Handle TRPC response format
+    if (data.result?.data) {
+      const notificationData = data.result.data;
+
+      if (notificationData.notifications && notificationData.notifications.length > 0) {
+        console.log(`[Service Worker] Found ${notificationData.notifications.length} unread notifications`);
+
+        // Show notifications
+        for (const notification of notificationData.notifications) {
+          await self.registration.showNotification(
+            notification.title || 'Neue Benachrichtigung',
+            {
+              body: notification.message,
+              icon: '/icons/icon-192.png',
+              badge: '/icons/icon-192.png',
+              tag: `notification-${notification.id}`,
+              data: {
+                url: notification.url || '/',
+              },
+            }
+          );
+        }
+
+        // Update last sync time
+        await setLastSyncTime(Date.now());
+      }
+    } else if (data.error) {
+      console.warn('[Service Worker] Error from backend:', data.error);
+    }
+  } catch (error) {
+    console.error('[Service Worker] Notification sync error:', error);
+  }
+}
+
+// IndexedDB helpers for sync tracking
+async function openNotificationDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('ausflug-manager', 1);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('sync-meta')) {
+        db.createObjectStore('sync-meta');
+      }
+    };
+  });
+}
+
+async function getLastSyncTime() {
+  try {
+    const db = await openNotificationDB();
+    return new Promise((resolve) => {
+      const transaction = db.transaction(['sync-meta'], 'readonly');
+      const store = transaction.objectStore('sync-meta');
+      const request = store.get('lastNotificationSync');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => resolve(null);
+    });
+  } catch (error) {
+    console.warn('[Service Worker] Error getting last sync time:', error);
+    return null;
+  }
+}
+
+async function setLastSyncTime(timestamp) {
+  try {
+    const db = await openNotificationDB();
+    return new Promise((resolve) => {
+      const transaction = db.transaction(['sync-meta'], 'readwrite');
+      const store = transaction.objectStore('sync-meta');
+      const request = store.put(timestamp, 'lastNotificationSync');
+      request.onsuccess = () => resolve();
+      request.onerror = () => resolve();
+    });
+  } catch (error) {
+    console.warn('[Service Worker] Error setting last sync time:', error);
+  }
+}
