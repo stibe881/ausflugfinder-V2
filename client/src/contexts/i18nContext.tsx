@@ -1046,6 +1046,8 @@ const translations: Record<Language, Record<string, string>> = {
     "common.delete": "Supprimer",
     "common.edit": "Modifier",
     "common.back": "Retour",
+    "explore.destDeleteConfirm": "Voulez-vous vraiment supprimer cette destination?",
+    "explore.destDeleteConfirmTitle": "Confirmer la suppression de la destination",
     "destinations.namePlaceholder": "par exemple Forêt Noire",
     "destinations.locationPlaceholder": "par exemple Bade-Wurtemberg, Allemagne",
     "destinations.descPlaceholder": "Qu'est-ce qui rend ce lieu spécial?",

@@ -11,6 +11,7 @@ import { useI18n } from "@/contexts/i18nContext";
 import { MapPin, Plus, Trash2, Edit, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 export default function Destinations() {
   const { t } = useI18n();
@@ -23,6 +24,8 @@ export default function Destinations() {
     location: "",
     imageUrl: "",
   });
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+  const [destinationToDeleteId, setDestinationToDeleteId] = useState<number | null>(null);
 
   const { data: destinations, isLoading, refetch } = trpc.destinations.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -88,9 +91,8 @@ export default function Destinations() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm(t("destinations.deleteConfirm"))) {
-      deleteMutation.mutate({ id });
-    }
+    setDestinationToDeleteId(id);
+    setShowConfirmDeleteDialog(true);
   };
 
   if (authLoading) {
@@ -274,6 +276,23 @@ export default function Destinations() {
           </Card>
         )}
       </div>
+
+      <ConfirmationDialog
+        isOpen={showConfirmDeleteDialog}
+        onConfirm={() => {
+          if (destinationToDeleteId !== null) {
+            deleteMutation.mutate({ id: destinationToDeleteId });
+            setShowConfirmDeleteDialog(false);
+            setDestinationToDeleteId(null);
+          }
+        }}
+        onCancel={() => setShowConfirmDeleteDialog(false)}
+        title={t("destinations.deleteConfirmTitle") || "Confirm Destination Deletion"} // Assuming new translation key
+        message={t("destinations.deleteConfirm")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        isDestructive
+      />
     </div>
   );
 }
