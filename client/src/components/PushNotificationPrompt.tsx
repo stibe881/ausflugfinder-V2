@@ -24,29 +24,28 @@ export const PushNotificationPrompt = () => {
   const [alreadyTriedSubscribe, setAlreadyTriedSubscribe] = useState(false);
 
   useEffect(() => {
+    const permission = Notification.permission;
+
     console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', {
       hasUser: !!user,
       isSupported,
       isSubscribed,
+      permission,
     });
 
     // Only show prompt if:
     // 1. User is logged in
     // 2. Push notifications are supported
-    // 3. Not already subscribed
-    if (!user || !isSupported || isSubscribed) {
+    if (!user || !isSupported) {
       return;
     }
 
-    const permission = Notification.permission;
-    console.log('[PushNotificationPrompt] Current permission:', permission);
-
-    // Only show prompt if permission is 'default' (not yet decided by user)
+    // Show prompt if permission hasn't been granted yet (regardless of DB subscription status)
     if (permission === 'default') {
       console.log('[PushNotificationPrompt] Showing prompt - permission is default');
       setShowPrompt(true);
     } else if (permission === 'granted' && !isSubscribed && !alreadyTriedSubscribe) {
-      // If permission is granted but not subscribed, try to subscribe
+      // If permission is granted but not subscribed in DB, try to subscribe
       console.log('[PushNotificationPrompt] Permission granted but not subscribed, attempting subscription...');
       setAlreadyTriedSubscribe(true);
       handleSubscribe();
