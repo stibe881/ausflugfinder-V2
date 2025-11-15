@@ -327,7 +327,7 @@ export const appRouter = router({
             throw new ValidationError("End date must be after start date");
           }
           const { categories, ...tripData } = input;
-          await createTrip({
+          const result = await createTrip({
             userId: ctx.user.id,
             ...tripData,
           });
@@ -335,7 +335,7 @@ export const appRouter = router({
           // Note: Categories will be handled by the frontend via separate request
           // The trip.create endpoint in CreateTripWizard handles category assignment
 
-          return { success: true };
+          return { id: result.id };
         } catch (error) {
           const appError = handleError(error, "trips.create");
           throw toTRPCError(appError);
