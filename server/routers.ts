@@ -308,8 +308,8 @@ export const appRouter = router({
           title: z.string().min(1),
           description: z.string().optional(),
           destination: z.string().min(1),
-          startDate: z.date(),
-          endDate: z.date(),
+          startDate: z.date().optional(),
+          endDate: z.date().optional(),
           participants: z.number().min(1).default(1),
           status: z.enum(["planned", "ongoing", "completed", "cancelled"]).default("planned"),
           isFavorite: z.number().optional().default(0),
@@ -322,7 +322,8 @@ export const appRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         try {
-          if (input.endDate <= input.startDate) {
+          // Only validate date order if both dates are provided
+          if (input.startDate && input.endDate && input.endDate <= input.startDate) {
             throw new ValidationError("End date must be after start date");
           }
           const { categories, ...tripData } = input;
