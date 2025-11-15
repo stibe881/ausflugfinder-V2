@@ -39,8 +39,8 @@ export const trips = mysqlTable("trips", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   destination: varchar("destination", { length: 255 }).notNull(),
-  startDate: timestamp("startDate").notNull(),
-  endDate: timestamp("endDate").notNull(),
+  startDate: timestamp("startDate"),
+  endDate: timestamp("endDate"),
   participants: int("participants").default(1).notNull(),
   status: mysqlEnum("status", ["planned", "ongoing", "completed", "cancelled"]).default("planned").notNull(),
   // New fields from ausflugfinder.ch
