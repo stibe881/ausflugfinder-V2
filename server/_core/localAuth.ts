@@ -113,11 +113,15 @@ export function registerLocalAuthRoutes(app: Express) {
         return;
       }
 
-      // Update last signed in
-      await db
-        .update(users)
-        .set({ lastSignedIn: new Date().toISOString() })
-        .where(eq(users.id, user.id));
+      // Update last signed in (non-critical, don't fail login if this fails)
+      try {
+        await db
+          .update(users)
+          .set({ lastSignedIn: new Date().toISOString() })
+          .where(eq(users.id, user.id));
+      } catch (err) {
+        console.warn('[Auth] Failed to update lastSignedIn:', err);
+      }
 
       // Create JWT session token like the OAuth version
       const jwtSecret = process.env.JWT_SECRET;
