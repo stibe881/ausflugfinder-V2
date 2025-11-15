@@ -56,7 +56,7 @@ export default function TripDetail() {
     description: "",
     destination: "",
     region: "",
-    category: "",
+    categories: [] as string[],
     cost: "free" as const,
     image: "",
     websiteUrl: "",
@@ -91,7 +91,7 @@ export default function TripDetail() {
         description: trip.description || "",
         destination: trip.destination || "",
         region: trip.region || "",
-        category: trip.category || "",
+        categories: trip.categories || [],
         cost: (trip.cost as "free" | "low" | "medium" | "high" | "very_high") || "free",
         image: trip.image || "",
         websiteUrl: trip.websiteUrl || "",
@@ -110,7 +110,7 @@ export default function TripDetail() {
       description: "",
       destination: "",
       region: "",
-      category: "",
+      categories: [],
       cost: "free" as const,
       image: "",
       websiteUrl: "",
@@ -134,7 +134,7 @@ export default function TripDetail() {
       description: editForm.description,
       destination: editForm.destination,
       region: editForm.region,
-      category: editForm.category,
+      categories: editForm.categories,
       cost: editForm.cost,
       image: editForm.image || undefined,
       websiteUrl: editForm.websiteUrl || undefined,
@@ -506,21 +506,60 @@ export default function TripDetail() {
                       </Select>
                     </div>
 
-                    {/* Editable Category */}
+                    {/* Editable Categories (Multiple Selection) */}
                     <div>
-                      <label className="block text-sm font-medium mb-2">{t("tripDetail.category")}</label>
-                      <Select value={editForm.category} onValueChange={(value) => setEditForm({ ...editForm, category: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("tripDetail.categoryPlaceholder")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
-                            <SelectItem key={cat} value={cat}>
+                      <label className="block text-sm font-medium mb-2">{t("tripDetail.category")} (Mehrfachauswahl)</label>
+                      <div className="border rounded-md p-3 max-h-48 overflow-y-auto space-y-2">
+                        {["Aktion & Sport", "Badewelt", "Freizeitpark", "Innenspielplatz", "Kultur", "Pumptrack", "Restaurant", "Schnitzeljagd", "Spielplatz", "Tierpark/Zoo", "Wanderweg", "Abenteuerweg", "Kugelbahn", "Museum"].map((cat) => (
+                          <div key={cat} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`cat-edit-${cat}`}
+                              checked={editForm.categories.includes(cat)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    categories: [...prev.categories, cat],
+                                  }));
+                                } else {
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    categories: prev.categories.filter((c) => c !== cat),
+                                  }));
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <label htmlFor={`cat-edit-${cat}`} className="text-sm cursor-pointer">
                               {cat}
-                            </SelectItem>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      {editForm.categories.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {editForm.categories.map((cat) => (
+                            <div
+                              key={cat}
+                              className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs flex items-center gap-1"
+                            >
+                              {cat}
+                              <button
+                                onClick={() => {
+                                  setEditForm((prev) => ({
+                                    ...prev,
+                                    categories: prev.categories.filter((c) => c !== cat),
+                                  }));
+                                }}
+                                className="font-bold hover:opacity-75"
+                              >
+                                ×
+                              </button>
+                            </div>
                           ))}
-                        </SelectContent>
-                      </Select>
+                        </div>
+                      )}
                     </div>
 
                     {/* Editable Region */}
@@ -607,11 +646,15 @@ export default function TripDetail() {
                       </Badge>
                     </div>
 
-                    {/* Category */}
-                    {trip.category && (
+                    {/* Categories */}
+                    {trip.categories && trip.categories.length > 0 && (
                       <div className="pb-4 border-b">
-                        <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.category")}</div>
-                        <div className="font-medium">{trip.category}</div>
+                        <div className="text-sm text-muted-foreground mb-2">{t("tripDetail.category")}</div>
+                        <div className="flex flex-wrap gap-1">
+                          {trip.categories.map((cat) => (
+                            <Badge key={cat} variant="secondary">{cat}</Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
 
