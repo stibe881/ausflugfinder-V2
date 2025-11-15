@@ -40,27 +40,25 @@ export const useWebSocketNotifications = () => {
   const maxReconnectAttempts = 5;
   const baseReconnectDelay = 2000; // 2 seconds
 
-  // Get the token from localStorage
-  const getToken = useCallback(() => {
-    const token = localStorage.getItem('auth_token');
-    return token ? decodeURIComponent(token) : null;
-  }, []);
-
   // Connect to WebSocket server
   const connect = useCallback(() => {
-    if (!user) return;
+    if (!user) {
+      console.log('⚠ No user logged in');
+      return;
+    }
 
-    const token = getToken();
+    const token = localStorage.getItem('auth_token');
     if (!token) {
       console.log('⚠ No auth token available for WebSocket');
       setError('Authentication required');
       return;
     }
 
+    const decodedToken = decodeURIComponent(token);
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
+    const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(decodedToken)}`;
 
-    console.log('→ Attempting WebSocket connection');
+    console.log('→ Attempting WebSocket connection to:', wsUrl.replace(decodedToken, '***'));
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -148,7 +146,7 @@ export const useWebSocketNotifications = () => {
       console.error('Error creating WebSocket:', err);
       setError('Failed to create WebSocket connection');
     }
-  }, [user, getToken, toast]);
+  }, [user, toast]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {
@@ -171,16 +169,17 @@ export const useWebSocketNotifications = () => {
 
   // Auto-connect when user changes
   useEffect(() => {
-    if (user) {
+    if (user && localStorage.getItem('auth_token')) {
+      console.log('⏱ User detected, connecting to WebSocket...');
       connect();
     } else {
       disconnect();
     }
 
     return () => {
-      disconnect();
+      // disconnect();
     };
-  }, [user, connect, disconnect]);
+  }, [user]);
 
   return {
     isConnected,
