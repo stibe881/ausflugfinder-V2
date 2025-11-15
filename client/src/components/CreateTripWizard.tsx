@@ -98,12 +98,14 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
   });
 
   const uploadTripImageMutation = trpc.upload.tripImage.useMutation();
+  const utils = trpc.useUtils();
 
   const createTripMutation = trpc.trips.create.useMutation({
     onSuccess: (data) => {
       toast.success(t("tripDetail.createSuccess") || "Ausflug erstellt!");
       onOpenChange(false);
       resetForm();
+      utils.trips.search.invalidate();
       // Navigate to the detail page of the newly created trip
       navigate(`/trips/${data.id}`);
     },

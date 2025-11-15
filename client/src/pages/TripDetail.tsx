@@ -469,16 +469,6 @@ export default function TripDetail() {
               <CardContent className="space-y-4">
                 {isEditMode ? (
                   <>
-                    {/* Editable Title */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">{t("tripDetail.titleLabel")}</label>
-                      <Input
-                        value={editForm.title}
-                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        placeholder={t("tripDetail.titlePlaceholder")}
-                      />
-                    </div>
-
                     {/* Editable Destination */}
                     <div>
                       <label className="block text-sm font-medium mb-2">{t("tripDetail.destination")}</label>
