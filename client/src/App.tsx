@@ -98,15 +98,14 @@ function AppContent() {
         >
           <TooltipProvider>
             <Toaster />
-            <Router />
-
-            <div className="fixed bottom-4 right-4 flex items-center gap-2">
+            <div className="fixed top-4 right-4 flex items-center gap-2">
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
                 showInstallPromptDialog={showInstallPromptDialog}
                 showInstallPromptInstructions={showInstallPromptInstructions}
               />
             </div>
+            <Router />
 
             {/* Install Prompt Dialog */}
             <InstallPromptDialog
