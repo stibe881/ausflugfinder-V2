@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { applySecurity, registerHealthCheck } from "./middleware";
+import { setupWebSocketServer } from "./websocket";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -70,6 +71,9 @@ async function startServer() {
       createContext,
     })
   );
+  // Setup WebSocket server for real-time notifications
+  setupWebSocketServer(server, process.env.JWT_SECRET);
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);

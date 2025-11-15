@@ -21,6 +21,8 @@ import { InstallPromptDialog } from "./components/InstallPromptDialog";
 import { AutoLogoutDialog } from "./components/AutoLogoutDialog";
 import { useInstallPrompt } from "./hooks/useInstallPrompt";
 import { useAutoLogout } from "./hooks/useAutoLogout";
+import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
+import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -52,7 +54,13 @@ function Router() {
 function AppContent() {
   const [location] = useLocation();
   const [showAutoLogoutDialog, setShowAutoLogoutDialog] = useState(false);
-  const { showPrompt, handleInstallClick, handleDismiss, isAppInstalled } = useInstallPrompt();
+  const {
+    isAppInstalled,
+    showInstallPromptDialog,
+    showInstallPromptInstructions,
+    handleInstallClick,
+    handleDismissInstallPromptDialog,
+  } = useInstallPrompt();
 
   // Don't enable auto-logout on login page
   const isLoginPage = location === '/login';
@@ -88,11 +96,19 @@ function AppContent() {
             <Toaster />
             <Router />
 
+            <div className="fixed bottom-4 right-4 flex items-center gap-2">
+              <ThemeLanguageToggle
+                isAppInstalled={isAppInstalled}
+                showInstallPromptDialog={showInstallPromptDialog}
+                showInstallPromptInstructions={showInstallPromptInstructions}
+              />
+            </div>
+
             {/* Install Prompt Dialog */}
             <InstallPromptDialog
-              open={showPrompt}
+              open={showInstallPromptDialog}
               onInstall={handleInstallClick}
-              onDismiss={handleDismiss}
+              onDismiss={handleDismissInstallPromptDialog}
             />
 
             {/* Auto-Logout Dialog */}

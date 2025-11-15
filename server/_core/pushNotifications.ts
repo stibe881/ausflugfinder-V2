@@ -7,6 +7,7 @@ import webpush from 'web-push';
 import { getDb } from '../db';
 import { pushSubscriptions, userSettings, notifications as notificationsTable, users, friendships, userLocations, trips } from '../../drizzle/schema';
 import { eq, and, inArray } from 'drizzle-orm';
+import { sendWebSocketNotification, broadcastWebSocketNotification } from './websocket';
 
 // Initialize web-push with VAPID keys
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY!;
@@ -123,6 +124,15 @@ export async function sendPushNotificationToUser(
       message: payload.message,
       type: notificationType as 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'new_trip' | 'system',
       relatedId: payload.data?.relatedId,
+    });
+
+    // Also send via WebSocket for real-time notifications (works on all devices including iPhone)
+    sendWebSocketNotification(userId, {
+      title: payload.title,
+      message: payload.message,
+      notificationType,
+      relatedId: payload.data?.relatedId,
+      url: payload.data?.url,
     });
 
     return successCount > 0;

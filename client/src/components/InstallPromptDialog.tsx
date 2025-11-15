@@ -1,6 +1,7 @@
 import { Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useI18n } from '@/contexts/i18nContext';
 
 interface InstallPromptDialogProps {
   open: boolean;
@@ -9,6 +10,7 @@ interface InstallPromptDialogProps {
 }
 
 export function InstallPromptDialog({ open, onInstall, onDismiss }: InstallPromptDialogProps) {
+  const { t } = useI18n();
   return (
     <Dialog open={open} onOpenChange={(newOpen) => {
       if (!newOpen) onDismiss();
@@ -16,7 +18,7 @@ export function InstallPromptDialog({ open, onInstall, onDismiss }: InstallPromp
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>App installieren</DialogTitle>
+            <DialogTitle>{t("install.dialogTitle")}</DialogTitle>
             <button
               onClick={onDismiss}
               className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
@@ -26,26 +28,26 @@ export function InstallPromptDialog({ open, onInstall, onDismiss }: InstallPromp
             </button>
           </div>
           <DialogDescription>
-            Installiere AusflugFinder auf deinem Gerät für schnellere und einfachere Nutzung
+            {t("install.dialogDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
           <p className="text-sm text-muted-foreground mb-4">
-            Mit der installierten App kannst du:
+            {t("install.benefitsTitle")}
           </p>
           <ul className="space-y-2 text-sm">
             <li className="flex items-start gap-3">
               <span className="text-primary font-bold">✓</span>
-              <span>Offline arbeiten und deine Trips verwalten</span>
+              <span>{t("install.benefit1")}</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-primary font-bold">✓</span>
-              <span>Schneller auf die App zugreifen</span>
+              <span>{t("install.benefit2")}</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-primary font-bold">✓</span>
-              <span>Auf dem Homescreen ein Symbol haben</span>
+              <span>{t("install.benefit3")}</span>
             </li>
           </ul>
         </div>
@@ -56,14 +58,14 @@ export function InstallPromptDialog({ open, onInstall, onDismiss }: InstallPromp
             className="flex-1 gap-2"
           >
             <Download className="h-4 w-4" />
-            Installieren
+            {t("install.button")}
           </Button>
           <Button
             variant="outline"
             onClick={onDismiss}
             className="flex-1"
           >
-            Später
+            {t("install.laterButton")}
           </Button>
         </div>
       </DialogContent>

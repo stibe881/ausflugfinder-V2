@@ -158,4 +158,87 @@ export function registerLocalAuthRoutes(app: Express) {
       });
     }
   });
+
+  // Forgot password request
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        res.status(400).json({ error: "Email is required" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+
+      if (!user) {
+        // For security reasons, don't tell the user if the email doesn't exist.
+        // Just return a success message.
+        console.warn(`[Auth] Password reset requested for non-existent email: ${email}`);
+        res.status(200).json({ success: true, message: "If an account with that email exists, a password reset link has been sent." });
+        return;
+      }
+
+      const token = await generatePasswordResetToken(user.id);
+      const resetLink = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`;
+
+      await sendPasswordResetEmail(email, resetLink);
+
+      res.status(200).json({ success: true, message: "If an account with that email exists, a password reset link has been sent." });
+
+    } catch (error) {
+      console.error("[Auth] Forgot password failed:", error instanceof Error ? error.message : error);
+      res.status(500).json({
+        error: "Failed to process forgot password request",
+        details: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
+
+  // Reset password with token
+  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) {
+        res.status(400).json({ error: "Token and new password are required" });
+        return;
+      }
+
+      const db = await getDb();
+      if (!db) {
+        res.status(500).json({ error: "Database not available" });
+        return;
+      }
+
+      const { valid, userId, error } = await validatePasswordResetToken(token);
+
+      if (!valid || !userId) {
+        res.status(400).json({ error: error || "Invalid or expired token" });
+        return;
+      }
+
+      // Hash new password
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update user's password
+      await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+
+      // Delete the used token
+      await deletePasswordResetToken(token);
+
+      res.status(200).json({ success: true, message: "Password has been reset successfully." });
+
+    } catch (error) {
+      console.error("[Auth] Reset password failed:", error instanceof Error ? error.message : error);
+      res.status(500).json({
+        error: "Failed to reset password",
+        details: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
 }
