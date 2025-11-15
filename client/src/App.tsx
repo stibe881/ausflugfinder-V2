@@ -30,6 +30,7 @@ import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-ad
 import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
+import { initCapacitorPushNotifications, isCapacitorApp } from "@/services/capacitorPush";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -80,9 +81,16 @@ function AppContent() {
     }
   }, [isConnected, error]);
 
-  // Temporary toast to test if toasts are working at all
+  // Initialize Capacitor push notifications if running as native app
   useEffect(() => {
-    toast.info('App.tsx: Toast test from AppContent loaded!');
+    const initCapacitorPush = async () => {
+      if (isCapacitorApp()) {
+        console.log('[App] Capacitor environment detected');
+        await initCapacitorPushNotifications();
+      }
+    };
+
+    initCapacitorPush();
   }, []);
 
 
