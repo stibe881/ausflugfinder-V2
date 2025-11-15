@@ -36,6 +36,17 @@ export const usePushNotifications = () => {
 
   // tRPC queries and mutations
   const vapidQuery = trpc.push.getVapidPublicKey.useQuery();
+
+  // Debug VAPID query
+  useEffect(() => {
+    console.log('DEBUG: VAPID query updated:', {
+      isLoading: vapidQuery.isLoading,
+      isError: vapidQuery.isError,
+      data: vapidQuery.data,
+      error: vapidQuery.error,
+    });
+  }, [vapidQuery.isLoading, vapidQuery.data, vapidQuery.error]);
+
   const subscribesMutation = trpc.push.subscribe.useMutation();
   const unsubscribeMutation = trpc.push.unsubscribe.useMutation();
   const getSettingsQuery = trpc.push.getSettings.useQuery(undefined, {
@@ -57,6 +68,11 @@ export const usePushNotifications = () => {
       'Notification' in window;
     setIsSupported(supported);
     console.log(`✓ Push notifications supported: ${supported}`);
+    console.log('DEBUG: Browser capabilities:', {
+      serviceWorker: 'serviceWorker' in navigator,
+      PushManager: 'PushManager' in window,
+      Notification: 'Notification' in window,
+    });
   }, []);
 
   // Register Service Worker and check subscription
@@ -91,35 +107,53 @@ export const usePushNotifications = () => {
    * Subscribe to push notifications
    */
   const subscribe = useCallback(async () => {
+    console.log('DEBUG: subscribe() called');
+    console.log('DEBUG: isSupported =', isSupported);
+
     if (!isSupported) {
+      console.log('DEBUG: Push notifications not supported');
       setError('Push notifications not supported');
       return false;
     }
 
+    console.log('DEBUG: vapidQuery.data =', vapidQuery.data);
+    console.log('DEBUG: vapidQuery.isLoading =', vapidQuery.isLoading);
+    console.log('DEBUG: vapidQuery.error =', vapidQuery.error);
+
     if (!vapidQuery.data?.publicKey) {
+      console.log('DEBUG: VAPID public key not available');
       setError('VAPID public key not available');
       return false;
     }
 
     try {
       // Request notification permission
+      console.log('DEBUG: Notification.permission =', Notification.permission);
+
       if (Notification.permission === 'denied') {
+        console.log('DEBUG: Notification permission is denied');
         setError('Notification permission denied');
         return false;
       }
 
       if (Notification.permission !== 'granted') {
+        console.log('DEBUG: Requesting notification permission...');
         const permission = await Notification.requestPermission();
+        console.log('DEBUG: Permission result =', permission);
         if (permission !== 'granted') {
+          console.log('DEBUG: User denied notification permission');
           setError('Notification permission denied');
           return false;
         }
       }
 
       // Get service worker registration
+      console.log('DEBUG: Getting service worker registration...');
       const reg = await navigator.serviceWorker.ready;
+      console.log('DEBUG: Service worker ready:', reg);
 
       // Create subscription
+      console.log('DEBUG: Creating push subscription...');
       const newSubscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidQuery.data.publicKey),
@@ -128,6 +162,7 @@ export const usePushNotifications = () => {
       console.log('✓ Push subscription created:', newSubscription.endpoint);
 
       // Send subscription to backend
+      console.log('DEBUG: Sending subscription to backend...');
       const result = await subscribesMutation.mutateAsync({
         endpoint: newSubscription.endpoint,
         keys: {
@@ -145,6 +180,7 @@ export const usePushNotifications = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       console.error('✗ Error subscribing to push:', err);
+      console.error('✗ Error details:', errorMessage);
       setError(errorMessage);
       return false;
     }
