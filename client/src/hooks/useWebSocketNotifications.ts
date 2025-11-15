@@ -92,11 +92,7 @@ export const useWebSocketNotifications = () => {
             console.log('📬 Received WebSocket notification:', notification);
 
             // Show toast notification
-            toast({
-              title: notification.title,
-              description: notification.message,
-              variant: notification.notificationType === 'system' ? 'default' : 'default',
-            });
+            toast.success(`${notification.title}: ${notification.message}`);
 
             // Optionally navigate if URL provided and user clicks
             // This could be enhanced with a more interactive notification
