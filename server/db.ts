@@ -99,11 +99,22 @@ export async function createTrip(trip: InsertTrip) {
     throw new Error("Database not available");
   }
   const result = await db.insert(trips).values(trip);
-  // Drizzle's MySQL insert with mysql2 returns the result object with insertId
-  // Extract the auto-incremented ID from the insert result
-  const insertId = (result as any).insertId;
+  // Drizzle's MySQL insert returns the result directly from mysql2
+  // Log the result structure for debugging
+  console.log("[createTrip] Insert result:", JSON.stringify(result, null, 2));
+
+  // Try to extract insertId from different possible locations
+  let insertId = (result as any).insertId;
+  if (!insertId && Array.isArray(result) && result[0]) {
+    insertId = result[0].insertId;
+  }
+  if (!insertId && typeof result === 'object' && result) {
+    // Check all keys in the result object
+    insertId = Object.values(result).find((val: any) => typeof val === 'number');
+  }
+
   if (!insertId) {
-    throw new Error("Failed to get inserted trip ID");
+    throw new Error(`Failed to get inserted trip ID. Result: ${JSON.stringify(result)}`);
   }
   return { id: insertId };
 }
