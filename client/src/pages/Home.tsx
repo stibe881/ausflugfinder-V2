@@ -149,47 +149,6 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       {/* Header with Theme and Language Toggle */}
       <header className="fixed top-0 right-0 z-40 p-4 flex gap-2">
-        {/* Theme Toggle */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleTheme}
-          className="rounded-lg"
-          title={theme === "light" ? "Dark Mode" : "Light Mode"}
-        >
-          {theme === "light" ? (
-            <Moon className="h-[1.2rem] w-[1.2rem]" />
-          ) : (
-            <Sun className="h-[1.2rem] w-[1.2rem]" />
-          )}
-        </Button>
-
-        {/* Language Selector */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="rounded-lg" title="Select Language">
-              <Globe className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Sprache / Language</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {languages.map((lang) => (
-              <DropdownMenuItem
-                key={lang.code}
-                onClick={() => setLanguage(lang.code)}
-                className={language === lang.code ? "bg-accent" : ""}
-              >
-                {lang.name}
-                {language === lang.code && (
-                  <span className="ml-2 text-primary font-bold">✓</span>
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <InstallButton />
       </header>
 
       {/* Hero Section with Video Background */}
