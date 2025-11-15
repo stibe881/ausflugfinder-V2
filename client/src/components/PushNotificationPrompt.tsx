@@ -21,6 +21,7 @@ export const PushNotificationPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [alreadyTriedSubscribe, setAlreadyTriedSubscribe] = useState(false);
 
   useEffect(() => {
     // Only show prompt if:
@@ -39,12 +40,13 @@ export const PushNotificationPrompt = () => {
     if (permission === 'default') {
       console.log('[PushNotificationPrompt] Showing prompt - permission is default');
       setShowPrompt(true);
-    } else if (permission === 'granted' && !isSubscribed) {
+    } else if (permission === 'granted' && !isSubscribed && !alreadyTriedSubscribe) {
       // If permission is granted but not subscribed, try to subscribe
       console.log('[PushNotificationPrompt] Permission granted but not subscribed, attempting subscription...');
+      setAlreadyTriedSubscribe(true);
       handleSubscribe();
     }
-  }, [user, isSupported, isSubscribed]);
+  }, [user, isSupported, isSubscribed, alreadyTriedSubscribe]);
 
   const handleSubscribe = async () => {
     setIsLoading(true);
@@ -58,12 +60,14 @@ export const PushNotificationPrompt = () => {
       if (permission === 'granted') {
         // Permission already granted, just subscribe
         console.log('[PushNotificationPrompt] Permission already granted, subscribing...');
+        // Add a small delay to ensure Service Worker is ready
+        await new Promise(resolve => setTimeout(resolve, 500));
         const success = await subscribe();
         if (success) {
           console.log('[PushNotificationPrompt] Subscription successful');
           setShowPrompt(false);
         } else {
-          setError('Fehler beim Abonnieren. Bitte versuche es später erneut.');
+          setError('Fehler beim Abonnieren. Bitte überprüfe deine Verbindung und versuche es erneut.');
         }
       } else if (permission === 'default') {
         // Request permission
@@ -75,12 +79,14 @@ export const PushNotificationPrompt = () => {
           if (newPermission === 'granted') {
             // Permission granted, now subscribe
             console.log('[PushNotificationPrompt] Permission granted, now subscribing...');
+            // Add a small delay to ensure Service Worker is ready
+            await new Promise(resolve => setTimeout(resolve, 500));
             const success = await subscribe();
             if (success) {
               console.log('[PushNotificationPrompt] Subscription successful');
               setShowPrompt(false);
             } else {
-              setError('Fehler beim Abonnieren. Bitte versuche es später erneut.');
+              setError('Fehler beim Abonnieren. Bitte überprüfe deine Verbindung und versuche es erneut.');
             }
           } else {
             console.log('[PushNotificationPrompt] User denied permission');
@@ -106,6 +112,12 @@ export const PushNotificationPrompt = () => {
     setShowPrompt(false);
   };
 
+  const handleRetry = () => {
+    console.log('[PushNotificationPrompt] User retrying subscription');
+    setError(null);
+    handleSubscribe();
+  };
+
   if (!showPrompt) {
     return null;
   }
@@ -124,24 +136,48 @@ export const PushNotificationPrompt = () => {
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
-        <div className="flex gap-2 mt-4">
-          <Button
-            size="sm"
-            onClick={handleSubscribe}
-            disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isLoading ? 'Lädt...' : 'Aktivieren'}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleDismiss}
-            disabled={isLoading}
-            className="border-blue-200 text-blue-700 hover:bg-blue-100"
-          >
-            Später
-          </Button>
+        <div className="flex gap-2 mt-4 flex-wrap">
+          {error ? (
+            <>
+              <Button
+                size="sm"
+                onClick={handleRetry}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isLoading ? 'Versucht...' : 'Erneut versuchen'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDismiss}
+                disabled={isLoading}
+                className="border-blue-200 text-blue-700 hover:bg-blue-100"
+              >
+                Schließen
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                onClick={handleSubscribe}
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isLoading ? 'Lädt...' : 'Aktivieren'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleDismiss}
+                disabled={isLoading}
+                className="border-blue-200 text-blue-700 hover:bg-blue-100"
+              >
+                Später
+              </Button>
+            </>
+          )}
         </div>
       </Alert>
     </div>
