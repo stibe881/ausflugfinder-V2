@@ -2,6 +2,20 @@ import { Link, useLocation } from "wouter";
 import { Mountain, Sun, Compass } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useI18n } from "@/contexts/i18nContext";
+import { useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+import { useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
 
 type AuthMode = "login" | "register";
 
