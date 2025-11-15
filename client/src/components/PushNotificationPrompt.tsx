@@ -33,6 +33,8 @@ export const PushNotificationPrompt = () => {
       permission,
     });
 
+    toast.info(`Push Status: Supported=${isSupported}, Permission=${permission}`);
+
     // Only show prompt if:
     // 1. User is logged in
     // 2. Push notifications are supported

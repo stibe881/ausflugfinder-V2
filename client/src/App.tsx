@@ -27,6 +27,8 @@ import { useAutoLogout } from "./hooks/useAutoLogout";
 import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
 import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
 import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -120,6 +122,19 @@ function AppContent() {
     isAppInstalled && !isLoginPage // Only enable auto-logout when NOT on login page
   );
 
+  const sendTestWebPushMutation = trpc.push.sendTestWebPushNotification.useMutation();
+
+  const handleSendTestWebPush = () => {
+    sendTestWebPushMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        toast.success(data.message);
+      },
+      onError: (error) => {
+        toast.error(`Fehler beim Senden des Test-Push: ${error.message}`);
+      }
+    });
+  };
+
   return (
     <ErrorBoundary>
       <I18nProvider defaultLanguage="de">
@@ -131,6 +146,8 @@ function AppContent() {
             <Toaster />
             <PushNotificationPrompt />
             <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
+              {/* Temporary Test Web Push Button */}
+              <Button onClick={handleSendTestWebPush} size="sm" variant="secondary" className="px-3 py-1 text-sm rounded-lg shadow-md">Test Push</Button>
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
                 handleInstallClick={handleInstallClick}
