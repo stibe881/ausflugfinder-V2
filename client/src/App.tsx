@@ -69,18 +69,23 @@ function AppContent() {
   useWebSocketNotifications();
 
   // Force Service Worker update on mount (critical for iOS PWA)
+  // Delayed to allow WebSocket to connect first
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (const registration of registrations) {
-          registration.update().catch((err) => {
-            console.warn('[SW] Failed to update Service Worker:', err);
-          });
-        }
-      }).catch((err) => {
-        console.warn('[SW] Failed to get Service Worker registrations:', err);
-      });
-    }
+    const timer = setTimeout(() => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.update().catch((err) => {
+              console.warn('[SW] Failed to update Service Worker:', err);
+            });
+          }
+        }).catch((err) => {
+          console.warn('[SW] Failed to get Service Worker registrations:', err);
+        });
+      }
+    }, 2000); // Delay by 2 seconds to allow WebSocket to establish first
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Don't enable auto-logout on login page
