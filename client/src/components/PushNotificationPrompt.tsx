@@ -22,14 +22,20 @@ export const PushNotificationPrompt = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alreadyTriedSubscribe, setAlreadyTriedSubscribe] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
-    console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', {
-      user: !!user,
+    const debugData = {
+      hasUser: !!user,
       isSupported,
       isSubscribed,
-      userEmail: user?.email,
-    });
+      userEmail: user?.email || 'N/A',
+      permission: Notification.permission,
+    };
+
+    setDebugInfo(JSON.stringify(debugData, null, 2));
+
+    console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', debugData);
 
     // Only show prompt if:
     // 1. User is logged in
@@ -125,11 +131,23 @@ export const PushNotificationPrompt = () => {
     handleSubscribe();
   };
 
-  if (!showPrompt) {
-    return null;
-  }
-
+  // Always show debug info temporarily
   return (
+    <>
+      {/* Debug Info */}
+      <div className="fixed bottom-20 right-4 max-w-sm z-50 bg-yellow-100 border border-yellow-300 rounded p-2 text-xs">
+        <p className="font-bold mb-1">Debug Info:</p>
+        <pre className="whitespace-pre-wrap break-words text-yellow-900">{debugInfo}</pre>
+      </div>
+
+      {/* Main Prompt */}
+      {!showPrompt && (
+        <div className="fixed bottom-4 right-4 max-w-sm z-50 bg-gray-100 border border-gray-300 rounded p-2 text-xs">
+          <p>Prompt hidden (showPrompt=false)</p>
+        </div>
+      )}
+
+      {showPrompt && (
     <div className="fixed bottom-4 right-4 max-w-sm z-50">
       <Alert className="border-blue-200 bg-blue-50 shadow-lg">
         <Bell className="h-4 w-4 text-blue-600" />
@@ -187,6 +205,8 @@ export const PushNotificationPrompt = () => {
           )}
         </div>
       </Alert>
-    </div>
+      </div>
+      )}
+    </>
   );
 };
