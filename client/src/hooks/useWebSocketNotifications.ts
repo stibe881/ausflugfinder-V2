@@ -140,7 +140,7 @@ export const useWebSocketNotifications = () => {
       console.error('Error creating WebSocket:', err);
       setError('Failed to create WebSocket connection');
     }
-  }, [user, toast]);
+  }, [user]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {

@@ -139,8 +139,8 @@ export default function Friends() {
         setIsAddOpen(false);
       }
     } catch (error) {
-      const errorMessage = String((error as any)?.message || t("friends.addError"));
-      toast.error(errorMessage);
+      console.error("Error adding friend:", error); // Log the original error for inspection
+      toast.error("Ein unerwarteter Fehler ist aufgetreten."); // Simplified error message
     } finally {
       setIsSubmitting(false);
     }
