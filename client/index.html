@@ -18,6 +18,11 @@
     <link rel="mask-icon" href="/icons/icon-512.svg" color="#3b82f6" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="color-scheme" content="light dark" />
+    <!-- Additional iOS PWA Optimization -->
+    <!-- Prevent user scaling to ensure app feels native -->
+    <meta name="user-scalable" content="no" />
+    <!-- Safe area insets for iPhone notch/dynamic island -->
+    <meta name="viewport-fit" content="cover" />
     <title>%VITE_APP_TITLE%</title>
     <!-- Add Google Fonts here, example:
     <link rel="preconnect" href="https://fonts.googleapis.com" />

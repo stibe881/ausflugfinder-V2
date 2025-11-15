@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -79,6 +80,12 @@ function AppContent() {
     }
   }, [isConnected, error]);
 
+  // Temporary toast to test if toasts are working at all
+  useEffect(() => {
+    toast.info('App.tsx: Toast test from AppContent loaded!');
+  }, []);
+
+
   // Force Service Worker update on mount (critical for iOS PWA)
   // Delayed to allow WebSocket to connect first
   useEffect(() => {
@@ -145,9 +152,29 @@ function AppContent() {
           <TooltipProvider>
             <Toaster />
             <PushNotificationPrompt />
+            {/* Test Web Push Button - Large and visible for debugging */}
+            <button
+              onClick={handleSendTestWebPush}
+              style={{
+                position: 'fixed',
+                top: '20px',
+                left: '20px',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                zIndex: 9999,
+              }}
+            >
+              📬 Test Push
+            </button>
+
             <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
-              {/* Temporary Test Web Push Button */}
-              <Button onClick={handleSendTestWebPush} size="sm" variant="secondary" className="px-3 py-1 text-sm rounded-lg shadow-md">Test Push</Button>
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
                 handleInstallClick={handleInstallClick}
