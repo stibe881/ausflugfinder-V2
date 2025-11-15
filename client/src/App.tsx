@@ -66,6 +66,9 @@ function AppContent() {
     handleDismissInstallPromptDialog,
   } = useInstallPrompt();
 
+  // Initialize WebSocket notifications on app load
+  useWebSocketNotifications();
+
   // Don't enable auto-logout on login page
   const isLoginPage = location === '/login';
 

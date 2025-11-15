@@ -92,15 +92,17 @@ export default function Friends() {
 
     setIsSubmitting(true);
     try {
-      // For now, we need to get the user ID from email
-      // This would require a lookup endpoint - for demo, we'll show an error
-      // In production, you'd have a user search/lookup feature
+      // Find user by email
+      const userToBefriend = await trpc.push.findUserByEmail.query({ email: newFriendEmail });
 
-      toast.error("Benutzersuche nach E-Mail ist nicht implementiert. Verwende bitte die Friend-ID oder einen anderen Mechanismus.");
+      if (!userToBefriend) {
+        toast.error(t("friends.userNotFound"));
+        return;
+      }
 
-      /* TODO: Implement proper user lookup by email
+      // Send friend request using the found user's ID
       const response = await sendFriendRequestMutation.mutateAsync({
-        toUserId: userId
+        toUserIdentifier: userToBefriend.id,
       });
 
       if (response.success) {
@@ -108,9 +110,9 @@ export default function Friends() {
         setNewFriendEmail("");
         setIsAddOpen(false);
       }
-      */
     } catch (error) {
-      toast.error(t("friends.addError"));
+      const errorMessage = (error as any)?.message || t("friends.addError");
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -12,6 +12,7 @@ import {
   userLocations,
   notifications as notificationsTable,
   friendships,
+  users,
 } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import {
@@ -435,9 +436,42 @@ export const pushRouter = router({
       }
     }),
 
+  // Find user by email
+  findUserByEmail: protectedProcedure
+    .input(z.object({ email: z.string().email("Invalid email format") }))
+    .query(async ({ input, ctx }) => {
+      try {
+        const db = await getDb();
+
+        if (!db) {
+          throw new Error("Database not available");
+        }
+
+        const [user] = await db
+          .select({ id: users.id, name: users.name, email: users.email })
+          .from(users)
+          .where(eq(users.email, input.email))
+          .limit(1);
+
+        if (!user) {
+          return null;
+        }
+
+        // Do not allow finding self
+        if (user.id === ctx.user?.id) {
+          throw new Error("Cannot add yourself as a friend");
+        }
+
+        return user;
+      } catch (error) {
+        const appError = handleError(error, "push.findUserByEmail");
+        throw toTRPCError(appError);
+      }
+    }),
+
   // Send friend request
   sendFriendRequest: protectedProcedure
-    .input(z.object({ toUserId: z.number() }))
+    .input(z.object({ toUserIdentifier: z.union([z.number(), z.string().email("Invalid email format")]) }))
     .mutation(async ({ input, ctx }) => {
       try {
         const db = await getDb();
@@ -451,6 +485,30 @@ export const pushRouter = router({
           throw new Error("User not authenticated");
         }
 
+        let toUserId: number;
+
+        if (typeof input.toUserIdentifier === 'string') {
+          // It's an email, find the user ID
+          const [user] = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.email, input.toUserIdentifier))
+            .limit(1);
+
+          if (!user) {
+            throw new Error("User with this email not found");
+          }
+          toUserId = user.id;
+        } else {
+          // It's already a user ID
+          toUserId = input.toUserIdentifier;
+        }
+
+        // Do not allow sending friend request to self
+        if (fromUserId === toUserId) {
+          throw new Error("Cannot send friend request to yourself");
+        }
+
         // Check if users are already friends or have a pending request
         const existingFriendship = await db
           .select()
@@ -458,7 +516,7 @@ export const pushRouter = router({
           .where(
             and(
               eq(friendships.userId, fromUserId),
-              eq(friendships.friendId, input.toUserId)
+              eq(friendships.friendId, toUserId)
             )
           )
           .limit(1);
@@ -476,23 +534,23 @@ export const pushRouter = router({
         // Create friendship record (forward direction)
         await db.insert(friendships).values({
           userId: fromUserId,
-          friendId: input.toUserId,
+          friendId: toUserId,
           status: "pending",
           requestedBy: fromUserId,
         });
 
         // Create friendship record (reverse direction) - for easier querying
         await db.insert(friendships).values({
-          userId: input.toUserId,
+          userId: toUserId,
           friendId: fromUserId,
           status: "pending",
           requestedBy: fromUserId,
         });
 
         // Send notification
-        await sendFriendRequestNotification(fromUserId, input.toUserId);
+        await sendFriendRequestNotification(fromUserId, toUserId);
 
-        console.log(`✓ Friend request sent from ${fromUserId} to ${input.toUserId}`);
+        console.log(`✓ Friend request sent from ${fromUserId} to ${toUserId}`);
         return { success: true, message: "Friend request sent" };
       } catch (error) {
         const appError = handleError(error, "push.sendFriendRequest");
