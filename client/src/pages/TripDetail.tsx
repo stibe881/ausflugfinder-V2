@@ -75,7 +75,7 @@ export default function TripDetail() {
   const canEdit = canEditTrip;
 
   const COST_LABELS: Record<string, string> = {
-    free: t("tripDetail.costFree"),
+    free: "Kostenlos",
     low: "CHF 🪙",
     medium: "CHF 🪙🪙",
     high: "CHF 🪙🪙🪙",
@@ -530,7 +530,7 @@ export default function TripDetail() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="free">{t("tripDetail.costFree")}</SelectItem>
+                          <SelectItem value="free">Kostenlos</SelectItem>
                           <SelectItem value="low">CHF •</SelectItem>
                           <SelectItem value="medium">CHF ••</SelectItem>
                           <SelectItem value="high">CHF •••</SelectItem>

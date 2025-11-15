@@ -26,6 +26,8 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  const uploadImageMutation = trpc.upload.tripImage.useMutation();
+
   const uploadPhotoMutation = trpc.photos.add.useMutation({
     onSuccess: () => {
       toast.success("Foto erfolgreich hochgeladen");
@@ -75,25 +77,20 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
         reader.readAsDataURL(selectedFile);
       });
 
-      // Upload image and get URL
-      const uploadResult = await new Promise<{ url: string }>(async (resolve, reject) => {
-        trpc.upload.tripImage.mutate(
-          { base64 },
-          {
-            onSuccess: (data) => resolve(data),
-            onError: (error) => reject(error),
-          }
-        );
-      });
+      // Upload image and get URL using mutateAsync
+      const uploadResult = await uploadImageMutation.mutateAsync({ base64 });
 
       // Add photo with the uploaded URL
-      uploadPhotoMutation.mutate({
+      await uploadPhotoMutation.mutateAsync({
         tripId,
         photoUrl: uploadResult.url,
         caption: caption || undefined,
       });
 
-      // Success is handled by onSuccess callback
+      toast.success("Foto erfolgreich hochgeladen");
+      setSelectedFile(null);
+      setCaption("");
+      onRefresh();
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error(error instanceof Error ? error.message : "Fehler beim Hochladen des Fotos");

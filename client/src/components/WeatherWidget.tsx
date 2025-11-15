@@ -63,7 +63,7 @@ export function WeatherWidget({ latitude, longitude, tripDate }: WeatherWidgetPr
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">{t("tripDetail.weather")}</CardTitle>
+        <CardTitle className="text-lg">Aktuelles Wetter</CardTitle>
         {tripDate && (
           <CardDescription>
             {new Date(tripDate).toLocaleDateString()}
