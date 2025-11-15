@@ -368,6 +368,22 @@ export type SelectUsers = InferSelectModel<typeof users>;
 export type InsertUserSettings = InferInsertModel<typeof userSettings>;
 export type SelectUserSettings = InferSelectModel<typeof userSettings>;
 
+export const passwordResetTokens = mysqlTable("passwordResetTokens", {
+	id: int().autoincrement().notNull(),
+	userId: int().notNull(), // Foreign key to users table
+	token: varchar({ length: 255 }).notNull(), // The actual reset token
+	expiresAt: timestamp({ mode: 'string' }).notNull(), // When the token expires
+	createdAt: timestamp({ mode: 'string' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+},
+(table) => [
+	index("password_reset_tokens_user_id_idx").on(table.userId),
+	unique("password_reset_tokens_token_unique").on(table.token),
+]);
+
+export type InsertPasswordResetTokens = InferInsertModel<typeof passwordResetTokens>;
+export type SelectPasswordResetTokens = InferSelectModel<typeof passwordResetTokens>;
+
+
 // export const commentRelations = relations(tripComments, ({ one }) => ({
 //   user: one(users, { fields: [tripComments.userId], references: [users.id] }),
 // }));
