@@ -38,10 +38,13 @@ const HEARTBEAT_TIMEOUT = 60000; // 60 seconds
 export function setupWebSocketServer(server: HTTPServer, secret: string = process.env.JWT_SECRET || '') {
   const wss = new WebSocketServer({ server, path: '/ws' });
 
-  console.log('✓ WebSocket server initialized');
+  console.log('✓ WebSocket server initialized on path /ws');
 
+  // Log all WebSocket connection attempts
   wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
     console.log('→ New WebSocket connection attempt');
+    console.log('  URL:', req.url);
+    console.log('  Headers:', JSON.stringify(req.headers, null, 2).substring(0, 500));
 
     // Extract and verify JWT token
     const token = extractToken(req.url);
