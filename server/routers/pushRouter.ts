@@ -76,6 +76,12 @@ export const pushRouter = router({
           return { success: true, isNew: false, message: "Subscription already exists" };
         }
 
+        // Log subscription details for debugging
+        console.log(`[push.subscribe] Starting subscription for user ${userId}`);
+        console.log(`[push.subscribe] Endpoint length: ${input.endpoint.length}`);
+        console.log(`[push.subscribe] Auth key length: ${input.keys.auth.length}`);
+        console.log(`[push.subscribe] P256DH key length: ${input.keys.p256dh.length}`);
+
         // Insert new subscription
         await db.insert(pushSubscriptions).values({
           userId,
@@ -84,6 +90,8 @@ export const pushRouter = router({
           p256dh: input.keys.p256dh,
           userAgent: ctx.request?.headers.get("user-agent") || undefined,
         });
+
+        console.log(`[push.subscribe] Subscription inserted successfully for user ${userId}`);
 
         // Create default user settings if not exists
         const existingSettings = await db
@@ -102,6 +110,7 @@ export const pushRouter = router({
             nearbyTripDistance: 5000,
             locationTrackingEnabled: 1,
           });
+          console.log(`[push.subscribe] Default user settings created for user ${userId}`);
         }
 
         console.log(`✓ Push subscription added for user ${userId}`);
