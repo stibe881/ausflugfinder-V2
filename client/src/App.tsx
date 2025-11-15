@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -28,8 +27,6 @@ import { useAutoLogout } from "./hooks/useAutoLogout";
 import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
 import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
 import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
 import { initCapacitorPushNotifications, isCapacitorApp } from "@/services/capacitorPush";
 
 function Router() {
@@ -132,23 +129,10 @@ function AppContent() {
     setShowAutoLogoutDialog(true);
   }, []);
 
-  const { isAutoLogoutDisabled, setAutoLogoutDisabled } = useAutoLogout(
+  const { setAutoLogoutDisabled } = useAutoLogout(
     handleAutoLogout,
     isAppInstalled && !isLoginPage // Only enable auto-logout when NOT on login page
   );
-
-  const sendTestWebPushMutation = trpc.push.sendTestWebPushNotification.useMutation();
-
-  const handleSendTestWebPush = () => {
-    sendTestWebPushMutation.mutate(undefined, {
-      onSuccess: (data) => {
-        toast.success(data.message);
-      },
-      onError: (error) => {
-        toast.error(`Fehler beim Senden des Test-Push: ${error.message}`);
-      }
-    });
-  };
 
   return (
     <ErrorBoundary>
@@ -160,28 +144,6 @@ function AppContent() {
           <TooltipProvider>
             <Toaster />
             <PushNotificationPrompt />
-            {/* Test Web Push Button - Large and visible for debugging */}
-            <button
-              onClick={handleSendTestWebPush}
-              style={{
-                position: 'fixed',
-                top: '20px',
-                left: '20px',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-                zIndex: 9999,
-              }}
-            >
-              📬 Test Push
-            </button>
-
             <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
