@@ -7,7 +7,6 @@ import { Server as HTTPServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import type { IncomingMessage } from 'http';
 import { sdk } from './sdk';
-import { COOKIE_NAME } from '../shared/const';
 
 interface NotificationMessage {
   type: 'notification' | 'ping' | 'pong';
@@ -81,10 +80,10 @@ export function setupWebSocketServer(server: HTTPServer) {
 
     // Authenticate using session cookie
     const cookies = parseCookies(req.headers.cookie);
-    const sessionCookie = cookies.get(COOKIE_NAME);
+    const sessionCookie = cookies.get('app_session_id');
 
     if (!sessionCookie) {
-      console.log(`✗ No session cookie (${COOKIE_NAME}) found`);
+      console.log('✗ No session cookie (app_session_id) found');
       ws.close(1008, 'Unauthorized: No session cookie');
       return;
     }
