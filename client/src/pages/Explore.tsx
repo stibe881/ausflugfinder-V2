@@ -180,9 +180,8 @@ export default function Explore() {
   };
 
   const handleDeleteDest = (id: number) => {
-    if (confirm(t("explore.destDeleteConfirm"))) {
-      toast.success(t("explore.destDeleted"));
-    }
+    setDestinationToDeleteId(id);
+    setShowConfirmDeleteDialog(true);
   };
 
   // Get user location
@@ -945,6 +944,23 @@ export default function Explore() {
       <CreateTripWizard
         open={isCreateTripOpen}
         onOpenChange={setIsCreateTripOpen}
+      />
+      <ConfirmationDialog
+        isOpen={showConfirmDeleteDialog}
+        onConfirm={() => {
+          if (destinationToDeleteId !== null) {
+            deleteDestMutation.mutate(destinationToDeleteId); // Assuming this mutation exists and takes the ID
+            toast.success(t("explore.destDeleted")); // Placeholder for success message
+            setShowConfirmDeleteDialog(false);
+            setDestinationToDeleteId(null);
+          }
+        }}
+        onCancel={() => setShowConfirmDeleteDialog(false)}
+        title={t("explore.destDeleteConfirmTitle") || "Confirm Destination Deletion"} // Assuming new translation key
+        message={t("explore.destDeleteConfirm")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        isDestructive
       />
     </div>
   );

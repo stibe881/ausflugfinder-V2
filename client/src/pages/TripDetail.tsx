@@ -824,7 +824,6 @@ export default function TripDetail() {
           </div>
         </DialogContent>
       </Dialog>
-      </Dialog>
 
       <ConfirmationDialog
         isOpen={showConfirmDeleteDialog}
