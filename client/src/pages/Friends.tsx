@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Users, Plus, Trash2, ArrowLeft, Loader2, UserPlus, MapPin, Plane, Mail, MessageCircle, Check, X } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 export default function Friends() {
   const { t } = useI18n();
@@ -19,6 +20,10 @@ export default function Friends() {
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const [newFriendEmail, setNewFriendEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmDeleteFriendDialog, setShowConfirmDeleteFriendDialog] = useState(false);
+  const [friendToDeleteId, setFriendToDeleteId] = useState<number | null>(null);
+  const [showConfirmDeleteInviteDialog, setShowConfirmDeleteInviteDialog] = useState(false);
+  const [inviteToDeleteId, setInviteToDeleteId] = useState<number | null>(null);
 
   // Fetch accepted friends
   const { data: acceptedFriendsData, isLoading: isLoadingAccepted } = trpc.push.getFriends.useQuery(
@@ -35,6 +40,29 @@ export default function Friends() {
   // tRPC mutations
   const sendFriendRequestMutation = trpc.push.sendFriendRequest.useMutation();
   const acceptFriendRequestMutation = trpc.push.acceptFriendRequest.useMutation();
+  const deleteFriendMutation = trpc.push.deleteFriend.useMutation({
+    onSuccess: () => {
+      toast.success(t("friends.deleteSuccess"));
+      setSelectedFriend(null);
+      setShowConfirmDeleteFriendDialog(false);
+      friendshipUtils.getFriends.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || t("friends.deleteError"));
+    },
+  });
+  const removeFriendRequestMutation = trpc.push.removeFriendRequest.useMutation({ // Assuming this mutation exists or will be added
+    onSuccess: () => {
+      toast.success(t("friends.invitationDeleted") || "Einladung entfernt");
+      setShowConfirmDeleteInviteDialog(false);
+      friendshipUtils.getFriends.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || t("friends.deleteError"));
+    },
+  });
+
+  const friendshipUtils = trpc.useUtils().push;
 
   const friends = acceptedFriendsData?.friends || [];
   const pendingRequests = (pendingRequestsData?.friends || []).filter(
@@ -119,10 +147,8 @@ export default function Friends() {
   };
 
   const handleDeleteFriend = (id: number) => {
-    if (confirm(t("friends.deleteConfirm"))) {
-      // TODO: Implement friend deletion via API
-      toast.error("Freund löschen ist noch nicht implementiert");
-    }
+    setFriendToDeleteId(id);
+    setShowConfirmDeleteFriendDialog(true);
   };
 
   const handleAcceptRequest = async (requestFromUserId: number) => {
@@ -153,10 +179,8 @@ export default function Friends() {
   };
 
   const handleDeleteInvitation = (invitationId: number) => {
-    if (confirm(t("friends.deleteInviteConfirm") || "Are you sure?")) {
-      setPendingInvitations(pendingInvitations.filter(i => i.id !== invitationId));
-      toast.success(t("friends.invitationDeleted") || "Invitation removed");
-    }
+    setInviteToDeleteId(invitationId);
+    setShowConfirmDeleteInviteDialog(true);
   };
 
   const handleRemindInvitation = (email: string) => {
@@ -537,6 +561,37 @@ export default function Friends() {
           </div>
         </div>
       </main>
+
+      <ConfirmationDialog
+        isOpen={showConfirmDeleteFriendDialog}
+        onConfirm={() => {
+          if (friendToDeleteId !== null) {
+            deleteFriendMutation.mutate({ friendId: friendToDeleteId });
+          }
+        }}
+        onCancel={() => setShowConfirmDeleteFriendDialog(false)}
+        title={t("friends.deleteConfirmTitle") || "Confirm Friend Deletion"} // Assuming new translation key
+        message={t("friends.deleteConfirm")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        isDestructive
+      />
+
+      <ConfirmationDialog
+        isOpen={showConfirmDeleteInviteDialog}
+        onConfirm={() => {
+          if (inviteToDeleteId !== null) {
+            // Placeholder: Assuming `removeFriendRequestMutation` exists and takes the invitation ID
+            removeFriendRequestMutation.mutate({ invitationId: inviteToDeleteId });
+          }
+        }}
+        onCancel={() => setShowConfirmDeleteInviteDialog(false)}
+        title={t("friends.deleteInviteConfirmTitle") || "Confirm Invitation Deletion"} // Assuming new translation key
+        message={t("friends.deleteInviteConfirm") || "Are you sure you want to delete this invitation?"}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        isDestructive
+      />
     </div>
   );
 }

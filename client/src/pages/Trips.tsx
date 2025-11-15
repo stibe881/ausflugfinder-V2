@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { MapPin, Calendar, Users, Plus, Trash2, ArrowLeft, Loader2, Mountain, DollarSign, Flame, Eye, Share2, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useRef, useEffect } from "react";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
@@ -22,6 +23,8 @@ export default function Trips() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTripIndex, setSelectedTripIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+  const [tripToDeleteId, setTripToDeleteId] = useState<number | null>(null);
 
   // Swipe navigation for mobile
   useSwipeNavigation({
@@ -57,6 +60,8 @@ export default function Trips() {
     onSuccess: () => {
       refetch();
       toast.success(t("trips.deleteSuccess"));
+      setShowConfirmDeleteDialog(false); // Close dialog on success
+      setTripToDeleteId(null); // Clear the trip to delete
     },
     onError: (error) => {
       toast.error(t("trips.deleteError") + error.message);
@@ -462,9 +467,8 @@ export default function Trips() {
                     variant="destructive"
                     size="sm"
                     onClick={() => {
-                      if (confirm(t("trips.confirmDelete"))) {
-                        deleteMutation.mutate({ id: trip.id });
-                      }
+                      setTripToDeleteId(trip.id);
+                      setShowConfirmDeleteDialog(true);
                     }}
                     title={t("trips.delete")}
                   >
@@ -494,6 +498,20 @@ export default function Trips() {
             </CardContent>
           </Card>
         )}
+        <ConfirmationDialog
+          isOpen={showConfirmDeleteDialog}
+          onConfirm={() => {
+            if (tripToDeleteId !== null) {
+              deleteMutation.mutate({ id: tripToDeleteId });
+            }
+          }}
+          onCancel={() => setShowConfirmDeleteDialog(false)}
+          title={t("trips.deleteConfirmTitle")} // Assuming a new translation key
+          message={t("trips.deleteConfirm")}
+          confirmText={t("common.delete")}
+          cancelText={t("common.cancel")}
+          isDestructive
+        />
       </main>
     </div>
   );

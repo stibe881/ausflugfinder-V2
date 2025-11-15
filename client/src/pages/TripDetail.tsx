@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/contexts/i18nContext";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 export default function TripDetail() {
   const { t } = useI18n();
@@ -29,6 +30,7 @@ export default function TripDetail() {
   const [mapUrl, setMapUrl] = useState("");
   const [, navigate] = useLocation();
   const { user, loading: userLoading } = useAuth();
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
 
   const { data: trip, isLoading: tripLoading, refetch: refetchTrip } = trpc.trips.getById.useQuery({ id: tripId });
   const { data: photos = [], refetch: refetchPhotos } = trpc.photos.list.useQuery({ tripId }, { enabled: !!tripId });
@@ -146,9 +148,7 @@ export default function TripDetail() {
 
   const handleDeleteTrip = () => {
     if (!trip) return;
-    if (confirm(t("tripDetail.confirmDelete"))) {
-      deleteTripMutation.mutate({ id: trip.id });
-    }
+    setShowConfirmDeleteDialog(true);
   };
 
   if (tripLoading) {
@@ -824,6 +824,22 @@ export default function TripDetail() {
           </div>
         </DialogContent>
       </Dialog>
+      </Dialog>
+
+      <ConfirmationDialog
+        isOpen={showConfirmDeleteDialog}
+        onConfirm={() => {
+          if (trip) {
+            deleteTripMutation.mutate({ id: trip.id });
+          }
+        }}
+        onCancel={() => setShowConfirmDeleteDialog(false)}
+        title={t("tripDetail.deleteConfirmTitle")} // Assuming a new translation key
+        message={t("tripDetail.deleteConfirm")}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        isDestructive
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { useIsMobile } from "@/hooks/useMobile";
 import { FilterBottomSheet } from "@/components/FilterBottomSheet";
 import { CreateTripWizard } from "@/components/CreateTripWizard";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 
 const CATEGORIES = [
@@ -104,6 +105,8 @@ export default function Explore() {
   const [editingDestId, setEditingDestId] = useState<number | null>(null);
   const [destLoading, setDestLoading] = useState(false);
   const [allDestinations, setAllDestinations] = useState<any[]>([]);
+  const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+  const [destinationToDeleteId, setDestinationToDeleteId] = useState<number | null>(null);
 
   // Read query parameters on mount and when location changes
   useEffect(() => {
