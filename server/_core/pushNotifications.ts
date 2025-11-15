@@ -305,14 +305,9 @@ export async function sendNewPublicTripNotification(
       },
     };
 
-    // Send notification to all users except the creator
+    // Send notification to all users including the creator
     let successCount = 0;
     for (const user of allUsers) {
-      // Skip notification for the trip creator (they already know)
-      if (creatorId && user.id === creatorId) {
-        continue;
-      }
-
       const sent = await sendPushNotificationToUser(user.id, payload, 'new_trip');
       if (sent) {
         successCount++;

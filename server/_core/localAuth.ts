@@ -64,7 +64,8 @@ export function registerLocalAuthRoutes(app: Express) {
       console.error("[Auth] Register error stack:", error instanceof Error ? error.stack : "No stack trace");
       res.status(500).json({
         error: "Registration failed",
-        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+        // Always include details for debugging this critical issue
+        details: error instanceof Error ? error.message : String(error),
       });
     }
   });
@@ -119,7 +120,13 @@ export function registerLocalAuthRoutes(app: Express) {
         .where(eq(users.id, user.id));
 
       // Create JWT session token like the OAuth version
-      const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || "default-secret");
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret || jwtSecret.length < 32) {
+        console.error("[Auth] JWT_SECRET is not set or too short. It must be at least 32 characters long.");
+        res.status(500).json({ error: "Server configuration error: JWT_SECRET invalid" });
+        return;
+      }
+      const secretKey = new TextEncoder().encode(jwtSecret);
       const expirationSeconds = Math.floor((Date.now() + ONE_YEAR_MS) / 1000);
 
       const sessionToken = await new SignJWT({
@@ -146,7 +153,8 @@ export function registerLocalAuthRoutes(app: Express) {
       console.error("[Auth] Login error stack:", error instanceof Error ? error.stack : "No stack trace");
       res.status(500).json({
         error: "Login failed",
-        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+        // Always include details for debugging this critical issue
+        details: error instanceof Error ? error.message : String(error),
       });
     }
   });
