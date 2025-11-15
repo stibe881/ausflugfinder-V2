@@ -62,14 +62,26 @@ function AppContent() {
   const [showAutoLogoutDialog, setShowAutoLogoutDialog] = useState(false);
   const {
     isAppInstalled,
-    showInstallPromptDialog,
-    showInstallPromptInstructions,
     handleInstallClick,
-    handleDismissInstallPromptDialog,
   } = useInstallPrompt();
 
   // Initialize WebSocket notifications on app load
   useWebSocketNotifications();
+
+  // Force Service Worker update on mount (critical for iOS PWA)
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.update().catch((err) => {
+            console.warn('[SW] Failed to update Service Worker:', err);
+          });
+        }
+      }).catch((err) => {
+        console.warn('[SW] Failed to get Service Worker registrations:', err);
+      });
+    }
+  }, []);
 
   // Don't enable auto-logout on login page
   const isLoginPage = location === '/login';
