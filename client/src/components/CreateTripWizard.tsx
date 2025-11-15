@@ -200,6 +200,10 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
       }
 
       // Create trip with or without image
+      const ageRecommendation = formData.ageRecommendationMin && formData.ageRecommendationMax
+        ? `${formData.ageRecommendationMin}-${formData.ageRecommendationMax}`
+        : undefined;
+
       const tripData = {
         title: formData.title,
         description: formData.description,
@@ -208,6 +212,8 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
         categories: formData.categories,
         cost: formData.cost,
         image: imageUrl || undefined,
+        websiteUrl: formData.websiteUrl || undefined,
+        ageRecommendation: ageRecommendation,
         // Dates are optional - not collected in this wizard form
         participants: 1,
         // Make trip public by default so it appears on explore page
@@ -374,6 +380,40 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div>
+                    <Label htmlFor="websiteUrl">Website URL (optional)</Label>
+                    <Input
+                      id="websiteUrl"
+                      type="url"
+                      placeholder="https://example.com"
+                      value={formData.websiteUrl}
+                      onChange={(e) => handleInputChange("websiteUrl", e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Altersempfehlung (optional)</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <Input
+                        placeholder="Alter von"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.ageRecommendationMin}
+                        onChange={(e) => handleInputChange("ageRecommendationMin", e.target.value)}
+                      />
+                      <Input
+                        placeholder="Alter bis"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.ageRecommendationMax}
+                        onChange={(e) => handleInputChange("ageRecommendationMax", e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -441,6 +481,22 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                           {COST_OPTIONS.find(opt => opt.value === formData.cost)?.label}
                         </span>
                       </div>
+                      {formData.websiteUrl && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Website:</span>
+                          <span className="font-medium">{formData.websiteUrl}</span>
+                        </div>
+                      )}
+                      {(formData.ageRecommendationMin || formData.ageRecommendationMax) && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Altersempfehlung:</span>
+                          <span className="font-medium">
+                            {formData.ageRecommendationMin && formData.ageRecommendationMax
+                              ? `${formData.ageRecommendationMin}-${formData.ageRecommendationMax} Jahre`
+                              : "-"}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Titelbild:</span>
                         <span className="font-medium">{imageFile ? "✓ Vorhanden" : "-"}</span>
