@@ -1046,7 +1046,7 @@ const translations: Record<Language, Record<string, string>> = {
     "destinations.deleteSuccess": "Destination supprimée!",
     "destinations.deleteError": "Erreur lors de la suppression: ",
     "friends.addError": "Erreur lors de l'ajout d'ami",
-    "friends.userNotFound": "Utilisateur avec cet e-mail introuvable."
+    "friends.userNotFound": "Utilisateur avec cet e-mail introuvable.",
     "admin.accessDenied": "Accès Refusé",
     "admin.noPermission": "Vous n'avez pas les permissions d'administrateur",
     "admin.backHome": "Retour à l'accueil",
