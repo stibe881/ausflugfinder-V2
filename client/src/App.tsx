@@ -17,6 +17,8 @@ import Planner from "./pages/Planner";
 import PlannerDetail from "./pages/PlannerDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import { InstallPromptDialog } from "./components/InstallPromptDialog";
 import { AutoLogoutDialog } from "./components/AutoLogoutDialog";
 import { useInstallPrompt } from "./hooks/useInstallPrompt";
@@ -39,6 +41,8 @@ function Router() {
       <Route path={"/planner"} component={Planner} />
       <Route path={"/planner/:id"} component={PlannerDetail} />
       <Route path={"/admin"} component={Admin} />
+      <Route path={"/forgot-password"} component={ForgotPassword} />
+      <Route path={"/reset-password"} component={ResetPassword} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
