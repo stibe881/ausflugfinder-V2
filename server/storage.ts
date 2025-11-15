@@ -76,7 +76,7 @@ export async function uploadFile(
   key: string,
   buffer: Buffer,
   contentType: string
-): Promise<void> {
+): Promise<{ url: string }> {
   const { baseUrl, apiKey } = getStorageConfig();
   const uploadUrl = buildUploadUrl(baseUrl, key);
   const formData = buildFormData(buffer, contentType);
@@ -90,6 +90,9 @@ export async function uploadFile(
   if (!response.ok) {
     throw new Error(`Upload failed with status ${response.status}`);
   }
+  
+  const url = await getDownloadUrl(key);
+  return { url };
 }
 
 export async function getDownloadUrl(key: string): Promise<string> {

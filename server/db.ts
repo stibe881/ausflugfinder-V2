@@ -1,7 +1,21 @@
 import { eq, and, sql, or, like, count, inArray, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
-  InsertTrip, InsertUser, InsertDestination, InsertTripParticipant, InsertTripComment, InsertTripPhoto, InsertTripAttribute, InsertDayPlan, InsertDayPlanItem, InsertPackingListItem, InsertBudgetItem, InsertChecklistItem, InsertTripJournalEntry, InsertTripVideo, InsertTripCategory,
+  InsertTrips as InsertTrip,
+  InsertUsers as InsertUser,
+  InsertDestinations as InsertDestination,
+  InsertTripParticipants as InsertTripParticipant,
+  InsertTripComments as InsertTripComment,
+  InsertTripPhotos as InsertTripPhoto,
+  InsertTripAttributes as InsertTripAttribute,
+  InsertDayPlans as InsertDayPlan,
+  InsertDayPlanItems as InsertDayPlanItem,
+  InsertPackingListItems as InsertPackingListItem,
+  InsertBudgetItems as InsertBudgetItem,
+  InsertChecklistItems as InsertChecklistItem,
+  InsertTripJournal as InsertTripJournalEntry,
+  InsertTripVideos as InsertTripVideo,
+  InsertTripCategories as InsertTripCategory,
   trips, users, destinations, tripParticipants, tripComments, tripPhotos, tripAttributes, dayPlans, dayPlanItems, packingListItems, budgetItems, checklistItems, tripJournal, tripVideos, tripCategories
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -605,9 +619,10 @@ export async function getStatistics() {
     db.select({ value: count() })
       .from(trips)
       .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-    db.select({ value: sql`COUNT(DISTINCT ${trips.category})` })
-      .from(trips)
-      .where(and(eq(trips.isPublic, 1), isNotNull(trips.category)))
+    db.select({ value: sql`COUNT(DISTINCT ${tripCategories.category})` })
+      .from(tripCategories)
+      .innerJoin(trips, eq(tripCategories.tripId, trips.id))
+      .where(eq(trips.isPublic, 1))
   ]);
 
   return {

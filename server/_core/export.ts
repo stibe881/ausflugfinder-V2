@@ -213,7 +213,7 @@ export async function generatePDFContent(plan: ExportPlan): Promise<Buffer> {
 
     // Page numbers
     doc.fontSize(8).fillColor(colors.lightText);
-    doc.text(`Seite 1`, { align: 'right', at: [500, doc.page.height - 30] });
+    doc.text(`Seite 1`, 50, doc.page.height - 30, { align: 'right' });
 
     doc.end();
   });
