@@ -39,6 +39,22 @@ export function setupWebSocketServer(server: HTTPServer, secret: string = proces
   const wss = new WebSocketServer({ server, path: '/ws' });
 
   console.log('✓ WebSocket server initialized on path /ws');
+  console.log('  Server object exists:', !!server);
+  console.log('  Server listening:', server.listening);
+
+  // Log upgrade attempts at server level
+  server.on('upgrade', (req, socket, head) => {
+    console.log('→ HTTP Upgrade request received');
+    console.log('  URL:', req.url);
+    console.log('  Method:', req.method);
+    console.log('  Headers:', {
+      upgrade: req.headers.upgrade,
+      connection: req.headers.connection,
+      host: req.headers.host,
+      'x-forwarded-for': req.headers['x-forwarded-for'],
+      'x-forwarded-proto': req.headers['x-forwarded-proto'],
+    });
+  });
 
   // Log all WebSocket connection attempts
   wss.on('connection', async (ws: WebSocket, req: IncomingMessage) => {
