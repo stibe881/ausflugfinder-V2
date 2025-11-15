@@ -171,15 +171,18 @@ export const useWebSocketNotifications = () => {
   useEffect(() => {
     if (user && localStorage.getItem('auth_token')) {
       console.log('⏱ User detected, connecting to WebSocket...');
+      console.log('User:', user);
+      console.log('Token exists:', !!localStorage.getItem('auth_token'));
       connect();
     } else {
+      console.log('⚠ Cannot connect - user:', !!user, 'token:', !!localStorage.getItem('auth_token'));
       disconnect();
     }
 
     return () => {
       // disconnect();
     };
-  }, [user]);
+  }, [user, connect, disconnect]);
 
   return {
     isConnected,
