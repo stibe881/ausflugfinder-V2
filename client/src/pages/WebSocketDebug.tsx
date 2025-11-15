@@ -4,7 +4,7 @@
  * Useful for diagnosing connection issues on mobile devices
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ interface DebugLog {
 }
 
 export default function WebSocketDebug() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const [logs, setLogs] = useState<DebugLog[]>([]);
   const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
   const [wsUrl, setWsUrl] = useState<string>('');
@@ -32,6 +32,24 @@ export default function WebSocketDebug() {
     setLogs((prev) => [...prev, { timestamp, level, message }]);
     console.log(`[${level.toUpperCase()}] ${message}`);
   };
+
+  // Check auth status on mount
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        addLog('⚠️ Du bist nicht angemeldet. Bitte melde dich zuerst an.', 'warning');
+      } else {
+        addLog('✅ Du bist angemeldet', 'success');
+      }
+
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        addLog('❌ Kein Auth-Token im LocalStorage gefunden', 'error');
+      } else {
+        addLog(`✅ Auth-Token gefunden (${token.length} Zeichen)`, 'success');
+      }
+    }
+  }, [isAuthenticated, loading]);
 
   const scrollToBottom = () => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
