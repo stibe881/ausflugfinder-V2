@@ -2,6 +2,7 @@
   "name": "AusflugFinder",
   "short_name": "AusflugFinder",
   "description": "Plan and manage unforgettable family trips and adventures",
+  "version": "2.0.0",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

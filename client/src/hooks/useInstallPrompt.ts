@@ -14,7 +14,6 @@ interface BeforeInstallPromptEvent extends Event {
 export const useInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
-  const [showInstallPromptDialog, setShowInstallPromptDialog] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed
@@ -32,21 +31,19 @@ export const useInstallPrompt = () => {
       console.log('✓ beforeinstallprompt event fired - Install Button wird sichtbar');
       const promptEvent = e as BeforeInstallPromptEvent;
       setInstallPrompt(promptEvent);
-      setShowInstallPromptDialog(true); // Show dialog when prompt is available
     };
 
     // Listen for app installed
     const handleAppInstalled = () => {
       console.log('✓ App erfolgreich installiert');
       setIsAppInstalled(true);
-      setShowInstallPromptDialog(false);
       setInstallPrompt(null);
     };
 
     // Log wenn Installation abgelehnt wird
     const handleBeforeInstallPromptError = () => {
       console.warn('⚠ beforeinstallprompt Event wurde nicht ausgelöst - Die App ist möglicherweise bereits installiert oder erfüllt nicht die PWA-Anforderungen');
-      setShowInstallPromptDialog(true); // Show dialog even if prompt is not available, to give instructions
+      // No dialog to show instructions, rely on InstallButton to handle lack of prompt
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -81,9 +78,8 @@ export const useInstallPrompt = () => {
       }
     } else {
       console.warn('⚠ Kein beforeinstallprompt Event verfügbar. Benutzer muss manuelle Anleitung befolgen.');
-      // Here we might just dismiss the dialog and rely on user to follow instructions in the dialog
+      toast.info('Bitte nutzen Sie die Browser-Optionen zur Installation der App, da die automatische Installation nicht verfügbar ist.'); // Add toast message
     }
-    setShowInstallPromptDialog(false); // Always close dialog after attempt
     setInstallPrompt(null);
   };
 
@@ -97,9 +93,6 @@ export const useInstallPrompt = () => {
 
   return {
     isAppInstalled,
-    showInstallPromptDialog,
-    showInstallPromptInstructions,
     handleInstallClick,
-    handleDismissInstallPromptDialog,
   };
 };
