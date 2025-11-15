@@ -80,7 +80,7 @@ export function WeatherWidget({ latitude, longitude, tripDate }: WeatherWidgetPr
                 <Sun className="w-8 h-8 text-yellow-500" />
                 <div>
                   <p className="text-3xl font-bold">{weather.temp}°</p>
-                  <p className="text-sm text-muted-foreground">{weather.condition}</p>
+                  <p className="text-sm text-muted-foreground">{t(weather.condition)}</p>
                 </div>
               </div>
             </div>
@@ -89,7 +89,7 @@ export function WeatherWidget({ latitude, longitude, tripDate }: WeatherWidgetPr
               <div className="flex items-center gap-2">
                 <Droplets className="w-5 h-5 text-blue-500" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Humidity</p>
+                  <p className="text-xs text-muted-foreground">Luftfeuchtigkeit</p>
                   <p className="font-semibold">{weather.humidity}%</p>
                 </div>
               </div>
@@ -109,16 +109,16 @@ export function WeatherWidget({ latitude, longitude, tripDate }: WeatherWidgetPr
 }
 
 function getWeatherCondition(code: number): string {
-  if (code === 0 || code === 1) return "Clear";
-  if (code === 2) return "Partly Cloudy";
-  if (code === 3) return "Overcast";
-  if (code >= 45 && code <= 48) return "Foggy";
-  if (code >= 51 && code <= 67) return "Drizzle";
-  if (code >= 80 && code <= 82) return "Showers";
-  if (code >= 85 && code <= 86) return "Snow Showers";
-  if (code >= 71 && code <= 77) return "Snow";
-  if (code >= 80 && code <= 99) return "Thunderstorm";
-  return "Unknown";
+  if (code === 0 || code === 1) return "weather.clear";
+  if (code === 2) return "weather.partlyCloudy";
+  if (code === 3) return "weather.overcast";
+  if (code >= 45 && code <= 48) return "weather.foggy";
+  if (code >= 51 && code <= 67) return "weather.drizzle";
+  if (code >= 80 && code <= 82) return "weather.showers";
+  if (code >= 85 && code <= 86) return "weather.snowShowers";
+  if (code >= 71 && code <= 77) return "weather.snow";
+  if (code >= 80 && code <= 99) return "weather.thunderstorm";
+  return "weather.unknown";
 }
 
 function getWeatherIcon(code: number): string {

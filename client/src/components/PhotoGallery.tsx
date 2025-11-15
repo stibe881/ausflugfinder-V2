@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Image as ImageIcon, Trash2, Plus, ImageOff } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useI18n } from "@/contexts/i18nContext";
 
 interface Photo {
   id: number;
@@ -22,6 +23,7 @@ interface PhotoGalleryProps {
 }
 
 export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoading = false }: PhotoGalleryProps) {
+  const { t } = useI18n();
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -107,7 +109,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ImageIcon className="w-5 h-5" />
-          Photo Gallery
+          {t("gallery.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -125,7 +127,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
                   />
                   {photo.isPrimary === 1 && (
                     <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-semibold">
-                      Titelbild
+                      {t("trips.coverImage")}
                     </div>
                   )}
                   {canEdit && (
@@ -137,7 +139,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
                           disabled={setPrimaryMutation.isPending}
                           className="gap-1"
                         >
-                          Als Titelbild
+                          {t("gallery.setAsCover")}
                         </Button>
                       )}
                       <Button
@@ -160,43 +162,40 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
         {galleryPhotos.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <ImageOff className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p>Noch keine Fotos</p>
+            <p>{t("gallery.noPhotos")}</p>
           </div>
         )}
 
         {/* Upload Section */}
         <div className="pt-4 border-t space-y-3">
-          <h4 className="text-sm font-semibold">Fotos hochladen</h4>
-          <div className="space-y-2">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              disabled={!canEdit}
-              className="w-full"
-            />
-            <input
-              type="text"
-              placeholder="Fototitel (optional)"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              disabled={!canEdit}
-              className="w-full p-2 border rounded-md"
-            />
-            <Button
-              onClick={handleUpload}
-              disabled={!canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
-              className="w-full gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              {uploading || uploadPhotoMutation.isPending ? "Wird hochgeladen..." : "Foto hochladen"}
-            </Button>
-            {!isLoading && !canEdit && (
-              <p className="text-xs text-muted-foreground text-center">
-                Du musst angemeldet sein, um Fotos hochzuladen.
-              </p>
-            )}
-          </div>
+          <h4 className="text-sm font-semibold">{t("gallery.addPhoto")}</h4>
+          <DragAndDropFileInput
+            onFileSelected={setSelectedFile}
+            selectedFile={selectedFile}
+            disabled={!canEdit}
+            accept="image/jpeg,image/png,image/webp"
+          />
+          <input
+            type="text"
+            placeholder={t("gallery.imageCaption")}
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            disabled={!canEdit}
+            className="w-full p-2 border rounded-md"
+          />
+          <Button
+            onClick={handleUpload}
+            disabled={!canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}
+            className="w-full gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            {uploading || uploadPhotoMutation.isPending ? t("gallery.uploading") : t("gallery.uploadPhoto")}
+          </Button>
+          {!isLoading && !canEdit && (
+            <p className="text-xs text-muted-foreground text-center">
+              {t("trips.loginRequiredToUploadPhotos")}
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
