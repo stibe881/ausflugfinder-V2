@@ -1,27 +1,26 @@
-import { useInstallPrompt } from "@/hooks/useInstallPrompt";
-import { Button } from "./ui/button";
-import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DownloadIcon } from "lucide-react";
+import React from "react";
+import { useI18n } from "@/contexts/i18nContext";
 
-export const InstallButton = () => {
-  const { isAppInstalled, showInstallPrompt } = useInstallPrompt();
+interface InstallButtonProps {
+  onInstall: () => void;
+  disabled: boolean;
+}
 
-  // Wenn App bereits installiert ist, Button verstecken
-  if (isAppInstalled) {
-    return null;
-  }
-
-  // Button wird immer angezeigt (mit oder ohne beforeinstallprompt Event)
-  // Die showInstallPrompt Funktion kümmert sich selbst darum
+export function InstallButton({ onInstall, disabled }: InstallButtonProps) {
+  const { t } = useI18n();
   return (
     <Button
-      onClick={showInstallPrompt}
-      variant="outline"
+      variant="ghost"
       size="sm"
-      className="flex items-center gap-2"
-      title="App auf diesem Gerät installieren"
+      onClick={onInstall}
+      disabled={disabled}
+      className="relative text-lg p-3 h-auto"
+      title={t("install.buttonTitle")}
     >
-      <Download className="w-4 h-4" />
-      Installieren
+      <DownloadIcon className="w-5 h-5 mr-2" />
+      {t("install.button")}
     </Button>
   );
-};
+}

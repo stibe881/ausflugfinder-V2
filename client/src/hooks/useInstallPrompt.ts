@@ -14,7 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
 export const useInstallPrompt = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [showInstallPromptDialog, setShowInstallPromptDialog] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed
@@ -32,19 +32,21 @@ export const useInstallPrompt = () => {
       console.log('✓ beforeinstallprompt event fired - Install Button wird sichtbar');
       const promptEvent = e as BeforeInstallPromptEvent;
       setInstallPrompt(promptEvent);
+      setShowInstallPromptDialog(true); // Show dialog when prompt is available
     };
 
     // Listen for app installed
     const handleAppInstalled = () => {
       console.log('✓ App erfolgreich installiert');
       setIsAppInstalled(true);
-      setShowPrompt(false);
+      setShowInstallPromptDialog(false);
       setInstallPrompt(null);
     };
 
     // Log wenn Installation abgelehnt wird
     const handleBeforeInstallPromptError = () => {
       console.warn('⚠ beforeinstallprompt Event wurde nicht ausgelöst - Die App ist möglicherweise bereits installiert oder erfüllt nicht die PWA-Anforderungen');
+      setShowInstallPromptDialog(true); // Show dialog even if prompt is not available, to give instructions
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -61,52 +63,43 @@ export const useInstallPrompt = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!installPrompt) {
-      console.warn('⚠ Kein beforeinstallprompt Event verfügbar');
-      return;
-    }
-
-    try {
-      console.log('→ Zeige Install-Prompt...');
-      await installPrompt.prompt();
-      const { outcome } = await installPrompt.userChoice;
-      console.log(`✓ User response to the install prompt: ${outcome}`);
-
-      if (outcome === 'accepted') {
-        console.log('✓ Installation akzeptiert');
-        setIsAppInstalled(true);
-      } else {
-        console.log('→ Installation abgelehnt');
-      }
-      setShowPrompt(false);
-      setInstallPrompt(null);
-    } catch (error) {
-      console.error('✗ Install prompt failed:', error);
-    }
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
-  };
-
-  const showInstallPrompt = async () => {
-    console.log('→ Install Button geklickt');
     if (installPrompt) {
-      console.log('→ beforeinstallprompt Event vorhanden, starte Installation...');
-      await handleInstallClick();
+      try {
+        console.log('→ Zeige Install-Prompt...');
+        await installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice;
+        console.log(`✓ User response to the install prompt: ${outcome}`);
+
+        if (outcome === 'accepted') {
+          console.log('✓ Installation akzeptiert');
+          setIsAppInstalled(true);
+        } else {
+          console.log('→ Installation abgelehnt');
+        }
+      } catch (error) {
+        console.error('✗ Install prompt failed:', error);
+      }
     } else {
-      console.log('⚠ Kein beforeinstallprompt Event - zeige Installationsanleitung oder Browser-Anleitung');
-      // In einem echten Szenario könnte hier ein Modal mit Anleitung gezeigt werden
-      alert('Um die App zu installieren:\n\n1. Klicke auf das Menü (⋯) oder Adressleiste\n2. Wähle "App installieren" oder "Zum Startbildschirm hinzufügen"\n3. Bestätige die Installation');
+      console.warn('⚠ Kein beforeinstallprompt Event verfügbar. Benutzer muss manuelle Anleitung befolgen.');
+      // Here we might just dismiss the dialog and rely on user to follow instructions in the dialog
     }
+    setShowInstallPromptDialog(false); // Always close dialog after attempt
+    setInstallPrompt(null);
+  };
+
+  const handleDismissInstallPromptDialog = () => {
+    setShowInstallPromptDialog(false);
+  };
+
+  const showInstallPromptInstructions = () => {
+    setShowInstallPromptDialog(true);
   };
 
   return {
-    installPrompt,
     isAppInstalled,
-    showPrompt,
+    showInstallPromptDialog,
+    showInstallPromptInstructions,
     handleInstallClick,
-    handleDismiss,
-    showInstallPrompt,
+    handleDismissInstallPromptDialog,
   };
 };

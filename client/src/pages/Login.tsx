@@ -1,10 +1,4 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Mountain, Sun, Compass } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useI18n } from "@/contexts/i18nContext";
@@ -159,6 +153,15 @@ export default function Login() {
                 required
                 className="border-border/50"
               />
+              {mode === "login" && (
+                <p className="mt-2 text-right text-sm">
+                  <Link href="/forgot-password">
+                    <a className="text-primary hover:underline font-semibold">
+                      {t("login.forgotPassword")}
+                    </a>
+                  </Link>
+                </p>
+              )}
             </div>
 
             <Button
