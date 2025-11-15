@@ -358,6 +358,12 @@ export const appRouter = router({
             }
           }
 
+          // Send push notification if trip is public
+          if (input.isPublic === 1) {
+            const { sendNewPublicTripNotification } = await import('./_core/pushNotifications');
+            await sendNewPublicTripNotification(result.id, input.title, ctx.user.id);
+          }
+
           return { id: result.id };
         } catch (error) {
           const appError = handleError(error, "trips.create");

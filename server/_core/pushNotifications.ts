@@ -29,7 +29,7 @@ export interface PushNotificationPayload {
   badge?: string;
   tag?: string;
   data?: {
-    type: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'system';
+    type: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'new_trip' | 'system';
     relatedId?: number;
     url?: string;
   };
@@ -41,7 +41,7 @@ export interface PushNotificationPayload {
 export async function sendPushNotificationToUser(
   userId: number,
   payload: PushNotificationPayload,
-  notificationType: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'system' = 'system'
+  notificationType: 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'new_trip' | 'system' = 'system'
 ): Promise<boolean> {
   try {
     const db = await getDb();
@@ -71,6 +71,9 @@ export async function sendPushNotificationToUser(
       return false;
     }
     if (notificationType === 'nearby_trip' && !userSettings_[0].nearbyTripNotifications) {
+      return false;
+    }
+    if (notificationType === 'new_trip' && !userSettings_[0].newTripNotifications) {
       return false;
     }
 
@@ -259,6 +262,67 @@ export async function sendNearbyTripNotification(
     return await sendPushNotificationToUser(userId, payload, 'nearby_trip');
   } catch (error) {
     console.error('Error in sendNearbyTripNotification:', error);
+    return false;
+  }
+}
+
+/**
+ * Send notification to all users about a new public trip
+ */
+export async function sendNewPublicTripNotification(
+  tripId: number,
+  tripTitle: string,
+  creatorId?: number
+): Promise<boolean> {
+  try {
+    const db = await getDb();
+
+    if (!db) {
+      console.error('Database not available in sendNewPublicTripNotification');
+      return false;
+    }
+
+    // Get all users except the trip creator
+    const allUsers = await db
+      .select({ id: users.id })
+      .from(users);
+
+    if (allUsers.length === 0) {
+      console.log('[Push] No users found to notify');
+      return false;
+    }
+
+    const payload: PushNotificationPayload = {
+      title: 'Neuer öffentlicher Ausflug',
+      message: `"${tripTitle}" wurde gerade hinzugefügt!`,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: `new-trip-${tripId}`,
+      data: {
+        type: 'new_trip',
+        relatedId: tripId,
+        url: `/trips/${tripId}`,
+      },
+    };
+
+    // Send notification to all users except the creator
+    let successCount = 0;
+    for (const user of allUsers) {
+      // Skip notification for the trip creator (they already know)
+      if (creatorId && user.id === creatorId) {
+        continue;
+      }
+
+      const sent = await sendPushNotificationToUser(user.id, payload, 'new_trip');
+      if (sent) {
+        successCount++;
+      }
+    }
+
+    console.log(`[Push] Sent new trip notification to ${successCount} users`);
+    return successCount > 0;
+  } catch (error) {
+    console.error('Error in sendNewPublicTripNotification:', error);
     return false;
   }
 }

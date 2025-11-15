@@ -3,7 +3,7 @@
  * Improvement #11: Standardize error handling across all endpoints
  */
 
-import { TRPCError } from "@trpc/server";
+import { TRPCError, TRPC_ERROR_CODE_KEY } from "@trpc/server";
 
 /**
  * Application Error Class
@@ -98,7 +98,7 @@ export function toTRPCError(error: AppError): TRPCError {
 /**
  * Map HTTP status codes to tRPC error codes
  */
-function mapStatusCodeToTRPCCode(statusCode: number): string {
+function mapStatusCodeToTRPCCode(statusCode: number): TRPC_ERROR_CODE_KEY {
   switch (statusCode) {
     case 400:
       return "BAD_REQUEST";

@@ -115,7 +115,7 @@ export function registerLocalAuthRoutes(app: Express) {
       // Update last signed in
       await db
         .update(users)
-        .set({ lastSignedIn: new Date() })
+        .set({ lastSignedIn: new Date().toISOString() })
         .where(eq(users.id, user.id));
 
       // Create JWT session token like the OAuth version
