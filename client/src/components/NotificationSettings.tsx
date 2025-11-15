@@ -151,14 +151,14 @@ export const NotificationSettings = () => {
       console.log('Toggling location tracking:', enabled);
 
       if (enabled) {
-        console.log('Starting location tracking...');
-        const success = await startTracking(60000); // 60 second interval
+        console.log('Starting real-time location tracking...');
+        const success = await startTracking(); // Real-time tracking (no interval)
         console.log('startTracking result:', success);
 
         if (success) {
           console.log('Updating settings to enable location tracking...');
           await updateSettings({ locationTrackingEnabled: true });
-          toast.success('Standort-Tracking gestartet');
+          toast.success('Echtzeit-Standort-Tracking gestartet');
         } else {
           toast.error('Fehler beim Starten des Standort-Tracking');
         }
@@ -487,8 +487,7 @@ export const NotificationSettings = () => {
 
           <div className="text-xs text-muted-foreground space-y-2 p-3 bg-muted rounded-lg">
             <p>
-              <strong>Standort-Daten:</strong> Werden alle 60 Sekunden
-              aktualisiert
+              <strong>Standort-Daten:</strong> Werden in Echtzeit aktualisiert
             </p>
             <p>
               <strong>Genauigkeit:</strong> Nutzt hochgenaue GPS-Koordinaten

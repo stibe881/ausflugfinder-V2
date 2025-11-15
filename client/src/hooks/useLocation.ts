@@ -108,19 +108,17 @@ export const useLocation = () => {
   }, [updateLocation]);
 
   /**
-   * Start continuous location tracking
-   * Default interval: 60 seconds (configurable)
+   * Start continuous location tracking using real-time watch
+   * More responsive than interval-based tracking
    */
   const startTracking = useCallback(
-    async (intervalMs = 60000) => {
+    async (intervalMs?: number) => {
       if (locationState.isTracking) {
         console.warn('⚠ Location tracking already active');
         return false;
       }
 
-      console.log(
-        `→ Starting location tracking (interval: ${intervalMs / 1000}s)`
-      );
+      console.log('→ Starting real-time location tracking');
 
       setLocationState((prev) => ({
         ...prev,
@@ -128,13 +126,23 @@ export const useLocation = () => {
         error: null,
       }));
 
-      // Get location immediately
-      await requestLocation();
-
-      // Set up recurring location updates
-      trackingIntervalRef.current = setInterval(() => {
-        requestLocation();
-      }, intervalMs);
+      // Use continuous watch for real-time updates
+      stopTrackingRef.current = await watchLocation(
+        (coords) => {
+          setLocationState((prev) => ({
+            ...prev,
+            coords,
+            isLoading: false,
+            error: null,
+          }));
+        },
+        (error) => {
+          setLocationState((prev) => ({
+            ...prev,
+            error,
+          }));
+        }
+      );
 
       // Also try to use background location tracking if available
       if ('BackgroundSync' in window && 'serviceWorker' in navigator) {
@@ -149,7 +157,7 @@ export const useLocation = () => {
 
       return true;
     },
-    [locationState.isTracking, requestLocation]
+    [locationState.isTracking, watchLocation]
   );
 
   /**
@@ -302,12 +310,49 @@ export const useLocation = () => {
 
   /**
    * Auto-start tracking on mount if enabled in settings
+   * Uses watchLocation for real-time tracking instead of interval-based
    */
   useEffect(() => {
-    if (settings?.locationTrackingEnabled && !locationState.isTracking) {
-      startTracking(60000); // Start with 60 second interval
+    if (!settings?.locationTrackingEnabled || locationState.isTracking) {
+      return;
     }
-  }, [settings?.locationTrackingEnabled, locationState.isTracking, startTracking]);
+
+    let cleanup: (() => void) | null = null;
+
+    const initTracking = async () => {
+      setLocationState((prev) => ({
+        ...prev,
+        isTracking: true,
+        error: null,
+      }));
+
+      // Use continuous location watch for real-time tracking
+      cleanup = await watchLocation(
+        (coords) => {
+          setLocationState((prev) => ({
+            ...prev,
+            coords,
+            isLoading: false,
+            error: null,
+          }));
+        },
+        (error) => {
+          setLocationState((prev) => ({
+            ...prev,
+            error,
+          }));
+        }
+      );
+    };
+
+    initTracking();
+
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  }, [settings?.locationTrackingEnabled, locationState.isTracking, watchLocation]);
 
   /**
    * Cleanup on unmount
