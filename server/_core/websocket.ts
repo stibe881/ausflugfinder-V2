@@ -64,13 +64,15 @@ export function setupWebSocketServer(server: HTTPServer) {
     console.log('→ HTTP Upgrade request received');
     console.log('  URL:', req.url);
     console.log('  Method:', req.method);
+    const cookies = parseCookies(req.headers.cookie);
     console.log('  Headers:', {
       upgrade: req.headers.upgrade,
       connection: req.headers.connection,
       host: req.headers.host,
       'x-forwarded-for': req.headers['x-forwarded-for'],
       'x-forwarded-proto': req.headers['x-forwarded-proto'],
-      cookie: req.headers.cookie ? '***' : 'none',
+      'all-cookies': Array.from(cookies.keys()).join(', ') || 'none',
+      'has-app-session-id': cookies.has('app_session_id') ? 'yes' : 'NO',
     });
   });
 
