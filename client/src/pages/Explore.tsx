@@ -580,10 +580,15 @@ export default function Explore() {
 
                       // Create markers for each trip
                       (trips.data || []).forEach((trip) => {
-                        if (!trip.latitude || !trip.longitude) return;
+                        // Skip if no coordinates or if coordinates are the string 'NULL'
+                        if (!trip.latitude || !trip.longitude || trip.latitude === 'NULL' || trip.longitude === 'NULL') return;
 
                         const lat = parseFloat(trip.latitude);
                         const lng = parseFloat(trip.longitude);
+
+                        // Skip if parsing failed or coordinates are invalid
+                        if (isNaN(lat) || isNaN(lng)) return;
+
                         const position = { lat, lng };
 
                         // Create modern marker with custom styling
