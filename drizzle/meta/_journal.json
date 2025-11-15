@@ -71,6 +71,13 @@
       "when": 1763154851712,
       "tag": "0009_demonic_stingray",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1763190296383,
+      "tag": "0010_make_trip_dates_nullable",
+      "breakpoints": true
     }
   ]
 }
