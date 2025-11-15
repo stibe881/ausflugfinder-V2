@@ -58,7 +58,11 @@ export const useWebSocketNotifications = () => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(decodedToken)}`;
 
-    console.log('→ Attempting WebSocket connection to:', wsUrl.replace(decodedToken, '***'));
+    console.log('→ Attempting WebSocket connection');
+    console.log('  Protocol:', protocol);
+    console.log('  Host:', window.location.host);
+    console.log('  URL:', wsUrl.replace(decodedToken, '***'));
+    console.log('  Token length:', decodedToken.length);
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -115,8 +119,10 @@ export const useWebSocketNotifications = () => {
       };
 
       ws.onerror = (event) => {
-        console.error('✗ WebSocket error:', event);
-        setError('WebSocket connection error');
+        const errorMsg = event instanceof Event ? 'Connection failed' : String(event);
+        console.error('✗ WebSocket error event:', event);
+        console.error('✗ WebSocket readyState:', ws.readyState);
+        setError(`WebSocket error: ${errorMsg}`);
       };
 
       ws.onclose = () => {
