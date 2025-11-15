@@ -200,7 +200,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
       }
 
       // Create trip with or without image
-      createTripMutation.mutate({
+      const tripData = {
         title: formData.title,
         description: formData.description,
         destination: formData.destination,
@@ -210,7 +210,9 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
         image: imageUrl || undefined,
         // Dates are optional - not collected in this wizard form
         participants: 1,
-      });
+      };
+      console.log("Submitting trip data:", tripData);
+      createTripMutation.mutate(tripData);
     } catch (error) {
       console.error("Submit failed:", error);
       toast.error(error instanceof Error ? error.message : "Fehler beim Erstellen des Ausflugs");
