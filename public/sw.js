@@ -1,5 +1,5 @@
 // Service Worker for Ausflug Manager PWA
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `ausflug-manager-${CACHE_VERSION}`;
 const API_CACHE = `ausflug-api-${CACHE_VERSION}`;
 
