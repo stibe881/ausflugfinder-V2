@@ -40,6 +40,11 @@ const plugins = [
       "/icons/**/*.png",
       "/icons/**/*.svg",
     ],
+    strategies: "injectManifest",
+    injectManifest: {
+      swSrc: "client/src/sw.ts",
+      globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,woff,woff2,ttf,eot}"],
+    },
     manifest: {
       name: "AusflugFinder",
       short_name: "AusflugFinder",
