@@ -27,6 +27,7 @@ import { useAutoLogout } from "./hooks/useAutoLogout";
 import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
 import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
 import { AutoPushSubscriber } from "./components/AutoPushSubscriber";
+import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -130,6 +131,7 @@ function AppContent() {
           <TooltipProvider>
             <Toaster />
             <AutoPushSubscriber />
+            <PushNotificationPrompt />
             <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
