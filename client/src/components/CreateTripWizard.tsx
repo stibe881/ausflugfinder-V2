@@ -87,7 +87,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    destination: "",
+    destination: "", // Keep internal name for API compatibility
     region: "",
     categories: [] as string[],
     cost: "free" as const,
@@ -247,7 +247,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Grundinformationen</CardTitle>
-                  <CardDescription>Titel, Destination und Beschreibung</CardDescription>
+                  <CardDescription>Titel, Ort und Beschreibung</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -262,7 +262,7 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
                   </div>
 
                   <div>
-                    <Label htmlFor="destination">Destination *</Label>
+                    <Label htmlFor="destination">Ort *</Label>
                     <Input
                       id="destination"
                       placeholder="z.B. Appenzell"

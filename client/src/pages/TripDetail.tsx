@@ -471,11 +471,11 @@ export default function TripDetail() {
                   <>
                     {/* Editable Destination */}
                     <div>
-                      <label className="block text-sm font-medium mb-2">{t("tripDetail.destination")}</label>
+                      <label className="block text-sm font-medium mb-2">Ort</label>
                       <Input
                         value={editForm.destination}
                         onChange={(e) => setEditForm({ ...editForm, destination: e.target.value })}
-                        placeholder={t("tripDetail.destinationPlaceholder")}
+                        placeholder="z.B. Appenzell"
                       />
                     </div>
 
@@ -659,7 +659,7 @@ export default function TripDetail() {
                     {/* Destination */}
                     {trip.destination && (
                       <div className="pb-4 border-b">
-                        <div className="text-sm text-muted-foreground mb-1">{t("tripDetail.destination")}</div>
+                        <div className="text-sm text-muted-foreground mb-1">Ort</div>
                         <div
                           className="font-medium cursor-pointer hover:text-primary transition-colors"
                           onClick={() => handleLocationClick(trip.destination)}
