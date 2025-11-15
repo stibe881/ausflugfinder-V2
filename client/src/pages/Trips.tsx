@@ -37,9 +37,11 @@ export default function Trips() {
     enabled: isAuthenticated,
   });
   
+  const utils = trpc.useUtils();
   const createMutation = trpc.trips.create.useMutation({
     onSuccess: () => {
       refetch();
+      utils.trips.search.invalidate();
       setIsCreateOpen(false);
       // Reset form
       const form = document.querySelector('form');
