@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePushNotifications, type PushNotificationSettings } from '@/hooks/usePushNotifications';
 import { useLocation } from '@/hooks/useLocation';
+import { useWebSocketNotifications } from '@/hooks/useWebSocketNotifications';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +37,7 @@ export const NotificationSettings = () => {
   } = usePushNotifications();
 
   const { isTracking, startTracking, stopTracking } = useLocation();
+  const { isConnected, error } = useWebSocketNotifications();
 
   const [isSaving, setIsSaving] = useState(false);
   const [isTestingSending, setIsTestingSending] = useState(false);
@@ -537,6 +539,30 @@ export const NotificationSettings = () => {
             </p>
           </div>
         </CardContent>
+      </Card>
+
+      {/* WebSocket Status */}
+      <Card className={isConnected ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {isConnected ? (
+              <>
+                <div className="w-2 h-2 bg-green-600 rounded-full" />
+                WebSocket Verbunden
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 bg-red-600 rounded-full" />
+                WebSocket Getrennt
+              </>
+            )}
+          </CardTitle>
+          <CardDescription>
+            {isConnected
+              ? 'Deine WebSocket-Verbindung ist aktiv und bereit für Push-Benachrichtigungen'
+              : error || 'Versucht sich zu verbinden...'}
+          </CardDescription>
+        </CardHeader>
       </Card>
 
       {/* Test Notification */}
