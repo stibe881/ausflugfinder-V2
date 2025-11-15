@@ -1,0 +1,1 @@
+ALTER TABLE `notifications` MODIFY COLUMN `type` enum('friend_request','friend_accepted','nearby_trip','new_trip','system') NOT NULL DEFAULT 'system';

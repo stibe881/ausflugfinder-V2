@@ -121,7 +121,7 @@ export async function sendPushNotificationToUser(
       userId,
       title: payload.title,
       message: payload.message,
-      type: notificationType,
+      type: notificationType as 'friend_request' | 'friend_accepted' | 'nearby_trip' | 'new_trip' | 'system',
       relatedId: payload.data?.relatedId,
     });
 
@@ -423,7 +423,7 @@ export async function checkAndSendNearbyTripNotifications(userId: number): Promi
 
         // Only send if no notification in last 24 hours
         if (recentNotification.length === 0 ||
-          new Date().getTime() - recentNotification[0].createdAt.getTime() > 24 * 60 * 60 * 1000) {
+          new Date().getTime() - new Date(recentNotification[0].createdAt).getTime() > 24 * 60 * 60 * 1000) {
           await sendNearbyTripNotification(userId, trip.id, distance);
         }
       }
