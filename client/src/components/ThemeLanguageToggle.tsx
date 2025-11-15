@@ -10,11 +10,10 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import { useI18n, type Language } from "@/contexts/i18nContext";
 import { Moon, Sun, Globe } from "lucide-react";
-import { InstallButton } from "./InstallButton"; // Import InstallButton
 
 interface ThemeLanguageToggleProps {
-  isAppInstalled: boolean;
-  handleInstallClick: () => void;
+  isAppInstalled?: boolean;
+  handleInstallClick?: () => void;
 }
 
 export function ThemeLanguageToggle({
@@ -79,13 +78,6 @@ export function ThemeLanguageToggle({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Install Button */}
-      {!isAppInstalled && (
-        <InstallButton
-          onInstall={handleInstallClick}
-        />
-      )}
     </div>
   );
 }
