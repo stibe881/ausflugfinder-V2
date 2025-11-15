@@ -15,9 +15,6 @@ import {
   AlertTitle,
 } from '@/components/ui/alert';
 
-const PROMPT_DISMISSED_KEY = 'push-notification-prompt-dismissed';
-const PROMPT_DISMISS_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-
 export const PushNotificationPrompt = () => {
   const { user } = useAuth();
   const { isSupported, isSubscribed, subscribe } = usePushNotifications();
@@ -31,19 +28,8 @@ export const PushNotificationPrompt = () => {
     // 1. User is logged in
     // 2. Push notifications are supported
     // 3. Not already subscribed
-    // 4. User hasn't previously denied notifications
     if (!user || !isSupported || isSubscribed) {
       return;
-    }
-
-    // Check if user dismissed the prompt recently
-    const dismissedTime = localStorage.getItem(PROMPT_DISMISSED_KEY);
-    if (dismissedTime) {
-      const timeSinceDismiss = Date.now() - parseInt(dismissedTime, 10);
-      if (timeSinceDismiss < PROMPT_DISMISS_DURATION) {
-        console.log('[PushNotificationPrompt] Prompt was dismissed recently, not showing');
-        return;
-      }
     }
 
     const permission = Notification.permission;
@@ -122,7 +108,6 @@ export const PushNotificationPrompt = () => {
 
   const handleDismiss = () => {
     console.log('[PushNotificationPrompt] Dismissing prompt');
-    localStorage.setItem(PROMPT_DISMISSED_KEY, Date.now().toString());
     setShowPrompt(false);
   };
 
