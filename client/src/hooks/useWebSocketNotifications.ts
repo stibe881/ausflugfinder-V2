@@ -47,22 +47,14 @@ export const useWebSocketNotifications = () => {
       return;
     }
 
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      console.log('⚠ No auth token available for WebSocket');
-      setError('Authentication required');
-      return;
-    }
-
-    const decodedToken = decodeURIComponent(token);
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(decodedToken)}`;
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
 
     console.log('→ Attempting WebSocket connection');
     console.log('  Protocol:', protocol);
     console.log('  Host:', window.location.host);
-    console.log('  URL:', wsUrl.replace(decodedToken, '***'));
-    console.log('  Token length:', decodedToken.length);
+    console.log('  URL:', wsUrl);
+    console.log('  User:', user.name);
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -175,20 +167,19 @@ export const useWebSocketNotifications = () => {
 
   // Auto-connect when user changes
   useEffect(() => {
-    if (user && localStorage.getItem('auth_token')) {
+    if (user) {
       console.log('⏱ User detected, connecting to WebSocket...');
-      console.log('User:', user);
-      console.log('Token exists:', !!localStorage.getItem('auth_token'));
+      console.log('User:', user.name);
       connect();
     } else {
-      console.log('⚠ Cannot connect - user:', !!user, 'token:', !!localStorage.getItem('auth_token'));
+      console.log('⚠ Cannot connect - no user logged in');
       disconnect();
     }
 
     return () => {
       // disconnect();
     };
-  }, [user]);
+  }, [user, connect, disconnect]);
 
   return {
     isConnected,

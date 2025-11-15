@@ -40,13 +40,8 @@ export default function WebSocketDebug() {
         addLog('⚠️ Du bist nicht angemeldet. Bitte melde dich zuerst an.', 'warning');
       } else {
         addLog('✅ Du bist angemeldet', 'success');
-      }
-
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        addLog('❌ Kein Auth-Token im LocalStorage gefunden', 'error');
-      } else {
-        addLog(`✅ Auth-Token gefunden (${token.length} Zeichen)`, 'success');
+        addLog('✅ Session-Cookie ist vorhanden (app_session_id)', 'success');
+        addLog('💡 WebSocket authentifiziert sich automatisch über den Session-Cookie', 'info');
       }
     }
   }, [isAuthenticated, loading]);
@@ -73,22 +68,15 @@ export default function WebSocketDebug() {
     addLog('🔍 Starting WebSocket connection...', 'info');
     setWsStatus('connecting');
 
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-      addLog('❌ No auth token found', 'error');
-      setWsStatus('error');
-      return;
-    }
-
-    const decodedToken = decodeURIComponent(token);
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(decodedToken)}`;
+    const url = `${protocol}//${window.location.host}/ws`;
 
-    setWsUrl(url.replace(decodedToken, '***'));
+    setWsUrl(url);
     addLog(`Protocol: ${protocol}`, 'info');
     addLog(`Host: ${window.location.host}`, 'info');
-    addLog(`Full URL: ${url.replace(decodedToken, '***')}`, 'info');
-    addLog(`Token length: ${decodedToken.length}`, 'info');
+    addLog(`Full URL: ${url}`, 'info');
+    addLog(`User: ${user.name}`, 'info');
+    addLog('✅ Session-Cookie wird automatisch übertragen', 'success');
 
     try {
       const ws = new WebSocket(url);
