@@ -51,11 +51,17 @@ export const usePushNotifications = () => {
   const unsubscribeMutation = trpc.push.unsubscribe.useMutation();
   const getSettingsQuery = trpc.push.getSettings.useQuery(undefined, {
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
   const updateSettingsMutation = trpc.push.updateSettings.useMutation();
   const getNotificationsQuery = trpc.push.getNotifications.useQuery(
     { limit: 20, unreadOnly: false },
-    { enabled: !!user }
+    {
+      enabled: !!user,
+      staleTime: 30 * 1000, // Cache for 30 seconds
+      gcTime: 2 * 60 * 1000, // Keep in cache for 2 minutes
+    }
   );
   const markAsReadMutation = trpc.push.markAsRead.useMutation();
   const updateLocationMutation = trpc.push.updateLocation.useMutation();
