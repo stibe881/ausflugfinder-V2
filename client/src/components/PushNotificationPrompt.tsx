@@ -24,11 +24,19 @@ export const PushNotificationPrompt = () => {
   const [alreadyTriedSubscribe, setAlreadyTriedSubscribe] = useState(false);
 
   useEffect(() => {
+    console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', {
+      user: !!user,
+      isSupported,
+      isSubscribed,
+      userEmail: user?.email,
+    });
+
     // Only show prompt if:
     // 1. User is logged in
     // 2. Push notifications are supported
     // 3. Not already subscribed
     if (!user || !isSupported || isSubscribed) {
+      console.log('[PushNotificationPrompt] Returning early - user:', !!user, 'isSupported:', isSupported, 'isSubscribed:', isSubscribed);
       return;
     }
 
