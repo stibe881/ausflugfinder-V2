@@ -605,9 +605,10 @@ export async function getStatistics() {
     db.select({ value: count() })
       .from(trips)
       .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-    db.select({ value: sql`COUNT(DISTINCT ${trips.category})` })
-      .from(trips)
-      .where(and(eq(trips.isPublic, 1), isNotNull(trips.category)))
+    db.select({ value: sql`COUNT(DISTINCT ${tripCategories.category})` })
+      .from(tripCategories)
+      .innerJoin(trips, eq(tripCategories.tripId, trips.id))
+      .where(eq(trips.isPublic, 1))
   ]);
 
   return {
