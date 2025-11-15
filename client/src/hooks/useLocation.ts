@@ -126,23 +126,63 @@ export const useLocation = () => {
         error: null,
       }));
 
+      if (!navigator.geolocation) {
+        setLocationState((prev) => ({
+          ...prev,
+          isTracking: false,
+          error: 'Geolocation not supported',
+        }));
+        return false;
+      }
+
       // Use continuous watch for real-time updates
-      stopTrackingRef.current = await watchLocation(
-        (coords) => {
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          const coords: LocationCoords = {
+            latitude,
+            longitude,
+            accuracy,
+            timestamp: Date.now(),
+          };
+
           setLocationState((prev) => ({
             ...prev,
             coords,
             isLoading: false,
             error: null,
           }));
+
+          updateLocation(latitude, longitude, accuracy);
         },
         (error) => {
+          let errorMessage = 'Location watch error';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location permission denied';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information unavailable';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out';
+              break;
+          }
           setLocationState((prev) => ({
             ...prev,
-            error,
+            error: errorMessage,
           }));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
         }
       );
+
+      stopTrackingRef.current = () => {
+        navigator.geolocation.clearWatch(watchId);
+      };
 
       // Also try to use background location tracking if available
       if ('BackgroundSync' in window && 'serviceWorker' in navigator) {
@@ -157,7 +197,7 @@ export const useLocation = () => {
 
       return true;
     },
-    [locationState.isTracking, watchLocation]
+    [locationState.isTracking, updateLocation]
   );
 
   /**
@@ -310,49 +350,14 @@ export const useLocation = () => {
 
   /**
    * Auto-start tracking on mount if enabled in settings
-   * Uses watchLocation for real-time tracking instead of interval-based
    */
   useEffect(() => {
     if (!settings?.locationTrackingEnabled || locationState.isTracking) {
       return;
     }
 
-    let cleanup: (() => void) | null = null;
-
-    const initTracking = async () => {
-      setLocationState((prev) => ({
-        ...prev,
-        isTracking: true,
-        error: null,
-      }));
-
-      // Use continuous location watch for real-time tracking
-      cleanup = await watchLocation(
-        (coords) => {
-          setLocationState((prev) => ({
-            ...prev,
-            coords,
-            isLoading: false,
-            error: null,
-          }));
-        },
-        (error) => {
-          setLocationState((prev) => ({
-            ...prev,
-            error,
-          }));
-        }
-      );
-    };
-
-    initTracking();
-
-    return () => {
-      if (cleanup) {
-        cleanup();
-      }
-    };
-  }, [settings?.locationTrackingEnabled, locationState.isTracking, watchLocation]);
+    startTracking();
+  }, [settings?.locationTrackingEnabled, locationState.isTracking, startTracking]);
 
   /**
    * Cleanup on unmount
