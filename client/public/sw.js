@@ -50,6 +50,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip WebSocket upgrade requests - they must not be intercepted by Service Worker
+  // WebSocket upgrades use the upgrade header which cannot be handled by fetch()
+  if (request.headers.get('upgrade') === 'websocket') {
+    console.log('[Service Worker] Skipping WebSocket upgrade request:', url.pathname);
+    return;
+  }
+
   // API requests - Network first, fallback to cache
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
