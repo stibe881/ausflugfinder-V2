@@ -210,6 +210,8 @@ export function CreateTripWizard({ open, onOpenChange }: CreateTripWizardProps) 
         image: imageUrl || undefined,
         // Dates are optional - not collected in this wizard form
         participants: 1,
+        // Make trip public by default so it appears on explore page
+        isPublic: 1,
       };
       createTripMutation.mutate(tripData);
     } catch (error) {
