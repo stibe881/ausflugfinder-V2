@@ -5,6 +5,7 @@ import { Image as ImageIcon, Trash2, Plus, ImageOff } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
+import { DragAndDropFileInput } from "@/components/DragAndDropFileInput";
 
 interface Photo {
   id: number;
