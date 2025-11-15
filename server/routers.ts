@@ -330,12 +330,19 @@ export const appRouter = router({
 
           // Automatically geocode destination if coordinates are not provided
           if (input.destination && (!input.latitude || !input.longitude)) {
+            console.log('[trips.create] Geocoding needed for destination:', input.destination);
+            console.log('[trips.create] Input latitude:', input.latitude, 'longitude:', input.longitude);
             const { geocodeAddress } = await import('./geocoding');
             const coordinates = await geocodeAddress(input.destination);
             if (coordinates) {
+              console.log('[trips.create] Geocoding successful, setting coordinates:', coordinates);
               (tripData as any).latitude = coordinates.latitude;
               (tripData as any).longitude = coordinates.longitude;
+            } else {
+              console.warn('[trips.create] Geocoding failed or returned no results');
             }
+          } else {
+            console.log('[trips.create] Coordinates already provided or no destination');
           }
 
           const result = await createTrip({
