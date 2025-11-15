@@ -79,11 +79,14 @@ export default function WebSocketDebug() {
     addLog('✅ Session-Cookie wird automatisch übertragen', 'success');
 
     try {
+      addLog('🔌 Creating WebSocket object...', 'info');
       const ws = new WebSocket(url);
+      addLog('✅ WebSocket object created, waiting for connection...', 'info');
 
       ws.onopen = () => {
         addLog('✅ WebSocket connected!', 'success');
         setWsStatus('connected');
+        addLog('📡 Connection is OPEN and ready for communication', 'success');
       };
 
       ws.onmessage = (event) => {
@@ -97,26 +100,50 @@ export default function WebSocketDebug() {
             addLog(`🔔 Received notification: ${message.data?.title}`, 'success');
           }
         } catch (err) {
-          addLog(`Error processing message: ${err}`, 'error');
+          const errorMsg = err instanceof Error ? err.message : String(err);
+          addLog(`❌ Error processing message: ${errorMsg}`, 'error');
         }
       };
 
       ws.onerror = (event) => {
-        const errorMsg = event instanceof Event ? 'Connection failed' : String(event);
-        addLog(`❌ WebSocket error: ${errorMsg}`, 'error');
+        console.error('[WebSocket Debug] Error event:', event);
+        console.error('[WebSocket Debug] WebSocket readyState:', ws.readyState);
+        addLog(`❌ WebSocket error event triggered!`, 'error');
+        addLog(`   ReadyState: ${ws.readyState} (0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED)`, 'error');
+        // Try to get more details about the error
+        if (event instanceof Event) {
+          addLog(`   Error: Connection failed (no details available on this browser)`, 'error');
+        } else {
+          addLog(`   Error: ${String(event)}`, 'error');
+        }
         setWsStatus('error');
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
+        console.error('[WebSocket Debug] Close event:', event);
         addLog('🔌 WebSocket closed', 'warning');
+        addLog(`   Code: ${event.code}`, 'warning');
+        addLog(`   Reason: ${event.reason || '(no reason provided)'}`, 'warning');
+        addLog(`   Was clean: ${event.wasClean}`, 'warning');
         setWsStatus('disconnected');
         wsRef.current = null;
       };
 
+      // Add a timeout to detect if connection is hanging
+      setTimeout(() => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
+          addLog('⏱️ WebSocket connection timeout after 10 seconds!', 'error');
+          addLog('   This usually means the server is not responding', 'error');
+          addLog('   Check server logs: docker logs ausflug-manager-app', 'error');
+        }
+      }, 10000);
+
       wsRef.current = ws;
+      addLog('⏳ Waiting for connection (this may take a few seconds...)', 'info');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       addLog(`❌ Error creating WebSocket: ${errorMsg}`, 'error');
+      console.error('[WebSocket Debug] Exception:', err);
       setWsStatus('error');
     }
   };
