@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePushNotifications, type PushNotificationSettings } from '@/hooks/usePushNotifications';
 import { useLocation } from '@/hooks/useLocation';
-import { trpc } from '@/_core/trpc/client';
+import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
