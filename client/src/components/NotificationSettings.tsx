@@ -43,6 +43,7 @@ export const NotificationSettings = () => {
     friendRequestNotifications: true,
     friendRequestAcceptedNotifications: true,
     nearbyTripNotifications: true,
+    newTripNotifications: true,
     nearbyTripDistance: 5000,
     locationTrackingEnabled: true,
   };
@@ -59,7 +60,7 @@ export const NotificationSettings = () => {
   }, [settings]);
 
   const handleToggleSetting = async (
-    key: 'notificationsEnabled' | 'friendRequestNotifications' | 'friendRequestAcceptedNotifications' | 'nearbyTripNotifications' | 'locationTrackingEnabled',
+    key: 'notificationsEnabled' | 'friendRequestNotifications' | 'friendRequestAcceptedNotifications' | 'nearbyTripNotifications' | 'newTripNotifications' | 'locationTrackingEnabled',
     value: boolean
   ) => {
     setLocalSettings((prev) => ({
@@ -366,6 +367,30 @@ export const NotificationSettings = () => {
                     }
                     onCheckedChange={(value) =>
                       handleToggleSetting('nearbyTripNotifications', value)
+                    }
+                    disabled={isSaving || !localSettings?.notificationsEnabled}
+                  />
+                </div>
+
+                {/* New Trip Notifications */}
+                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors">
+                  <div className="flex items-start gap-3 flex-1">
+                    <Bell className="w-4 h-4 text-blue-500 mt-1 flex-shrink-0" />
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Neue Ausflüge
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Benachrichtigungen wenn neue öffentliche Ausflüge hinzugefügt werden
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={
+                      localSettings?.newTripNotifications ?? true
+                    }
+                    onCheckedChange={(value) =>
+                      handleToggleSetting('newTripNotifications', value)
                     }
                     disabled={isSaving || !localSettings?.notificationsEnabled}
                   />
