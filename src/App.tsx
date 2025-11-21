@@ -31,6 +31,8 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  console.log('[App] Rendering App component');
+
   return (
     <ErrorBoundary>
       <ThemeProvider
