@@ -33,10 +33,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-      // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <div className="flex flex-col min-h-screen">
@@ -45,18 +42,6 @@ function App() {
             </div>
             <PrivacyFooter />
           </div>
-          {/* Development helper to reset cookie consent */}
-          {process.env.NODE_ENV === "development" && (
-            <button
-              onClick={() => {
-                window.localStorage.removeItem("cookieConsent");
-                window.location.reload();
-              }}
-              className="fixed bottom-4 left-4 bg-red-500 text-white px-3 py-1 rounded"
-            >
-              Reset Cookie Consent (dev)
-            </button>
-          )}
           <CookieBanner />
         </TooltipProvider>
       </ThemeProvider>
