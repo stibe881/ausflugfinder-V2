@@ -1,5 +1,5 @@
 import { Cookie } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import {
     Card,
@@ -18,11 +18,13 @@ import {
 } from "@/lib/cookieConsent";
 
 export function CookieBanner() {
-    const [isVisible, setIsVisible] = useState(() => {
-        // Check if user has already made a choice
-        return getConsent() === null;
-    });
+    const [isVisible, setIsVisible] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+
+    useEffect(() => {
+        // Check if user has already made a choice (only run on client)
+        setIsVisible(getConsent() === null);
+    }, []);
 
     if (!isVisible) {
         return null;
