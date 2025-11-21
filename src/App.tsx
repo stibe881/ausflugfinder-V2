@@ -5,11 +5,19 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Privacy from "./pages/Privacy";
+import CookiePolicy from "./pages/CookiePolicy";
+import Imprint from "./pages/Imprint";
+import { CookieBanner } from "./components/CookieBanner";
+import { PrivacyFooter } from "./components/PrivacyFooter";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/cookie-policy" component={CookiePolicy} />
+      <Route path="/imprint" component={Imprint} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -27,11 +35,17 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
+      // switchable
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-1">
+              <Router />
+            </div>
+            <PrivacyFooter />
+          </div>
+          <CookieBanner />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
