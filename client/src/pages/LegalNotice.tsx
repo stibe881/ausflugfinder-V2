@@ -20,23 +20,23 @@ export default function LegalNotice() {
         <CardContent className="text-slate-700 space-y-4">
           <h2 className="text-xl font-semibold">Angaben gemäß § 5 TMG</h2>
           <p>
-            Max Mustermann
+            Stefan Gross
             <br />
-            Musterstraße 111
+            Neuhushof 3
             <br />
-            90210 Musterstadt
+            CH-6411 Zell LU
           </p>
 
           <h2 className="text-xl font-semibold">Kontakt</h2>
           <p>
             Telefon: +49 (0) 123 44 55 66
             <br />
-            E-Mail: max@mustermann.de
+            E-Mail: stefan.gross@hotmail.ch
           </p>
 
           <h2 className="text-xl font-semibold">Haftungsausschluss</h2>
           <p>
-            Inhaltlich verantwortlich: Max Mustermann (Anschrift wie oben)
+            Inhaltlich verantwortlich: Stefan Gross (Anschrift wie oben)
           </p>
           <p>
             Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. 
