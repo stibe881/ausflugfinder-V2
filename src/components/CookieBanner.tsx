@@ -23,12 +23,17 @@ export function CookieBanner() {
     const [showSettings, setShowSettings] = useState(false);
 
     useEffect(() => {
-        // Check if user has already made a choice (only run on client)
+        // This runs ONLY on the client after React hydration is complete
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        // Check if user has already made a choice (only run when mounted)
+        if (!isMounted) return;
         const hasConsent = getConsent() !== null;
         console.log('[CookieBanner] getConsent() returned:', getConsent(), 'hasConsent:', hasConsent);
         setIsVisible(!hasConsent);
-        setIsMounted(true);
-    }, []);
+    }, [isMounted]);
 
     // Don't render until mounted (client-side only)
     if (!isMounted) {
