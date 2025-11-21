@@ -29,7 +29,7 @@ export default function LegalNotice() {
 
           <h2 className="text-xl font-semibold">Kontakt</h2>
           <p>
-            Telefon: +49 (0) 123 44 55 66
+            Telefon: +41 79 414 06 16
             <br />
             E-Mail: stefan.gross@hotmail.ch
           </p>
