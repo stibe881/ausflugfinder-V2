@@ -5,8 +5,6 @@ import { CookieSettings } from "./CookieSettings";
 export function PrivacyFooter() {
     const [showSettings, setShowSettings] = useState(false);
 
-    console.log('[PrivacyFooter] Rendering footer');
-
     return (
         <>
             <footer className="mt-auto border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

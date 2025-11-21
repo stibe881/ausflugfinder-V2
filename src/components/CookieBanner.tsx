@@ -1,147 +1,53 @@
-import { Cookie } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "./ui/card";
-import { CookieSettings } from "./CookieSettings";
-import {
-    getAllAcceptedConsent,
-    getConsent,
-    getDefaultConsent,
-    setConsent,
-} from "@/lib/cookieConsent";
+import { useEffect, useState } from "react";
+import { getConsent, setConsent, getAllAcceptedConsent, getDefaultConsent } from "@/lib/cookieConsent";
 
 export function CookieBanner() {
-    const [isMounted, setIsMounted] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-    const [showSettings, setShowSettings] = useState(false);
+    const [show, setShow] = useState(false);
 
     useEffect(() => {
-        // This runs ONLY on the client after React hydration is complete
-        setIsMounted(true);
+        // Check localStorage for consent
+        const hasConsent = getConsent() !== null;
+        setShow(!hasConsent);
     }, []);
 
-    useEffect(() => {
-        // Check if user has already made a choice (only run when mounted)
-        if (!isMounted) return;
-        const hasConsent = getConsent() !== null;
-        console.log('[CookieBanner] getConsent() returned:', getConsent(), 'hasConsent:', hasConsent);
-        setIsVisible(!hasConsent);
-    }, [isMounted]);
-
-    // Don't render until mounted (client-side only)
-    if (!isMounted) {
-        return null;
-    }
-
-    if (!isVisible) {
-        return null;
-    }
-
-    const handleAcceptAll = () => {
-        setConsent(getAllAcceptedConsent());
-        setIsVisible(false);
-    };
-
-    const handleRejectAll = () => {
-        setConsent(getDefaultConsent());
-        setIsVisible(false);
-    };
-
-    const handleCustomize = () => {
-        setShowSettings(true);
-    };
-
-    const handleSettingsSaved = () => {
-        setShowSettings(false);
-        setIsVisible(false);
-    };
+    if (!show) return null;
 
     return (
-        <>
-            <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:max-w-md">
-                <Card className="shadow-lg border-2">
-                    <CardHeader className="pb-3">
-                        <div className="flex items-center gap-2">
-                            <Cookie className="h-5 w-5 text-primary" />
-                            <CardTitle className="text-lg">Cookie-Einstellungen</CardTitle>
-                        </div>
-                        <CardDescription className="text-sm">
-                            Wir verwenden Cookies, um Ihre Erfahrung zu verbessern und unsere
-                            Website zu analysieren. Sie können Ihre Einstellungen jederzeit
-                            anpassen.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pb-3">
-                        <p className="text-xs text-muted-foreground">
-                            Durch Klicken auf "Alle akzeptieren" stimmen Sie der Verwendung
-                            aller Cookies zu. Mit "Nur notwendige" werden nur essenzielle
-                            Cookies verwendet. Weitere Informationen finden Sie in unserer{" "}
-                            <a
-                                href="/privacy"
-                                className="underline hover:text-primary"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    window.location.href = "/privacy";
-                                }}
-                            >
-                                Datenschutzerklärung
-                            </a>{" "}
-                            und{" "}
-                            <a
-                                href="/cookie-policy"
-                                className="underline hover:text-primary"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    window.location.href = "/cookie-policy";
-                                }}
-                            >
-                                Cookie-Richtlinie
-                            </a>
-                            .
-                        </p>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-2 sm:flex-row">
-                        <Button
-                            onClick={handleAcceptAll}
-                            className="w-full sm:w-auto"
-                            size="sm"
-                        >
-                            Alle akzeptieren
-                        </Button>
-                        <Button
-                            onClick={handleRejectAll}
-                            variant="outline"
-                            className="w-full sm:w-auto"
-                            size="sm"
-                        >
-                            Nur notwendige
-                        </Button>
-                        <Button
-                            onClick={handleCustomize}
-                            variant="ghost"
-                            className="w-full sm:w-auto"
-                            size="sm"
-                        >
-                            Einstellungen
-                        </Button>
-                    </CardFooter>
-                </Card>
+        <div className="fixed bottom-4 left-4 right-4 z-50 max-w-sm">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                <h3 className="text-lg font-bold mb-2">🍪 Cookie-Einstellungen</h3>
+                <p className="text-sm text-gray-700 mb-4">
+                    Wir verwenden Cookies, um Ihre Erfahrung zu verbessern.
+                    Lesen Sie unsere{" "}
+                    <a href="/privacy" className="underline text-blue-600 hover:text-blue-800">
+                        Datenschutzerklärung
+                    </a>{" "}
+                    und{" "}
+                    <a href="/cookie-policy" className="underline text-blue-600 hover:text-blue-800">
+                        Cookie-Richtlinie
+                    </a>.
+                </p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            setConsent(getAllAcceptedConsent());
+                            setShow(false);
+                        }}
+                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                        Alle akzeptieren
+                    </button>
+                    <button
+                        onClick={() => {
+                            setConsent(getDefaultConsent());
+                            setShow(false);
+                        }}
+                        className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+                    >
+                        Nur notwendige
+                    </button>
+                </div>
             </div>
-
-            {showSettings && (
-                <CookieSettings
-                    isOpen={showSettings}
-                    onClose={() => setShowSettings(false)}
-                    onSave={handleSettingsSaved}
-                />
-            )}
-        </>
+        </div>
     );
 }
