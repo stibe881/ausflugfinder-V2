@@ -28,6 +28,10 @@ import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
 import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
 import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
 import { initCapacitorPushNotifications, isCapacitorApp } from "@/services/capacitorPush";
+import { Footer } from "./components/Footer";
+import { CookieBanner } from "./components/CookieBanner";
+import LegalNotice from "./pages/LegalNotice";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -47,6 +51,8 @@ function Router() {
       <Route path={"/forgot-password"} component={ForgotPassword} />
       <Route path={"/reset-password"} component={ResetPassword} />
       <Route path={"/ws-debug"} component={WebSocketDebug} />
+      <Route path={"/legal-notice"} component={LegalNotice} />
+      <Route path={"/privacy-policy"} component={PrivacyPolicy} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -150,7 +156,12 @@ function AppContent() {
                 handleInstallClick={handleInstallClick}
               />
             </div>
-            <Router />
+            <div className="flex flex-col min-h-screen">
+                <main className="flex-grow">
+                    <Router />
+                </main>
+                <Footer />
+            </div>
 
 
 
@@ -164,6 +175,7 @@ function AppContent() {
                 onDisableAutoLogout={setAutoLogoutDisabled}
               />
             )}
+            <CookieBanner />
           </TooltipProvider>
         </ThemeProvider>
       </I18nProvider>
