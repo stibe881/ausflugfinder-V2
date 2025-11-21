@@ -18,14 +18,21 @@ import {
 } from "@/lib/cookieConsent";
 
 export function CookieBanner() {
-    const [isVisible, setIsVisible] = useState(true);
+    const [isMounted, setIsMounted] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
 
     useEffect(() => {
         // Check if user has already made a choice (only run on client)
         const hasConsent = getConsent() !== null;
         setIsVisible(!hasConsent);
+        setIsMounted(true);
     }, []);
+
+    // Don't render until mounted (client-side only)
+    if (!isMounted) {
+        return null;
+    }
 
     if (!isVisible) {
         return null;
