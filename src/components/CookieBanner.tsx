@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getConsent, setConsent, getAllAcceptedConsent, getDefaultConsent } from "@/lib/cookieConsent";
 
 export function CookieBanner() {
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(true);
 
     useEffect(() => {
         // Check localStorage for consent
@@ -10,7 +10,8 @@ export function CookieBanner() {
         setShow(!hasConsent);
     }, []);
 
-    if (!show) return null;
+    // Always show banner for now - debug
+    if (false) return null;
 
     return (
         <div className="fixed bottom-4 left-4 right-4 z-50 max-w-sm">
