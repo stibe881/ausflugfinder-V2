@@ -23,9 +23,7 @@ export function CookieBanner() {
 
     useEffect(() => {
         // Check if user has already made a choice (only run on client)
-        const consent = getConsent();
-        console.log('CookieBanner: getConsent() returned:', consent);
-        setIsVisible(consent === null);
+        setIsVisible(getConsent() === null);
     }, []);
 
     if (!isVisible) {
