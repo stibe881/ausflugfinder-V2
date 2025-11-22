@@ -1039,7 +1039,7 @@ export const appRouter = router({
           filename: z.string().optional(),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         try {
           // OPTIMIZATION #8: Move images from Base64 to filesystem storage
 
@@ -1059,8 +1059,12 @@ export const appRouter = router({
           // Save to filesystem (use already-extracted base64Data)
           const result = await saveBase64ImageLocal(base64Data, input.filename);
 
+          // Construct full URL from request origin
+          const origin = ctx.req.headers.origin || `${ctx.req.headers['x-forwarded-proto'] || 'https'}://${ctx.req.headers['x-forwarded-host'] || ctx.req.headers.host || 'ausflugfinder.ch'}`;
+          const fullUrl = `${origin}${result.path}`;
+
           return {
-            url: result.path,
+            url: fullUrl,
             filename: result.filename,
             success: true
           };
