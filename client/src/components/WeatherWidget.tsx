@@ -43,7 +43,7 @@ export function WeatherWidget({ latitude, longitude, tripDate }: WeatherWidgetPr
       try {
         // Using Open-Meteo API (free, no API key required)
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,time&timezone=auto`
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`
         );
 
         if (!response.ok) throw new Error("Failed to fetch weather");

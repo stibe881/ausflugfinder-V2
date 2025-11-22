@@ -28,15 +28,20 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isPrimary, setIsPrimary] = useState(false);
 
   const uploadImageMutation = trpc.upload.tripImage.useMutation();
 
   const uploadPhotoMutation = trpc.photos.add.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Foto erfolgreich hochgeladen");
       setSelectedFile(null);
       setCaption("");
-      onRefresh();
+      if (isPrimary && data.id) {
+        setPrimaryMutation.mutate({ tripId, photoId: data.id });
+      } else {
+        onRefresh();
+      }
     },
     onError: (error) => {
       toast.error(error.message || "Fehler beim Hochladen des Fotos");
@@ -88,12 +93,8 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
         tripId,
         photoUrl: uploadResult.url,
         caption: caption || undefined,
+        isPrimary: isPrimary,
       });
-
-      toast.success("Foto erfolgreich hochgeladen");
-      setSelectedFile(null);
-      setCaption("");
-      onRefresh();
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error(error instanceof Error ? error.message : "Fehler beim Hochladen des Fotos");
@@ -184,6 +185,17 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
             disabled={!canEdit}
             className="w-full p-2 border rounded-md"
           />
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="is-primary"
+              disabled={!canEdit}
+              className="rounded border-gray-300"
+            />
+            <label htmlFor="is-primary" className="text-sm">
+              {t("gallery.setAsCover")}
+            </label>
+          </div>
           <Button
             onClick={handleUpload}
             disabled={!canEdit || !selectedFile || uploading || uploadPhotoMutation.isPending}

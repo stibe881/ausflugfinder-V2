@@ -327,7 +327,8 @@ export async function addTripPhoto(photo: InsertTripPhoto) {
   if (!db) {
     throw new Error("Database not available");
   }
-  return await db.insert(tripPhotos).values(photo);
+  const result = await db.insert(tripPhotos).values(photo);
+  return { insertId: (result as any)[0].insertId };
 }
 
 export async function getTripPhotos(tripId: number) {

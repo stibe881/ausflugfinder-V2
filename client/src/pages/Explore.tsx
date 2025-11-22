@@ -418,12 +418,12 @@ export default function Explore() {
               </Select>
 
               {/* Cost Filter */}
-              <Select value={cost} onValueChange={setCost}>
+              <Select value={cost} onValueChange={(value) => setCost(value === "all" ? "" : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("explore.allCosts")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("explore.allCosts")}</SelectItem>
+                  <SelectItem value="all">{t("explore.allCosts")}</SelectItem>
                   <SelectItem value="free">{t("explore.costFree")}</SelectItem>
                   <SelectItem value="low">CHF •</SelectItem>
                   <SelectItem value="medium">CHF ••</SelectItem>

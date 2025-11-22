@@ -544,11 +544,11 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         try {
-          await addTripPhoto({
+          const result = await addTripPhoto({
             ...input,
             isPrimary: input.isPrimary ? 1 : 0,
           });
-          return { success: true };
+          return { success: true, id: result.insertId };
         } catch (error) {
           const appError = handleError(error, "photos.add");
           throw toTRPCError(appError);

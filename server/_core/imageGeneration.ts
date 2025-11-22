@@ -15,7 +15,7 @@
  *     }]
  *   });
  */
-import { uploadFile } from "../storage";
+import { uploadFile } from "server/storage";
 import { ENV } from "./env";
 
 export type GenerateImageOptions = {
