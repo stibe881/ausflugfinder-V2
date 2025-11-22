@@ -182,6 +182,7 @@ const translations: Record<Language, Record<string, string>> = {
     "tripDetail.updateError": "Fehler beim Aktualisieren des Ausflugs.",
     "tripDetail.deleteSuccess": "Ausflug erfolgreich gelöscht!",
     "tripDetail.deleteError": "Fehler beim Löschen des Ausflugs.",
+    "tripDetail.createSuccess": "Ausflug erfolgreich erstellt!",
     "tripDetail.description": "Beschreibung",
     "tripDetail.niceToKnow": "Wissenswertes",
     "tripDetail.info": "Informationen",
