@@ -190,6 +190,7 @@ const translations: Record<Language, Record<string, string>> = {
     "tripDetail.category": "Kategorie",
     "tripDetail.region": "Region",
     "tripDetail.destination": "Zielort",
+    "tripDetail.regionPlaceholder": "Region auswählen",
     "tripDetail.contact": "Teilen",
     "tripDetail.email": "E-Mail",
     "tripDetail.whatsapp": "WhatsApp",
