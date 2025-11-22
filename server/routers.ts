@@ -35,6 +35,7 @@ import {
 } from "./db";
 import { eq } from "drizzle-orm";
 import { dayPlanItems, trips } from "../drizzle/schema";
+import { saveBase64ImageLocal, validateImageFile } from "./storage";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -1041,7 +1042,6 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         try {
           // OPTIMIZATION #8: Move images from Base64 to filesystem storage
-          const { saveBase64ImageLocal, validateImageFile } = await import("../storage");
 
           // Extract base64 data
           const base64Data = input.base64.includes(",")
@@ -1056,8 +1056,8 @@ export const appRouter = router({
             throw new Error(validation.error || "Invalid image file");
           }
 
-          // Save to filesystem
-          const result = await saveBase64ImageLocal(input.base64, input.filename);
+          // Save to filesystem (use already-extracted base64Data)
+          const result = await saveBase64ImageLocal(base64Data, input.filename);
 
           return {
             url: result.path,
