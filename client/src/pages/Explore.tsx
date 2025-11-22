@@ -112,11 +112,7 @@ export default function Explore() {
   useEffect(() => {
     const params = new URLSearchParams(location.split('?')[1]);
     const costParam = params.get('cost');
-    if (costParam) {
-      setCost(costParam);
-    } else {
-      setCost("");
-    }
+    setCost(costParam || "");
   }, [location]);
 
   const { data: trips, isLoading } = trpc.trips.search.useQuery({
@@ -427,6 +423,7 @@ export default function Explore() {
                   <SelectValue placeholder={t("explore.allCosts")} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">{t("explore.allCosts")}</SelectItem>
                   <SelectItem value="free">{t("explore.costFree")}</SelectItem>
                   <SelectItem value="low">CHF •</SelectItem>
                   <SelectItem value="medium">CHF ••</SelectItem>
