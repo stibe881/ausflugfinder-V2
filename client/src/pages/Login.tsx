@@ -25,7 +25,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [agbAccepted, setAgbAccepted] = useState(false);
   const { refresh } = useAuth();
   const [location, setLocation] = useLocation();
   const utils = trpc.useUtils();
@@ -46,6 +46,11 @@ export default function Login() {
 
     if (mode === "register" && !email) {
       toast.error(t("auth.emailRequired"));
+      return;
+    }
+
+    if (mode === "register" && !agbAccepted) {
+      toast.error(t("auth.agbRequired"));
       return;
     }
 
@@ -178,8 +183,28 @@ export default function Login() {
               )}
             </div>
 
+            {mode === 'register' && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="agb"
+                  checked={agbAccepted}
+                  onChange={(e) => setAgbAccepted(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="agb" className="text-sm">
+                  {t("auth.agbAccept")}{" "}
+                  <Link href="/terms-of-service">
+                    <a className="text-primary hover:underline" target="_blank">
+                      {t("auth.agb")}
+                    </a>
+                  </Link>
+                </label>
+              </div>
+            )}
+
             <Button
-              disabled={loading}
+              disabled={loading || (mode === 'register' && !agbAccepted)}
               onClick={handleSubmit as any}
               className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
             >

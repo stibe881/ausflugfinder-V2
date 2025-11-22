@@ -32,6 +32,7 @@ import { Footer } from "./components/Footer";
 import { CookieBanner } from "./components/CookieBanner";
 import LegalNotice from "./pages/LegalNotice";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -53,6 +54,7 @@ function Router() {
       <Route path={"/ws-debug"} component={WebSocketDebug} />
       <Route path={"/legal-notice"} component={LegalNotice} />
       <Route path={"/privacy-policy"} component={PrivacyPolicy} />
+      <Route path={"/terms-of-service"} component={TermsOfService} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
