@@ -186,6 +186,8 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
             <input
               type="checkbox"
               id="is-primary"
+              checked={isPrimary}
+              onChange={(e) => setIsPrimary(e.target.checked)}
               disabled={!canEdit}
               className="rounded border-gray-300"
             />
