@@ -553,6 +553,43 @@ export default function Explore() {
                               lng: position.coords.longitude,
                             };
 
+                            // Create a pulsating effect for the user location marker
+                            const pulseMarker = new window.google.maps.Marker({
+                              position: userLocation,
+                              map,
+                              icon: {
+                                path: window.google.maps.SymbolPath.CIRCLE,
+                                scale: 15,
+                                fillColor: "#3b82f6",
+                                fillOpacity: 0.3,
+                                strokeColor: "#3b82f6",
+                                strokeWeight: 1,
+                              },
+                              zIndex: 999, // Lower zIndex than the main marker
+                            });
+
+                            let pulseDirection = 1;
+                            setInterval(() => {
+                              const currentOpacity = pulseMarker.get("opacity") || 0.3;
+                              const currentScale = pulseMarker.get("scale") || 15;
+
+                              if (pulseDirection === 1) {
+                                if (currentScale >= 25) {
+                                  pulseDirection = -1;
+                                } else {
+                                  pulseMarker.set("opacity", currentOpacity + 0.05);
+                                  pulseMarker.set("scale", currentScale + 1);
+                                }
+                              } else {
+                                if (currentScale <= 15) {
+                                  pulseDirection = 1;
+                                } else {
+                                  pulseMarker.set("opacity", currentOpacity - 0.05);
+                                  pulseMarker.set("scale", currentScale - 1);
+                                }
+                              }
+                            }, 100);
+
                             // Create modern user location marker
                             new window.google.maps.Marker({
                               position: userLocation,
