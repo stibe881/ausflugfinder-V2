@@ -90,7 +90,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
         tripId,
         photoUrl: uploadResult.url,
         caption: caption || undefined,
-        isPrimary: isPrimary ? 1 : 0,
+        isPrimary: isPrimary,
       });
     } catch (error) {
       console.error("Upload failed:", error);
