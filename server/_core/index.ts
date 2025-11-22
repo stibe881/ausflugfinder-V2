@@ -46,7 +46,7 @@ async function startServer() {
 
   // OPTIMIZATION #8: Initialize local storage and serve uploaded files
   try {
-    const { initializeLocalStorage } = await import("server/storage");
+    const { initializeLocalStorage } = await import("../storage");
     await initializeLocalStorage();
     // Serve uploaded images statically
     app.use("/uploads/images", express.static(process.env.UPLOAD_DIR || "uploads/images"));
