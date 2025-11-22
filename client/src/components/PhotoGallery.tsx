@@ -37,11 +37,8 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
       toast.success("Foto erfolgreich hochgeladen");
       setSelectedFile(null);
       setCaption("");
-      if (isPrimary && data.id) {
-        setPrimaryMutation.mutate({ tripId, photoId: data.id });
-      } else {
-        onRefresh();
-      }
+      setIsPrimary(false);
+      onRefresh();
     },
     onError: (error) => {
       toast.error(error.message || "Fehler beim Hochladen des Fotos");
@@ -93,7 +90,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
         tripId,
         photoUrl: uploadResult.url,
         caption: caption || undefined,
-        isPrimary: isPrimary,
+        isPrimary: isPrimary ? 1 : 0,
       });
     } catch (error) {
       console.error("Upload failed:", error);
