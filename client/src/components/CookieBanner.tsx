@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { Cookie } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const COOKIE_CONSENT_KEY = 'cookie_consent';
 
@@ -26,25 +28,34 @@ export function CookieBanner() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border/40 p-4 z-50">
-      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Cookie className="h-5 w-5" />
-            <span>
-                Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Durch die weitere Nutzung der Website stimmen Sie der Verwendung von Cookies zu.
-            </span>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+    <motion.div
+      initial={{ y: "100%", opacity: 0 }}
+      animate={{ y: "0%", opacity: 1 }}
+      exit={{ y: "100%", opacity: 0 }}
+      transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      className="fixed bottom-0 left-0 right-0 z-50 p-4"
+    >
+      <Card className="mx-auto max-w-md bg-background/95 backdrop-blur-sm border-t border-border/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Cookie className="h-6 w-6 text-primary" /> Cookie-Einwilligung
+          </CardTitle>
+          <CardDescription>
+            Wir verwenden Cookies, um Ihre Erfahrung zu verbessern und die Funktionalität unserer Website zu gewährleisten.
+            Durch die weitere Nutzung der Website stimmen Sie der Verwendung von Cookies zu.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className="flex justify-end gap-2">
           <Button onClick={handleAccept} size="sm">
-            Akzeptieren
+            Alle Cookies akzeptieren
           </Button>
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild>
             <Link href="/privacy-policy">
               Mehr erfahren
             </Link>
           </Button>
-        </div>
-      </div>
-    </div>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }
