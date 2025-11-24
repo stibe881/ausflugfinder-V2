@@ -925,3 +925,66 @@ export async function deleteVideo(id: number) {
   if (!db) throw new Error("Database not available");
   return await db.delete(tripVideos).where(eq(tripVideos.id, id));
 }
+
+// ===== User Functions =====
+export async function deleteUser(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete all related data in cascade order
+  // Get all trips for this user
+  const userTrips = await db.select({ id: trips.id }).from(trips).where(eq(trips.userId, userId));
+  const tripIds = userTrips.map(t => t.id);
+
+  // Delete trip-related data for all trips
+  for (const tripId of tripIds) {
+    await db.delete(tripParticipants).where(eq(tripParticipants.tripId, tripId));
+    await db.delete(tripPhotos).where(eq(tripPhotos.tripId, tripId));
+    await db.delete(tripComments).where(eq(tripComments.tripId, tripId));
+    await db.delete(tripAttributes).where(eq(tripAttributes.tripId, tripId));
+    await db.delete(tripJournal).where(eq(tripJournal.tripId, tripId));
+    await db.delete(tripVideos).where(eq(tripVideos.tripId, tripId));
+  }
+
+  // Delete day plans and associated data
+  const userDayPlans = await db.select({ id: dayPlans.id }).from(dayPlans).where(eq(dayPlans.userId, userId));
+  const dayPlanIds = userDayPlans.map(dp => dp.id);
+
+  for (const dpId of dayPlanIds) {
+    await db.delete(dayPlanItems).where(eq(dayPlanItems.dayPlanId, dpId));
+    await db.delete(packingListItems).where(eq(packingListItems.dayPlanId, dpId));
+    await db.delete(budgetItems).where(eq(budgetItems.dayPlanId, dpId));
+    await db.delete(checklistItems).where(eq(checklistItems.dayPlanId, dpId));
+  }
+
+  // Delete day plans
+  await db.delete(dayPlans).where(eq(dayPlans.userId, userId));
+
+  // Delete trips
+  await db.delete(trips).where(eq(trips.userId, userId));
+
+  // Delete destinations
+  await db.delete(destinations).where(eq(destinations.userId, userId));
+
+  // Delete friendships
+  await db.delete(friendships).where(eq(friendships.userId, userId));
+  await db.delete(friendships).where(eq(friendships.friendId, userId));
+
+  // Delete notifications
+  await db.delete(notifications).where(eq(notifications.userId, userId));
+
+  // Delete push subscriptions
+  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+
+  // Delete user locations
+  await db.delete(userLocations).where(eq(userLocations.userId, userId));
+
+  // Delete user settings
+  await db.delete(userSettings).where(eq(userSettings.userId, userId));
+
+  // Delete password reset tokens
+  await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+
+  // Finally, delete the user
+  return await db.delete(users).where(eq(users.id, userId));
+}

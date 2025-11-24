@@ -8,12 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Bell } from "lucide-react";
+import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Bell, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Profile() {
   const { t } = useI18n();
@@ -21,6 +30,21 @@ export default function Profile() {
   const { data: trips } = trpc.trips.list.useQuery(undefined, { enabled: isAuthenticated });
   const { data: dayPlans } = trpc.dayPlans.list.useQuery(undefined, { enabled: isAuthenticated });
   const { data: destinations } = trpc.destinations.list.useQuery(undefined, { enabled: isAuthenticated });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const deleteAccountMutation = trpc.auth.deleteAccount.useMutation({
+    onSuccess: () => {
+      toast.success(t("profile.deleteAccountSuccess"));
+      setIsDeleteDialogOpen(false);
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+    },
+    onError: (error) => {
+      toast.error(t("profile.deleteAccountError"));
+      console.error('Delete account error:', error);
+    },
+  });
 
   if (loading) {
     return (
@@ -76,10 +100,36 @@ export default function Profile() {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Mein Profil</h1>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              {t("profile.logout")}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                {t("profile.logout")}
+              </Button>
+              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    {t("profile.deleteAccount")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>{t("profile.deleteAccountConfirmTitle")}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t("profile.deleteAccountConfirm")}
+                  </AlertDialogDescription>
+                  <div className="flex gap-2 justify-end">
+                    <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteAccountMutation.mutate()}
+                      disabled={deleteAccountMutation.isPending}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {deleteAccountMutation.isPending ? t("common.loading") : t("profile.deleteAccountBtn")}
+                    </AlertDialogAction>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         </div>
       </header>
@@ -103,8 +153,8 @@ export default function Profile() {
                   {user.role === "admin" ? t("profile.admin") : t("profile.user")}
                 </Badge>
                 {user.role === "admin" && (
-                  <Link href="/admin">
-                    <Button variant="default" size="sm" className="mt-4">
+                  <Link href="/admin" className="mt-4 block">
+                    <Button variant="default" size="sm" className="w-full">
                       {t("profile.adminPortal")}
                     </Button>
                   </Link>

@@ -31,6 +31,7 @@ import {
   addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem,
   addJournalEntry, getTripJournalEntries, updateJournalEntry, deleteJournalEntry,
   addVideo, getTripVideos, deleteVideo,
+  deleteUser,
   getDb
 } from "./db";
 import { eq } from "drizzle-orm";
@@ -76,6 +77,37 @@ export const appRouter = router({
       } catch (error) {
         console.error('[Auth Logout] Error during logout:', error);
         const appError = handleError(error, "auth.logout");
+        throw toTRPCError(appError);
+      }
+    }),
+    deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
+      try {
+        if (!ctx.user) {
+          throw new UnauthorizedError("User not authenticated");
+        }
+
+        console.log('[Auth DeleteAccount] Deleting user account:', ctx.user.id);
+
+        // Delete all user data from database
+        await deleteUser(ctx.user.id);
+
+        // Clear the session cookie
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, {
+          path: cookieOptions.path,
+          httpOnly: cookieOptions.httpOnly,
+          secure: cookieOptions.secure,
+          sameSite: cookieOptions.sameSite,
+        });
+
+        console.log('[Auth DeleteAccount] User account deleted successfully');
+
+        return {
+          success: true,
+        } as const;
+      } catch (error) {
+        console.error('[Auth DeleteAccount] Error deleting account:', error);
+        const appError = handleError(error, "auth.deleteAccount");
         throw toTRPCError(appError);
       }
     }),
