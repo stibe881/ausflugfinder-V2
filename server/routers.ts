@@ -728,7 +728,7 @@ export const appRouter = router({
           throw toTRPCError(appError);
         }
       }),
-    getItems: publicProcedure
+    getItems: protectedProcedure
       .input(z.object({ dayPlanId: z.number() }))
       .query(async ({ input }) => {
         try {
