@@ -210,7 +210,18 @@ export async function updateTrip(id: number, userId: number, data: Partial<Inser
   if (!db) {
     throw new Error("Database not available");
   }
-  return await db.update(trips).set(data).where(eq(trips.id, id));
+
+  // Filter out undefined values - only update fields that are actually provided
+  const updateData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== undefined)
+  );
+
+  // If no data to update, return success without attempting update
+  if (Object.keys(updateData).length === 0) {
+    return { changes: 0 };
+  }
+
+  return await db.update(trips).set(updateData as Partial<InsertTrip>).where(eq(trips.id, id));
 }
 
 export async function deleteTrip(id: number, userId: number) {
