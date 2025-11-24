@@ -1,4 +1,4 @@
-import { eq, and, sql, or, like, count, inArray, isNotNull, countDistinct, ne } from "drizzle-orm";
+import { eq, and, sql, or, like, count, inArray, isNotNull, countDistinct, ne, selectDistinct } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertTrips as InsertTrip,
@@ -647,13 +647,12 @@ export async function getStatistics() {
         .from(trips)
         .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
       // Get distinct categories - filter out null and empty strings
-      db.select({ category: tripCategories.category })
+      selectDistinct({ category: tripCategories.category })
         .from(tripCategories)
         .where(and(
-          ne(tripCategories.category, null),
-          ne(tripCategories.category, '')
-        ))
-        .distinct(),
+          ne(tripCategories.category, ''),
+          sql`${tripCategories.category} IS NOT NULL`
+        )),
       // Debug: count all trips
       db.select({ value: count() }).from(trips)
     ]);
