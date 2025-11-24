@@ -522,12 +522,17 @@ export async function toggleFavorite(tripId: number, userId: number) {
     throw new Error("Database not available");
   }
 
-  // OPTIMIZATION #5: Use SQL CASE statement instead of reading then writing
-  // Before: 1 read query + 1 write query = 2 queries
-  // After: 1 write query = 50% reduction
+  // Get current trip to check isFavorite status
+  const trip = await db.select().from(trips).where(eq(trips.id, tripId)).limit(1);
+  if (!trip || trip.length === 0) {
+    throw new Error(`Trip ${tripId} not found`);
+  }
+
+  // Toggle the isFavorite status (0 -> 1, 1 -> 0)
+  const newIsFavorite = trip[0].isFavorite === 1 ? 0 : 1;
   return await db
     .update(trips)
-    .set({ isFavorite: sql`CASE WHEN isFavorite = 1 THEN 0 ELSE 1 END` })
+    .set({ isFavorite: newIsFavorite })
     .where(eq(trips.id, tripId));
 }
 
@@ -538,12 +543,17 @@ export async function toggleDone(tripId: number, userId: number) {
     throw new Error("Database not available");
   }
 
-  // OPTIMIZATION #5: Use SQL CASE statement instead of reading then writing
-  // Before: 1 read query + 1 write query = 2 queries
-  // After: 1 write query = 50% reduction
+  // Get current trip to check isDone status
+  const trip = await db.select().from(trips).where(eq(trips.id, tripId)).limit(1);
+  if (!trip || trip.length === 0) {
+    throw new Error(`Trip ${tripId} not found`);
+  }
+
+  // Toggle the isDone status (0 -> 1, 1 -> 0)
+  const newIsDone = trip[0].isDone === 1 ? 0 : 1;
   return await db
     .update(trips)
-    .set({ isDone: sql`CASE WHEN isDone = 1 THEN 0 ELSE 1 END` })
+    .set({ isDone: newIsDone })
     .where(eq(trips.id, tripId));
 }
 
