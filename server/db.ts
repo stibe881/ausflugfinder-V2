@@ -528,8 +528,10 @@ export async function toggleFavorite(tripId: number, userId: number) {
     throw new Error(`Trip ${tripId} not found`);
   }
 
-  // Toggle the isFavorite status (0 -> 1, 1 -> 0)
-  const newIsFavorite = trip[0].isFavorite === 1 ? 0 : 1;
+  // Toggle the isFavorite status (0/null -> 1, 1 -> 0)
+  const currentIsFavorite = trip[0].isFavorite || 0;
+  const newIsFavorite = currentIsFavorite === 1 ? 0 : 1;
+
   return await db
     .update(trips)
     .set({ isFavorite: newIsFavorite })
@@ -549,8 +551,10 @@ export async function toggleDone(tripId: number, userId: number) {
     throw new Error(`Trip ${tripId} not found`);
   }
 
-  // Toggle the isDone status (0 -> 1, 1 -> 0)
-  const newIsDone = trip[0].isDone === 1 ? 0 : 1;
+  // Toggle the isDone status (0/null -> 1, 1 -> 0)
+  const currentIsDone = trip[0].isDone || 0;
+  const newIsDone = currentIsDone === 1 ? 0 : 1;
+
   return await db
     .update(trips)
     .set({ isDone: newIsDone })
