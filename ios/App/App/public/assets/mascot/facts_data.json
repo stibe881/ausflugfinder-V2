@@ -1,0 +1,204 @@
+{
+  "facts": [
+    {
+      "category": "natur",
+      "text": "Wusstest du, dass Murmeltiere bis zu 9 Monate im Winterschlaf verbringen? Sie senken dabei ihre Körpertemperatur auf nur 5 Grad Celsius!"
+    },
+    {
+      "category": "natur",
+      "text": "Der Edelweiss wächst nur auf Höhen zwischen 1800 und 3000 Metern. Die Schweizer nennen ihn liebevoll 'Königin der Alpenblumen'."
+    },
+    {
+      "category": "natur",
+      "text": "In der Schweiz gibt es über 3000 Bergseen! Der tiefste ist der Lago Maggiore mit 372 Metern Tiefe."
+    },
+    {
+      "category": "berge",
+      "text": "Die Schweiz hat 48 Viertausender! Der höchste Berg ist die Dufourspitze mit 4634 Metern."
+    },
+    {
+      "category": "berge",
+      "text": "Das Matterhorn ist einer der meistfotografierten Berge der Welt. Seine perfekte Pyramidenform macht es so einzigartig!"
+    },
+    {
+      "category": "berge",
+      "text": "Der Aletschgletscher ist mit 23 Kilometern Länge der längste Gletscher der Alpen. Er enthält etwa 11 Milliarden Tonnen Eis!"
+    },
+    {
+      "category": "tiere",
+      "text": "Steinböcke können an fast senkrechten Felswänden klettern! Ihre Hufe haben eine weiche Sohle, die wie Gummi haftet."
+    },
+    {
+      "category": "tiere",
+      "text": "Der Bartgeier hat eine Flügelspannweite von bis zu 2,9 Metern! Er ist der größte Vogel der Alpen."
+    },
+    {
+      "category": "tiere",
+      "text": "Gämsen können bis zu 8 Meter weit und 2 Meter hoch springen! Sie sind wahre Kletterkünstler."
+    },
+    {
+      "category": "geschichte",
+      "text": "Die Schweiz ist seit 1815 neutral. Das ist über 200 Jahre Frieden!"
+    },
+    {
+      "category": "geschichte",
+      "text": "Wilhelm Tell ist die berühmteste Schweizer Legende. Der Apfelschuss soll im Jahr 1307 stattgefunden haben."
+    },
+    {
+      "category": "geschichte",
+      "text": "Die erste Zahnradbahn Europas wurde 1871 auf die Rigi gebaut. Sie fährt noch heute!"
+    },
+    {
+      "category": "ausflüge",
+      "text": "Der Rheinfall bei Schaffhausen ist der größte Wasserfall Europas! Pro Sekunde stürzen bis zu 600.000 Liter Wasser in die Tiefe."
+    },
+    {
+      "category": "ausflüge",
+      "text": "Die Pilatus-Bahn ist die steilste Zahnradbahn der Welt mit einer Steigung von bis zu 48 Prozent!"
+    },
+    {
+      "category": "ausflüge",
+      "text": "Im Verzasca-Tal gibt es einen türkisfarbenen Fluss mit kristallklarem Wasser. Man kann bis zu 15 Meter tief sehen!"
+    },
+    {
+      "category": "natur",
+      "text": "Die Schweiz hat über 65.000 Kilometer markierte Wanderwege. Das entspricht mehr als dem Erdumfang!"
+    },
+    {
+      "category": "berge",
+      "text": "Der Jungfraujoch ist mit 3454 Metern die höchstgelegene Bahnstation Europas. Man nennt es das 'Top of Europe'!"
+    },
+    {
+      "category": "tiere",
+      "text": "Murmeltiere pfeifen zur Warnung vor Gefahr! Jeder Pfiff hat eine andere Bedeutung - je nach Art der Bedrohung."
+    },
+    {
+      "category": "natur",
+      "text": "Alpenrosen blühen nur auf kalkfreien Böden. Ihre leuchtend roten Blüten sind ein Symbol der Schweizer Alpen."
+    },
+    {
+      "category": "ausflüge",
+      "text": "Der Creux du Van ist ein natürliches Felsenamphitheater mit 160 Meter hohen Felswänden. Ein spektakuläres Naturwunder!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Honig wird nie schlecht! Archäologen haben 3000 Jahre alten Honig in ägyptischen Gräbern gefunden, der noch essbar war."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Kühe haben beste Freunde und werden traurig, wenn sie getrennt werden. Sie zeigen auch Mitgefühl für andere Kühe!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Flamingo wird rot durch die Algen, die es frisst! Ohne diese Algen würde es weiß oder grau sein."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Seeotter halten sich beim Schlafen die Hände. Das verhindert, dass sie auseinander treiben!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Eine Schnecke kann bis zu 3 Jahre lang schlafen! Und selbst wenn sie wach ist, schläft sie nur 15 Minuten pro Tag."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Licht bewegt sich schneller als Schall - deswegen sehen wir den Blitz BEVOR wir den Donner hören!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Der Duft von Bananen und Erdnussbutter zusammen kann bei übergewichtigen Menschen Gewichtsverlust auslösen. Das ist echt wahr!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Es gibt mehr Pizzerien in New York City als Menschen in Liechtenstein (ungefähr 2000 Pizzerien vs 39000 Menschen)."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Die durchschnittliche Person verbringt etwa 90.000 Stunden im Leben am Arbeitsplatz. Das ist fast 10 Jahre!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Wenn du laut Musik hörst, isst du mehr und schneller! Das ist wissenschaftlich bewiesen."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Erdbeeren sind eigentlich Nicht-Beeren, aber Bananen sind Beeren! Die Botanik ist verwirrend."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein durchschnittliches Stück Papier kann 15 Meter hoch gestapelt werden... moment, nein, es kann etwa 43 Mal gefaltet werden!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Wale können nicht rückwärts schwimmen. Daher ist der Wal das Wappentier auf der kanadischen Kriegsflagge!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Es dauert 43 Muskeln zum Stirnrunzeln, aber nur 17 zum Lächeln. Lächeln ist weniger anstrengend!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Koala schläft 22 Stunden am Tag! Dabei ist es wach effizienter und produktiver als der durchschnittliche Mensch."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Der längste Fluss der Welt ist der Nil, aber der längste Gebirgszug ist unter Wasser - der Mid-Ocean Ridge!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Wenn du einen Regenbogen schaust, schaust du in die Vergangenheit! Das Licht brauchte Zeit, um dich zu erreichen."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Elefanten sind eine der wenigen Tiere, die sich selbst im Spiegel erkennen können. Sie sind sehr intelligent!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Der Duft von Lavendel kann deine Herzfrequenz senken und dich entspannter machen. Probier's aus!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Oktopusse haben blaues Blut! Das liegt an dem kupferbasierten Hämocyanin statt eisenbasiertem Hämoglobin."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Blauwal kann länger als ein Schulbus und schwerer als 200 Tonnen sein. Das ist das größte Tier aller Zeiten!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Wenn du deine Augen für 8 Sekunden schließt, können deine Augen in dieser Zeit 240 Bilder verarbeiten!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Schmetterling schmeckt mit seinen Füßen! So weiß er sofort, ob die Pflanze gut zum Essen ist."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Die Sprache der Bienen ist so komplex, dass ein Bienentanz eine bestimmte Blume und deren genauen Standort anzeigen kann!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Sloth (Faultier) braucht zwei Wochen zum Verdauen seines Essens! Das ist echt langsam."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Dein Gehirn ist 60% Fett. Um richtig zu funktionieren, brauchst du Fett in deiner Ernährung!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Tintenfisch hat drei Herzen und blaues Blut. Zwei Herzen pumpen das Blut zu den Kiemen, eins zum Rest des Körpers."
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Die kleinste Knochen in deinem Körper ist der Stapes im Ohr - er ist so groß wie ein Reiskorn!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Es gibt mehr Sterne im Universum als Körner Sand auf allen Stränden der Erde. Unbegrenzte Unendlichkeit!"
+    },
+    {
+      "category": "unnützes_wissen",
+      "text": "Ein Päckchen Murmeltiere kann bis zu 20 Jahre alt werden in Gefangenschaft. Dein Maskottchen könnte sehr alt sein!"
+    }
+  ]
+}

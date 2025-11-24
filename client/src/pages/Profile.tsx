@@ -8,11 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
 import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Bell, Trash2 } from "lucide-react";
+=======
+import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft } from "lucide-react";
+>>>>>>> 21a3aaa (refactor: remove all push notification functionality)
 import { Link } from "wouter";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
-import { NotificationSettings } from "@/components/NotificationSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -182,12 +185,8 @@ export default function Profile() {
           {/* Content with Tabs */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-1">
                 <TabsTrigger value="overview">Übersicht</TabsTrigger>
-                <TabsTrigger value="notifications" className="flex items-center gap-2">
-                  <Bell className="w-4 h-4" />
-                  Benachrichtigungen
-                </TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
@@ -304,11 +303,6 @@ export default function Profile() {
                 </CardContent>
               </Card>
             )}
-              </TabsContent>
-
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-6">
-                <NotificationSettings />
               </TabsContent>
             </Tabs>
           </div>

@@ -25,7 +25,6 @@ import { LayoutDashboard, LogOut, PanelLeft, Users, Mountain, Sun, Compass, Zap 
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
-import { NotificationCenter } from './NotificationCenter';
 import { Button } from "./ui/button";
 
 const menuItems = [
@@ -281,7 +280,6 @@ function DashboardLayoutContent({
               <Sun className="w-5 h-5 text-secondary animate-pulse" style={{ animationDelay: '0.5s' }} />
               <Compass className="w-5 h-5 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
             </div>
-            <NotificationCenter />
           </div>
         )}
         {isMobile && (
@@ -300,7 +298,6 @@ function DashboardLayoutContent({
               <Mountain className="w-4 h-4 text-primary animate-pulse" />
               <Sun className="w-4 h-4 text-secondary animate-pulse" style={{ animationDelay: '0.5s' }} />
               <Compass className="w-4 h-4 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
-              <NotificationCenter />
             </div>
           </div>
         )}

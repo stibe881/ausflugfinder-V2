@@ -1,11 +1,9 @@
 /**
  * Location Hook
- * Handles geolocation tracking for proximity-based notifications
- * Supports background location tracking when enabled
+ * Handles geolocation tracking
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { usePushNotifications } from './usePushNotifications';
 
 export interface LocationCoords {
   latitude: number;
@@ -22,7 +20,6 @@ export interface LocationState {
 }
 
 export const useLocation = () => {
-  const { updateLocation, settings, startLocationTracking } = usePushNotifications();
   const [locationState, setLocationState] = useState<LocationState>({
     coords: null,
     isTracking: false,
@@ -71,8 +68,6 @@ export const useLocation = () => {
             )} (accuracy: ${accuracy}m)`
           );
 
-          // Send to backend
-          updateLocation(latitude, longitude, accuracy);
           resolve(coords);
         },
         (error) => {
@@ -105,7 +100,7 @@ export const useLocation = () => {
         }
       );
     });
-  }, [updateLocation]);
+  }, []);
 
   /**
    * Start continuous location tracking using real-time watch
@@ -152,8 +147,6 @@ export const useLocation = () => {
             isLoading: false,
             error: null,
           }));
-
-          updateLocation(latitude, longitude, accuracy);
         },
         (error) => {
           let errorMessage = 'Location watch error';
@@ -197,7 +190,7 @@ export const useLocation = () => {
 
       return true;
     },
-    [locationState.isTracking, updateLocation]
+    [locationState.isTracking]
   );
 
   /**
@@ -314,7 +307,6 @@ export const useLocation = () => {
           };
 
           onLocationChange(coords);
-          updateLocation(latitude, longitude, accuracy);
         },
         (error) => {
           let errorMessage = 'Location watch error';
@@ -345,19 +337,9 @@ export const useLocation = () => {
         navigator.geolocation.clearWatch(watchId);
       };
     },
-    [updateLocation]
+    []
   );
 
-  /**
-   * Auto-start tracking on mount if enabled in settings
-   */
-  useEffect(() => {
-    if (!settings?.locationTrackingEnabled || locationState.isTracking) {
-      return;
-    }
-
-    startTracking();
-  }, [settings?.locationTrackingEnabled, locationState.isTracking, startTracking]);
 
   /**
    * Cleanup on unmount
