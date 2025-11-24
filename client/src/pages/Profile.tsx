@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Trash2 } from "lucide-react";
+import { User, Mail, Calendar, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
@@ -28,7 +28,6 @@ export default function Profile() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const { data: trips } = trpc.trips.list.useQuery(undefined, { enabled: isAuthenticated });
   const { data: dayPlans } = trpc.dayPlans.list.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: destinations } = trpc.destinations.list.useQuery(undefined, { enabled: isAuthenticated });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const deleteAccountMutation = trpc.auth.deleteAccount.useMutation({
@@ -222,18 +221,6 @@ export default function Profile() {
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-8 h-8 text-green-500" />
                       <span className="text-3xl font-bold">{completedTrips.length}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>{t("profile.destinationsCount")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-8 h-8 text-orange-500" />
-                      <span className="text-3xl font-bold">{destinations?.length || 0}</span>
                     </div>
                   </CardContent>
                 </Card>
