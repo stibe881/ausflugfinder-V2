@@ -6,7 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
 import { DragAndDropFileInput } from "@/components/DragAndDropFileInput";
-nimport {
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
