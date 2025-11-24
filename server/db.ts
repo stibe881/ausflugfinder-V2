@@ -661,7 +661,14 @@ export async function getStatistics() {
     );
     const categoryCount = distinctCategories.size;
 
-    console.log('[Statistics] Total public activities:', totalResult[0]?.value, 'Free public activities:', freeResult[0]?.value, 'Total distinct categories:', categoryCount, 'Total trips in DB:', allTripsCount[0]?.value);
+    console.log('[Statistics] Query Results:');
+    console.log('  - Total public activities:', totalResult[0]?.value);
+    console.log('  - Free public activities:', freeResult[0]?.value);
+    console.log('  - Total trips in DB:', allTripsCount[0]?.value);
+    console.log('  - Raw categories from DB:', allCategoriesResult.length, 'rows');
+    console.log('  - First 5 category rows:', JSON.stringify(allCategoriesResult.slice(0, 5)));
+    console.log('  - Distinct categories (after filtering):', categoryCount);
+    console.log('  - Distinct category values:', Array.from(distinctCategories).slice(0, 10));
 
     const stats = {
       totalActivities: totalResult[0]?.value || 0,
