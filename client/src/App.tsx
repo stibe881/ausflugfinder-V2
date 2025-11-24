@@ -24,10 +24,7 @@ import { InstallPromptDialog } from "./components/InstallPromptDialog";
 import { AutoLogoutDialog } from "./components/AutoLogoutDialog";
 import { useInstallPrompt } from "./hooks/useInstallPrompt";
 import { useAutoLogout } from "./hooks/useAutoLogout";
-import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
-import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
-import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
-import { initCapacitorPushNotifications, isCapacitorApp } from "@/services/capacitorPush";
+import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle";
 import { Footer } from "./components/Footer";
 import { CookieBanner } from "./components/CookieBanner";
 import LegalNotice from "./pages/LegalNotice";
@@ -75,28 +72,6 @@ function AppContent() {
     handleInstallClick,
   } = useInstallPrompt();
 
-  // Initialize WebSocket notifications on app load
-  const { isConnected, error } = useWebSocketNotifications();
-
-  // Log WebSocket status changes for debugging
-  useEffect(() => {
-    console.log('📡 WebSocket Status:', isConnected ? 'Connected' : 'Disconnected');
-    if (error) {
-      console.error('❌ WebSocket Error:', error);
-    }
-  }, [isConnected, error]);
-
-  // Initialize Capacitor push notifications if running as native app
-  useEffect(() => {
-    const initCapacitorPush = async () => {
-      if (isCapacitorApp()) {
-        console.log('[App] Capacitor environment detected');
-        await initCapacitorPushNotifications();
-      }
-    };
-
-    initCapacitorPush();
-  }, []);
 
 
   // Force Service Worker update on mount (critical for iOS PWA)
@@ -151,7 +126,6 @@ function AppContent() {
         >
           <TooltipProvider>
             <Toaster />
-            <PushNotificationPrompt />
             <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
