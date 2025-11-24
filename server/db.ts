@@ -637,31 +637,45 @@ export async function getStatistics() {
     throw new Error("Database not available");
   }
 
-  // Get statistics using SQL queries
-  const [totalResult, freeResult, categoriesResult] = await Promise.all([
-    db.select({ value: count() })
-      .from(trips)
-      .where(eq(trips.isPublic, 1)),
-    db.select({ value: count() })
-      .from(trips)
-      .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-    // Count distinct categories using raw SQL
-    db.execute(sql`SELECT COUNT(DISTINCT category) as count FROM ${tripCategories}`)
-  ]);
+  try {
+    // Get statistics using SQL queries
+    const [totalResult, freeResult, categoriesResult] = await Promise.all([
+      db.select({ value: count() })
+        .from(trips)
+        .where(eq(trips.isPublic, 1)),
+      db.select({ value: count() })
+        .from(trips)
+        .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
+      // Count distinct categories using raw SQL
+      db.execute(sql`SELECT COUNT(DISTINCT category) as count FROM ${tripCategories}`)
+    ]);
 
-  let categoryCount = 0;
-  if (Array.isArray(categoriesResult)) {
-    const firstResult = categoriesResult[0] as any;
-    if (firstResult && typeof firstResult === 'object') {
-      categoryCount = Number(firstResult.count) || 0;
+    let categoryCount = 0;
+    console.log('[Statistics] Categories result:', categoriesResult);
+
+    if (Array.isArray(categoriesResult) && categoriesResult.length > 0) {
+      const firstResult = categoriesResult[0] as any;
+      console.log('[Statistics] First result:', firstResult);
+      if (firstResult && typeof firstResult === 'object') {
+        categoryCount = Number(firstResult.count) || 0;
+      }
     }
-  }
 
-  return {
-    totalActivities: totalResult[0]?.value || 0,
-    freeActivities: freeResult[0]?.value || 0,
-    totalCategories: categoryCount,
-  };
+    console.log('[Statistics] Category count:', categoryCount);
+
+    return {
+      totalActivities: totalResult[0]?.value || 0,
+      freeActivities: freeResult[0]?.value || 0,
+      totalCategories: categoryCount,
+    };
+  } catch (error) {
+    console.error('[Statistics] Error:', error);
+    return {
+      totalActivities: 0,
+      freeActivities: 0,
+      totalCategories: 0,
+    };
+  }
 }
 
 
