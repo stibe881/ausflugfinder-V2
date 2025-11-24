@@ -189,11 +189,9 @@ export default function Login() {
                 />
                 <label htmlFor="agb" className="text-sm">
                   {t("auth.agbAccept")}{" "}
-                  <Link href="/terms-of-service">
-                    <a className="text-primary hover:underline" target="_blank">
-                      {t("auth.agb")}
-                    </a>
-                  </Link>
+                  <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    {t("auth.agb")}
+                  </a>
                 </label>
               </div>
             )}
