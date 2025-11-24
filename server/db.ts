@@ -1021,17 +1021,10 @@ export async function deleteUser(userId: number) {
   // Delete destinations
   await db.delete(destinations).where(eq(destinations.userId, userId));
 
-  // Note: friendships, notifications, and pushSubscriptions tables are not yet implemented
-  // These delete operations are commented out until the friendship feature is completed
-
-  // Delete user locations
-  await db.delete(userLocations).where(eq(userLocations.userId, userId));
-
-  // Delete user settings
-  await db.delete(userSettings).where(eq(userSettings.userId, userId));
-
-  // Delete password reset tokens
-  await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  // Note: The following tables are not yet implemented in the schema:
+  // - friendships, notifications, pushSubscriptions
+  // - userLocations, userSettings, passwordResetTokens
+  // Delete operations for these tables are commented out until they are properly implemented
 
   // Finally, delete the user
   return await db.delete(users).where(eq(users.id, userId));
