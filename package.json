@@ -13,6 +13,7 @@
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "import:excursions": "tsx scripts/import-excursions.ts",
+    "migrate:categories": "tsx server/_core/migrate-categories.ts",
     "link:images": "node scripts/link-images-compiled.cjs",
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",
