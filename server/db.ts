@@ -639,16 +639,13 @@ export async function getStatistics() {
 
   try {
     // Get statistics using SQL queries
-    const [totalResult, freeResult, categoriesResult, categoryCountsResult] = await Promise.all([
+    const [totalResult, freeResult, categoryCountsResult] = await Promise.all([
       db.select({ value: count() })
         .from(trips)
         .where(eq(trips.isPublic, 1)),
       db.select({ value: count() })
         .from(trips)
         .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-      // Count distinct categories using countDistinct
-      db.select({ value: countDistinct(tripCategories.category) })
-        .from(tripCategories),
       // Get count of trips per category for public trips
       db.select({ category: trips.category, count: count() })
         .from(trips)
@@ -656,7 +653,7 @@ export async function getStatistics() {
         .groupBy(trips.category)
     ]);
 
-    const categoryCount = categoriesResult[0]?.value || 0;
+    const categoryCount = categoryCountsResult.length;
     console.log('[Statistics] Category count:', categoryCount);
 
     return {
