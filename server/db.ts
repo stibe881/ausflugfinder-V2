@@ -653,15 +653,23 @@ export async function getStatistics() {
         .groupBy(trips.category)
     ]);
 
+    console.log('[Statistics] totalResult:', totalResult);
+    console.log('[Statistics] freeResult:', freeResult);
+    console.log('[Statistics] categoryCountsResult:', categoryCountsResult);
+
     const categoryCount = categoryCountsResult.length;
     console.log('[Statistics] Category count:', categoryCount);
 
-    return {
+    const stats = {
       totalActivities: totalResult[0]?.value || 0,
       freeActivities: freeResult[0]?.value || 0,
       totalCategories: categoryCount,
       categories: categoryCountsResult.map(c => ({ ...c, count: c.count || 0 })),
     };
+
+    console.log('[Statistics] Returning stats:', stats);
+
+    return stats;
   } catch (error) {
     console.error('[Statistics] Error:', error);
     return {
