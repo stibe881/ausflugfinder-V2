@@ -1,36 +1,16 @@
 import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import fs from "node:fs";
 import path from "path";
 import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 import { VitePWA } from "vite-plugin-pwa";
-
-// Copy apple-touch-icon to dist after build
-function copyAppleIconPlugin() {
-  return {
-    name: "copy-apple-icon",
-    apply: "build",
-    writeBundle() {
-      const sourceIcon = path.resolve(import.meta.dirname, "public", "apple-touch-icon.png");
-      const distIcon = path.resolve(import.meta.dirname, "dist", "public", "apple-touch-icon.png");
-
-      if (fs.existsSync(sourceIcon)) {
-        fs.copyFileSync(sourceIcon, distIcon);
-        console.log("[PWA] Copied apple-touch-icon.png to dist/public");
-      }
-    },
-  };
-}
-
 
 const plugins = [
   react(),
   tailwindcss(),
   jsxLocPlugin(),
   vitePluginManusRuntime(),
-  copyAppleIconPlugin(),
   VitePWA({
     registerType: 'autoUpdate',
     strategy: 'injectManifest',
