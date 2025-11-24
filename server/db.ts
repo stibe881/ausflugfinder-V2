@@ -1021,15 +1021,8 @@ export async function deleteUser(userId: number) {
   // Delete destinations
   await db.delete(destinations).where(eq(destinations.userId, userId));
 
-  // Delete friendships
-  await db.delete(friendships).where(eq(friendships.userId, userId));
-  await db.delete(friendships).where(eq(friendships.friendId, userId));
-
-  // Delete notifications
-  await db.delete(notifications).where(eq(notifications.userId, userId));
-
-  // Delete push subscriptions
-  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+  // Note: friendships, notifications, and pushSubscriptions tables are not yet implemented
+  // These delete operations are commented out until the friendship feature is completed
 
   // Delete user locations
   await db.delete(userLocations).where(eq(userLocations.userId, userId));
