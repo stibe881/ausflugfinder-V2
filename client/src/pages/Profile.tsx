@@ -98,36 +98,10 @@ export default function Profile() {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Mein Profil</h1>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                {t("profile.logout")}
-              </Button>
-              <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    {t("profile.deleteAccount")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogTitle>{t("profile.deleteAccountConfirmTitle")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("profile.deleteAccountConfirm")}
-                  </AlertDialogDescription>
-                  <div className="flex gap-2 justify-end">
-                    <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteAccountMutation.mutate()}
-                      disabled={deleteAccountMutation.isPending}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      {deleteAccountMutation.isPending ? t("common.loading") : t("profile.deleteAccountBtn")}
-                    </AlertDialogAction>
-                  </div>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              {t("profile.logout")}
+            </Button>
           </div>
         </div>
       </header>
@@ -168,11 +142,31 @@ export default function Profile() {
                     <Calendar className="w-4 h-4" />
                     <span>{t("profile.memberSince")} {new Date(user.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="w-4 h-4" />
-                    <span>{t("profile.loginMethod")} {user.loginMethod || t("profile.loginDefault")}</span>
-                  </div>
                 </div>
+                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="w-full">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {t("profile.deleteAccount")}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogTitle>{t("profile.deleteAccountConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("profile.deleteAccountConfirm")}
+                    </AlertDialogDescription>
+                    <div className="flex gap-2 justify-end">
+                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteAccountMutation.mutate()}
+                        disabled={deleteAccountMutation.isPending}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteAccountMutation.isPending ? t("common.loading") : t("profile.deleteAccountBtn")}
+                      </AlertDialogAction>
+                    </div>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </div>
