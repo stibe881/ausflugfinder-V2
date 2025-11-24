@@ -21,23 +21,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 
-const CATEGORIES = [
-  "Abenteuerweg",
-  "Aktion & Sport",
-  "Badewelt",
-  "Freizeitpark",
-  "Innenspielplatz",
-  "Kugelbahn",
-  "Kultur",
-  "Museum",
-  "Pumptrack",
-  "Restaurant",
-  "Schnitzeljagd",
-  "Spielplatz",
-  "Tierpark/Zoo",
-  "Wanderweg",
-];
-
 const REGIONS = [
   // Schweizer Kantone
   "Aargau",
@@ -107,6 +90,7 @@ export default function Explore() {
   const [allDestinations, setAllDestinations] = useState<any[]>([]);
   const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
   const [destinationToDeleteId, setDestinationToDeleteId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<{ category: string | null; count: number; }[]>([]);
 
   // Read query parameters on mount and when location changes
   useEffect(() => {
@@ -123,7 +107,17 @@ export default function Explore() {
     isPublic: true,
   });
 
-  const { data: stats } = trpc.trips.statistics.useQuery();
+  const { data: stats } = trpc.trips.statistics.useQuery(undefined, {
+    onSuccess: (data) => {
+      if (data?.categories) {
+        // Filter out null or empty categories and sort them
+        const validCategories = data.categories
+          .filter(c => c.category)
+          .sort((a, b) => a.category!.localeCompare(b.category!));
+        setCategories(validCategories);
+      }
+    }
+  });
 
   // Toggle favorite mutation
   const toggleFavoriteMutation = trpc.trips.toggleFavorite.useMutation({
@@ -250,6 +244,11 @@ export default function Explore() {
     setSortOrder("desc");
   };
 
+  const handleCategoryClick = (cat: string) => {
+    setCategory(cat);
+    // Optional: scroll to results or apply filter immediately
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
       {/* Header */}
@@ -327,6 +326,24 @@ export default function Explore() {
                   <div className="text-sm text-muted-foreground">{t("explore.categories")}</div>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {/* Category Tiles */}
+          {categories.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-8">
+              {categories.map((cat) => (
+                <Card 
+                  key={cat.category} 
+                  className="cursor-pointer transition-all hover:shadow-lg hover:shadow-accent/10 hover:-translate-y-1"
+                  onClick={() => handleCategoryClick(cat.category!)}
+                >
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-2xl font-bold text-accent">{cat.count}</div>
+                    <div className="text-sm text-muted-foreground">{cat.category}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>
@@ -409,9 +426,9 @@ export default function Explore() {
                   <SelectValue placeholder={t("explore.allCategories")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
+                  {categories.map((c) => (
+                    <SelectItem key={c.category} value={c.category!}>
+                      {c.category}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -971,7 +988,7 @@ export default function Explore() {
         onCostChange={setCost}
         onReset={handleReset}
         regions={REGIONS}
-        categories={CATEGORIES}
+        categories={categories.map(c => c.category!)}
       />
 
       {/* Create Trip Wizard */}
