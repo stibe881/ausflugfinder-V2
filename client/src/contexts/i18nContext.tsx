@@ -502,6 +502,7 @@ const translations: Record<Language, Record<string, string>> = {
     "gallery.noPhotos": "Noch keine Fotos",
     "gallery.addPhoto": "Foto hinzufügen",
     "gallery.setAsCover": "Als Titelbild festlegen",
+    "gallery.deletePhotoConfirm": "Möchtest du dieses Foto wirklich löschen?",
     "weather.clear": "Klar",
     "weather.partlyCloudy": "Teilweise bewölkt",
     "weather.overcast": "Bedeckt",

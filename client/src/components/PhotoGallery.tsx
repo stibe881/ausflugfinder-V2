@@ -6,6 +6,15 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useI18n } from "@/contexts/i18nContext";
 import { DragAndDropFileInput } from "@/components/DragAndDropFileInput";
+nimport {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Photo {
   id: number;
@@ -28,6 +37,7 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [photoToDelete, setPhotoToDelete] = useState<number | null>(null);
   const [isPrimary, setIsPrimary] = useState(false);
 
   const uploadImageMutation = trpc.upload.tripImage.useMutation();
@@ -141,14 +151,37 @@ export function PhotoGallery({ tripId, photos, onRefresh, canEdit = true, isLoad
                           {t("gallery.setAsCover")}
                         </Button>
                       )}
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => deletePhotoMutation.mutate({ id: photo.id })}
-                        disabled={deletePhotoMutation.isPending}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <AlertDialog open={photoToDelete === photo.id} onOpenChange={(open) => !open && setPhotoToDelete(null)}>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => setPhotoToDelete(photo.id)}
+                            disabled={deletePhotoMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogTitle>{t("common.delete")} ?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {t("gallery.deletePhotoConfirm") || "Möchtest du dieses Foto wirklich löschen?"}
+                          </AlertDialogDescription>
+                          <div className="flex gap-2 justify-end">
+                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                deletePhotoMutation.mutate({ id: photo.id });
+                                setPhotoToDelete(null);
+                              }}
+                              disabled={deletePhotoMutation.isPending}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              {t("common.delete")}
+                            </AlertDialogAction>
+                          </div>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   )}
                 </div>
