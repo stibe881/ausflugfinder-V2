@@ -5,7 +5,9 @@
  * Run this once to bootstrap categories into the system.
  */
 
-import { getDb } from '../db';
+import 'dotenv/config';
+import { drizzle } from 'drizzle-orm/mysql2';
+import mysql from 'mysql2/promise';
 import { trips, tripCategories } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
@@ -33,12 +35,22 @@ function detectCategory(title: string, description: string, destination: string)
 }
 
 async function migrateCategories() {
-  const db = await getDb();
-  if (!db) {
-    throw new Error('Database not available');
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
   }
 
   console.log('[Migration] Starting category migration...');
+
+  // Create connection pool
+  const pool = await mysql.createPool({
+    uri: databaseUrl,
+    waitForConnections: true,
+    connectionLimit: 1,
+    queueLimit: 0,
+  });
+
+  const db = drizzle(pool);
 
   try {
     // Get all trips
@@ -99,6 +111,9 @@ async function migrateCategories() {
   } catch (error) {
     console.error('[Migration] Fatal error:', error);
     throw error;
+  } finally {
+    // Close connection pool
+    await pool.end();
   }
 }
 
