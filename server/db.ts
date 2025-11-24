@@ -632,8 +632,6 @@ export async function getStatistics() {
       .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
     db.selectDistinct({ category: tripCategories.category })
       .from(tripCategories)
-      .innerJoin(trips, eq(tripCategories.tripId, trips.id))
-      .where(eq(trips.isPublic, 1))
   ]);
 
   return {
