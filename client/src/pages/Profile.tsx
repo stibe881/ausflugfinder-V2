@@ -26,7 +26,7 @@ import {
 export default function Profile() {
   const { t } = useI18n();
   const { user, loading, isAuthenticated, logout } = useAuth();
-  const { data: trips } = trpc.trips.list.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: trips } = trpc.trips.myTrips.useQuery(undefined, { enabled: isAuthenticated });
   const { data: dayPlans } = trpc.dayPlans.list.useQuery(undefined, { enabled: isAuthenticated });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
