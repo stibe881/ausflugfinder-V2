@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Heart, Share2, Copy, Mail, Phone, MessageCircle, FileText, Loader2, MapPin, DollarSign, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams, useLocation } from "wouter";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -22,7 +22,6 @@ export default function TripDetail() {
   const { t } = useI18n();
   const params = useParams();
   const tripId = params.id ? parseInt(params.id) : 0;
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -34,10 +33,20 @@ export default function TripDetail() {
 
   const { data: trip, isLoading: tripLoading, refetch: refetchTrip } = trpc.trips.getById.useQuery({ id: tripId });
   const { data: photos = [], refetch: refetchPhotos } = trpc.photos.list.useQuery({ tripId }, { enabled: !!tripId });
+
+  // Sync local isFavorite state with trip data
+  const [isFavorite, setIsFavorite] = useState(false);
+  useEffect(() => {
+    if (trip) {
+      setIsFavorite(trip.isFavorite === 1);
+    }
+  }, [trip?.isFavorite]);
+
   const updateTripMutation = trpc.trips.update.useMutation({
     onSuccess: () => {
       toast.success(t("tripDetail.updateSuccess"));
       setIsEditMode(false);
+      refetchTrip();
     },
     onError: (error) => {
       toast.error(error.message || t("tripDetail.updateError"));
@@ -50,6 +59,24 @@ export default function TripDetail() {
     },
     onError: (error) => {
       toast.error(error.message || t("tripDetail.deleteError"));
+    },
+  });
+
+  const toggleFavoriteMutation = trpc.trips.toggleFavorite.useMutation({
+    onSuccess: () => {
+      refetchTrip();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Aktualisieren des Favoriten");
+    },
+  });
+
+  const toggleDoneMutation = trpc.trips.toggleDone.useMutation({
+    onSuccess: () => {
+      refetchTrip();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Fehler beim Aktualisieren des Status");
     },
   });
 
@@ -325,10 +352,13 @@ export default function TripDetail() {
             variant={isFavorite ? "default" : "outline"}
             size="sm"
             onClick={() => {
-              setIsFavorite(!isFavorite);
-              setIsHeartAnimating(true);
-              setTimeout(() => setIsHeartAnimating(false), 600);
+              if (trip) {
+                toggleFavoriteMutation.mutate({ tripId: trip.id });
+                setIsHeartAnimating(true);
+                setTimeout(() => setIsHeartAnimating(false), 600);
+              }
             }}
+            disabled={toggleFavoriteMutation.isPending}
             className="gap-2"
           >
             <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""} ${isHeartAnimating ? "animate-heart-beat" : ""}`} />
@@ -338,14 +368,11 @@ export default function TripDetail() {
             variant={trip?.isDone ? "default" : "outline"}
             size="sm"
             onClick={() => {
-              if (canEdit && trip) {
-                updateTripMutation.mutate({
-                  id: trip.id,
-                  isDone: trip.isDone ? 0 : 1,
-                });
+              if (trip) {
+                toggleDoneMutation.mutate({ tripId: trip.id });
               }
             }}
-            disabled={updateTripMutation.isPending || !canEdit}
+            disabled={toggleDoneMutation.isPending || !user}
             className="gap-2"
           >
             ✓ {trip?.isDone ? "Erledigt" : "Als erledigt markieren"}

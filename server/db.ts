@@ -649,12 +649,18 @@ export async function getStatistics() {
     db.execute(sql`SELECT COUNT(DISTINCT category) as count FROM ${tripCategories}`)
   ]);
 
-  const categoryCount = (categoriesResult as any)?.[0]?.count || 0;
+  let categoryCount = 0;
+  if (Array.isArray(categoriesResult)) {
+    const firstResult = categoriesResult[0] as any;
+    if (firstResult && typeof firstResult === 'object') {
+      categoryCount = Number(firstResult.count) || 0;
+    }
+  }
 
   return {
     totalActivities: totalResult[0]?.value || 0,
     freeActivities: freeResult[0]?.value || 0,
-    totalCategories: typeof categoryCount === 'bigint' ? Number(categoryCount) : categoryCount,
+    totalCategories: categoryCount,
   };
 }
 
