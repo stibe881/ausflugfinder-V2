@@ -1,4 +1,4 @@
-import { eq, and, sql, or, like, count, inArray, isNotNull } from "drizzle-orm";
+import { eq, and, sql, or, like, count, inArray, isNotNull, countDistinct } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertTrips as InsertTrip,
@@ -646,21 +646,12 @@ export async function getStatistics() {
       db.select({ value: count() })
         .from(trips)
         .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-      // Count distinct categories using raw SQL
-      db.execute(sql`SELECT COUNT(DISTINCT category) as count FROM ${tripCategories}`)
+      // Count distinct categories using countDistinct
+      db.select({ value: countDistinct(tripCategories.category) })
+        .from(tripCategories)
     ]);
 
-    let categoryCount = 0;
-    console.log('[Statistics] Categories result:', categoriesResult);
-
-    if (Array.isArray(categoriesResult) && categoriesResult.length > 0) {
-      const firstResult = categoriesResult[0] as any;
-      console.log('[Statistics] First result:', firstResult);
-      if (firstResult && typeof firstResult === 'object') {
-        categoryCount = Number(firstResult.count) || 0;
-      }
-    }
-
+    const categoryCount = categoriesResult[0]?.value || 0;
     console.log('[Statistics] Category count:', categoryCount);
 
     return {
