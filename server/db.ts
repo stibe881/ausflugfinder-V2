@@ -630,7 +630,7 @@ export async function getStatistics() {
     db.select({ value: count() })
       .from(trips)
       .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-    db.select({ value: sql`COUNT(DISTINCT ${tripCategories.category})` })
+    db.selectDistinct({ category: tripCategories.category })
       .from(tripCategories)
       .innerJoin(trips, eq(tripCategories.tripId, trips.id))
       .where(eq(trips.isPublic, 1))
@@ -639,7 +639,7 @@ export async function getStatistics() {
   return {
     totalActivities: totalResult[0]?.value || 0,
     freeActivities: freeResult[0]?.value || 0,
-    totalCategories: (categoriesResult[0]?.value as number) || 0,
+    totalCategories: categoriesResult?.length || 0,
   };
 }
 
