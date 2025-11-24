@@ -639,35 +639,26 @@ export async function getStatistics() {
 
   try {
     // Get statistics using SQL queries
-    const [totalResult, freeResult, categoryCountsResult] = await Promise.all([
+    const [totalResult, freeResult, categoriesResult] = await Promise.all([
       db.select({ value: count() })
         .from(trips)
         .where(eq(trips.isPublic, 1)),
       db.select({ value: count() })
         .from(trips)
         .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-      // Get count of trips per category for public trips
-      db.select({ category: trips.category, count: count() })
-        .from(trips)
-        .where(and(eq(trips.isPublic, 1), isNotNull(trips.category)))
-        .groupBy(trips.category)
+      // Count distinct categories from trip_categories table
+      db.selectDistinct({ category: tripCategories.category })
+        .from(tripCategories)
     ]);
 
-    console.log('[Statistics] totalResult:', totalResult);
-    console.log('[Statistics] freeResult:', freeResult);
-    console.log('[Statistics] categoryCountsResult:', categoryCountsResult);
-
-    const categoryCount = categoryCountsResult.length;
-    console.log('[Statistics] Category count:', categoryCount);
+    const categoryCount = categoriesResult.length;
+    console.log('[Statistics] Total activities:', totalResult[0]?.value, 'Free activities:', freeResult[0]?.value, 'Total categories:', categoryCount);
 
     const stats = {
       totalActivities: totalResult[0]?.value || 0,
       freeActivities: freeResult[0]?.value || 0,
       totalCategories: categoryCount,
-      categories: categoryCountsResult.map(c => ({ ...c, count: c.count || 0 })),
     };
-
-    console.log('[Statistics] Returning stats:', stats);
 
     return stats;
   } catch (error) {
