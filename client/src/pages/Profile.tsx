@@ -26,7 +26,7 @@ import {
 export default function Profile() {
   const { t } = useI18n();
   const { user, loading, isAuthenticated, logout } = useAuth();
-  const { data: trips } = trpc.trips.myTrips.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: tripsResponse } = trpc.trips.myTrips.useQuery(undefined, { enabled: isAuthenticated });
   const { data: dayPlans } = trpc.dayPlans.list.useQuery(undefined, { enabled: isAuthenticated });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -76,8 +76,9 @@ export default function Profile() {
     );
   }
 
-  const favoriteTrips = trips?.filter(t => t.isFavorite === 1) || [];
-  const completedTrips = trips?.filter(t => t.isDone === 1) || [];
+  const trips = tripsResponse?.data || [];
+  const favoriteTrips = trips.filter(t => t.isFavorite === 1) || [];
+  const completedTrips = trips.filter(t => t.isDone === 1) || [];
   const initials = user.name?.split(" ")?.map(n => n[0])?.join("")?.toUpperCase() || "U";
 
   const handleLogout = () => {
