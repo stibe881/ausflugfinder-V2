@@ -20,13 +20,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [agbAccepted, setAgbAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { refresh } = useAuth();
   const [location, setLocation] = useLocation();
   const utils = trpc.useUtils();
 
   const handleSubmit = async (e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
     if (e) e.preventDefault?.();
-  const [loading, setLoading] = useState(false);
     if (e) e.stopPropagation?.();
 
     if (!email || !password) {
