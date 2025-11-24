@@ -1,4 +1,4 @@
-import { eq, and, sql, or, like, count, inArray, isNotNull, countDistinct, ne, selectDistinct } from "drizzle-orm";
+import { eq, and, sql, or, like, count, inArray, isNotNull, countDistinct } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertTrips as InsertTrip,
@@ -639,25 +639,27 @@ export async function getStatistics() {
 
   try {
     // Get statistics using SQL queries
-    const [totalResult, freeResult, categoriesResult, allTripsCount] = await Promise.all([
+    const [totalResult, freeResult, allCategoriesResult, allTripsCount] = await Promise.all([
       db.select({ value: count() })
         .from(trips)
         .where(eq(trips.isPublic, 1)),
       db.select({ value: count() })
         .from(trips)
         .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-      // Get distinct categories - filter out null and empty strings
-      selectDistinct({ category: tripCategories.category })
-        .from(tripCategories)
-        .where(and(
-          ne(tripCategories.category, ''),
-          sql`${tripCategories.category} IS NOT NULL`
-        )),
+      // Get all categories (we'll filter and count distinct in JavaScript)
+      db.select({ category: tripCategories.category })
+        .from(tripCategories),
       // Debug: count all trips
       db.select({ value: count() }).from(trips)
     ]);
 
-    const categoryCount = categoriesResult?.length || 0;
+    // Count distinct categories, filtering out null and empty strings
+    const distinctCategories = new Set(
+      allCategoriesResult
+        .filter(row => row.category && row.category.trim() !== '')
+        .map(row => row.category)
+    );
+    const categoryCount = distinctCategories.size;
 
     console.log('[Statistics] Total public activities:', totalResult[0]?.value, 'Free public activities:', freeResult[0]?.value, 'Total distinct categories:', categoryCount, 'Total trips in DB:', allTripsCount[0]?.value);
 
