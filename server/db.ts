@@ -639,7 +639,7 @@ export async function getStatistics() {
 
   try {
     // Get statistics using SQL queries
-    const [totalResult, freeResult, categoriesResult] = await Promise.all([
+    const [totalResult, freeResult, categoriesResult, allTripsCount] = await Promise.all([
       db.select({ value: count() })
         .from(trips)
         .where(eq(trips.isPublic, 1)),
@@ -653,12 +653,14 @@ export async function getStatistics() {
           ne(tripCategories.category, null),
           ne(tripCategories.category, '')
         ))
-        .distinct()
+        .distinct(),
+      // Debug: count all trips
+      db.select({ value: count() }).from(trips)
     ]);
 
     const categoryCount = categoriesResult?.length || 0;
 
-    console.log('[Statistics] Total activities:', totalResult[0]?.value, 'Free activities:', freeResult[0]?.value, 'Total categories:', categoryCount);
+    console.log('[Statistics] Total public activities:', totalResult[0]?.value, 'Free public activities:', freeResult[0]?.value, 'Total distinct categories:', categoryCount, 'Total trips in DB:', allTripsCount[0]?.value);
 
     const stats = {
       totalActivities: totalResult[0]?.value || 0,
