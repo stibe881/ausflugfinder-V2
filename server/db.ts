@@ -637,7 +637,7 @@ export async function getStatistics() {
     throw new Error("Database not available");
   }
 
-  // Use SQL COUNT and DISTINCT instead of loading all data into memory
+  // Get statistics using SQL queries
   const [totalResult, freeResult, categoriesResult] = await Promise.all([
     db.select({ value: count() })
       .from(trips)
@@ -645,14 +645,16 @@ export async function getStatistics() {
     db.select({ value: count() })
       .from(trips)
       .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-    db.selectDistinct({ category: tripCategories.category })
-      .from(tripCategories)
+    // Count distinct categories using raw SQL
+    db.execute(sql`SELECT COUNT(DISTINCT category) as count FROM ${tripCategories}`)
   ]);
+
+  const categoryCount = (categoriesResult as any)?.[0]?.count || 0;
 
   return {
     totalActivities: totalResult[0]?.value || 0,
     freeActivities: freeResult[0]?.value || 0,
-    totalCategories: categoriesResult?.length || 0,
+    totalCategories: typeof categoryCount === 'bigint' ? Number(categoryCount) : categoryCount,
   };
 }
 
