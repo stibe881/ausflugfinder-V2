@@ -9,12 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 
 type AuthMode = "login" | "register";
@@ -32,6 +26,7 @@ export default function Login() {
 
   const handleSubmit = async (e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
     if (e) e.preventDefault?.();
+  const [loading, setLoading] = useState(false);
     if (e) e.stopPropagation?.();
 
     if (!email || !password) {
