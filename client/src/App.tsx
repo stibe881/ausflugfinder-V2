@@ -26,7 +26,7 @@ import { useInstallPrompt } from "./hooks/useInstallPrompt";
 import { useAutoLogout } from "./hooks/useAutoLogout";
 import { useWebSocketNotifications } from "./hooks/useWebSocketNotifications";
 import { ThemeLanguageToggle } from "./components/ThemeLanguageToggle"; // Re-added this import
-import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
+
 import { initCapacitorPushNotifications, isCapacitorApp } from "@/services/capacitorPush";
 import { Footer } from "./components/Footer";
 import { CookieBanner } from "./components/CookieBanner";
@@ -149,7 +149,7 @@ function AppContent() {
         >
           <TooltipProvider>
             <Toaster />
-            <PushNotificationPrompt />
+    
             <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
               <ThemeLanguageToggle
                 isAppInstalled={isAppInstalled}
