@@ -753,21 +753,26 @@ export const appRouter = router({
       )
       .mutation(async ({ input, ctx }) => {
         try {
-          // If dateAssigned is provided, validate it's within the trip's duration
+          // If dateAssigned is provided, validate it's within the PLAN's duration
           if (input.dateAssigned) {
-            const trip = await getTripById(input.tripId);
+            const plan = await getDayPlanById(input.dayPlanId);
             const dateAssigned = new Date(input.dateAssigned);
 
-            if (!trip) {
-              throw new NotFoundError("Trip", input.tripId);
+            if (!plan) {
+              throw new NotFoundError("DayPlan", input.dayPlanId);
             }
 
-            if (trip.startDate && trip.endDate) {
-              const tripStart = new Date(trip.startDate);
-              const tripEnd = new Date(trip.endDate);
+            if (plan.startDate && plan.endDate) {
+              const planStart = new Date(plan.startDate);
+              const planEnd = new Date(plan.endDate);
 
-              if (dateAssigned < tripStart || dateAssigned > tripEnd) {
-                throw new ValidationError(`Das Datum muss zwischen ${tripStart.toLocaleDateString('de-DE')} und ${tripEnd.toLocaleDateString('de-DE')} liegen`);
+              // Set time to 00:00:00 for accurate date comparison
+              planStart.setUTCHours(0, 0, 0, 0);
+              planEnd.setUTCHours(23, 59, 59, 999);
+              dateAssigned.setUTCHours(0, 0, 0, 0);
+
+              if (dateAssigned < planStart || dateAssigned > planEnd) {
+                throw new ValidationError(`Das Datum muss zwischen ${planStart.toLocaleDateString('de-DE')} und ${planEnd.toLocaleDateString('de-DE')} liegen`);
               }
             }
           }

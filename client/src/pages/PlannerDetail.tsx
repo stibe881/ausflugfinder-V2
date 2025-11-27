@@ -56,6 +56,7 @@ export default function PlannerDetail() {
   const [editPackingId, setEditPackingId] = useState<number | null>(null);
   const [checklistDialog, setChecklistDialog] = useState(false);
   const [showConfirmDeleteDialog, setShowConfirmDeleteDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [customTripTitle, setCustomTripTitle] = useState("");
@@ -640,6 +641,14 @@ export default function PlannerDetail() {
                       <div className="space-y-4">
                         {addTripMode === "select" ? (
                           <>
+                            <div className="mb-4">
+                              <Label>Suche</Label>
+                              <Input
+                                placeholder="Nach Titel oder Ziel suchen..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                              />
+                            </div>
                             <div>
                               <Label>Ausflug</Label>
                               <Select value={selectedTripId?.toString()} onValueChange={(v) => setSelectedTripId(parseInt(v))}>
@@ -647,11 +656,16 @@ export default function PlannerDetail() {
                                   <SelectValue placeholder="Ausflug wählen..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {availableTrips?.map((trip) => (
-                                    <SelectItem key={trip.id} value={trip.id.toString()}>
-                                      {trip.title} - {trip.destination}
-                                    </SelectItem>
-                                  ))}
+                                  {availableTrips
+                                    .filter(trip => 
+                                      trip.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                      trip.destination.toLowerCase().includes(searchTerm.toLowerCase())
+                                    )
+                                    .map((trip) => (
+                                      <SelectItem key={trip.id} value={trip.id.toString()}>
+                                        {trip.title} - {trip.destination}
+                                      </SelectItem>
+                                    ))}
                                 </SelectContent>
                               </Select>
                             </div>
