@@ -21,11 +21,10 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Mountain, Sun, Compass, Zap } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Zap } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
-import { NotificationCenter } from './NotificationCenter';
 import { Button } from "./ui/button";
 
 const menuItems = [
@@ -281,11 +280,10 @@ function DashboardLayoutContent({
               <Sun className="w-5 h-5 text-secondary animate-pulse" style={{ animationDelay: '0.5s' }} />
               <Compass className="w-5 h-5 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
             </div>
-            <NotificationCenter />
           </div>
         )}
         {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
+          <div className="flex border-b h-14 items-center justify-start bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
               <div className="flex items-center gap-3">
@@ -295,12 +293,6 @@ function DashboardLayoutContent({
                   </span>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Mountain className="w-4 h-4 text-primary animate-pulse" />
-              <Sun className="w-4 h-4 text-secondary animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <Compass className="w-4 h-4 text-accent animate-pulse" style={{ animationDelay: '1s' }} />
-              <NotificationCenter />
             </div>
           </div>
         )}

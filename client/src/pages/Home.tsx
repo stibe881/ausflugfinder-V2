@@ -1,14 +1,12 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { Calendar, MapPin, Users, Compass, Mountain, Sun, Moon, Globe } from "lucide-react";
+import { Calendar, MapPin, Users, Compass, Mountain, Sun } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useTheme } from "@/contexts/ThemeContext";
-import { InstallButton } from "@/components/InstallButton";
 import { useI18n, type Language } from "@/contexts/i18nContext";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const { isAuthenticated, loading, user } = useAuth();

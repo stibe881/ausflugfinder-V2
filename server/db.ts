@@ -1,4 +1,4 @@
-import { eq, and, sql, or, like, count, inArray, isNotNull } from "drizzle-orm";
+import { eq, and, sql, or, like, count, inArray, isNotNull, countDistinct } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertTrips as InsertTrip,
@@ -210,7 +210,18 @@ export async function updateTrip(id: number, userId: number, data: Partial<Inser
   if (!db) {
     throw new Error("Database not available");
   }
-  return await db.update(trips).set(data).where(eq(trips.id, id));
+
+  // Filter out undefined values - only update fields that are actually provided
+  const updateData = Object.fromEntries(
+    Object.entries(data).filter(([_, value]) => value !== undefined)
+  );
+
+  // If no data to update, return success without attempting update
+  if (Object.keys(updateData).length === 0) {
+    return { changes: 0 };
+  }
+
+  return await db.update(trips).set(updateData as Partial<InsertTrip>).where(eq(trips.id, id));
 }
 
 export async function deleteTrip(id: number, userId: number) {
@@ -327,7 +338,8 @@ export async function addTripPhoto(photo: InsertTripPhoto) {
   if (!db) {
     throw new Error("Database not available");
   }
-  return await db.insert(tripPhotos).values(photo);
+  const result = await db.insert(tripPhotos).values(photo);
+  return { insertId: (result as any)[0].insertId };
 }
 
 export async function getTripPhotos(tripId: number) {
@@ -521,12 +533,19 @@ export async function toggleFavorite(tripId: number, userId: number) {
     throw new Error("Database not available");
   }
 
-  // OPTIMIZATION #5: Use SQL CASE statement instead of reading then writing
-  // Before: 1 read query + 1 write query = 2 queries
-  // After: 1 write query = 50% reduction
+  // Get current trip to check isFavorite status
+  const trip = await db.select().from(trips).where(eq(trips.id, tripId)).limit(1);
+  if (!trip || trip.length === 0) {
+    throw new Error(`Trip ${tripId} not found`);
+  }
+
+  // Toggle the isFavorite status (0/null -> 1, 1 -> 0)
+  const currentIsFavorite = trip[0].isFavorite || 0;
+  const newIsFavorite = currentIsFavorite === 1 ? 0 : 1;
+
   return await db
     .update(trips)
-    .set({ isFavorite: sql`CASE WHEN isFavorite = 1 THEN 0 ELSE 1 END` })
+    .set({ isFavorite: newIsFavorite })
     .where(eq(trips.id, tripId));
 }
 
@@ -537,12 +556,19 @@ export async function toggleDone(tripId: number, userId: number) {
     throw new Error("Database not available");
   }
 
-  // OPTIMIZATION #5: Use SQL CASE statement instead of reading then writing
-  // Before: 1 read query + 1 write query = 2 queries
-  // After: 1 write query = 50% reduction
+  // Get current trip to check isDone status
+  const trip = await db.select().from(trips).where(eq(trips.id, tripId)).limit(1);
+  if (!trip || trip.length === 0) {
+    throw new Error(`Trip ${tripId} not found`);
+  }
+
+  // Toggle the isDone status (0/null -> 1, 1 -> 0)
+  const currentIsDone = trip[0].isDone || 0;
+  const newIsDone = currentIsDone === 1 ? 0 : 1;
+
   return await db
     .update(trips)
-    .set({ isDone: sql`CASE WHEN isDone = 1 THEN 0 ELSE 1 END` })
+    .set({ isDone: newIsDone })
     .where(eq(trips.id, tripId));
 }
 
@@ -611,25 +637,55 @@ export async function getStatistics() {
     throw new Error("Database not available");
   }
 
-  // Use SQL COUNT and DISTINCT instead of loading all data into memory
-  const [totalResult, freeResult, categoriesResult] = await Promise.all([
-    db.select({ value: count() })
-      .from(trips)
-      .where(eq(trips.isPublic, 1)),
-    db.select({ value: count() })
-      .from(trips)
-      .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
-    db.select({ value: sql`COUNT(DISTINCT ${tripCategories.category})` })
-      .from(tripCategories)
-      .innerJoin(trips, eq(tripCategories.tripId, trips.id))
-      .where(eq(trips.isPublic, 1))
-  ]);
+  try {
+    // Get statistics using SQL queries
+    const [totalResult, freeResult, allCategoriesResult, allTripsCount] = await Promise.all([
+      db.select({ value: count() })
+        .from(trips)
+        .where(eq(trips.isPublic, 1)),
+      db.select({ value: count() })
+        .from(trips)
+        .where(and(eq(trips.isPublic, 1), eq(trips.cost, 'free'))),
+      // Get all categories (we'll filter and count distinct in JavaScript)
+      db.select({ category: tripCategories.category })
+        .from(tripCategories),
+      // Debug: count all trips
+      db.select({ value: count() }).from(trips)
+    ]);
 
-  return {
-    totalActivities: totalResult[0]?.value || 0,
-    freeActivities: freeResult[0]?.value || 0,
-    totalCategories: (categoriesResult[0]?.value as number) || 0,
-  };
+    // Count distinct categories, filtering out null and empty strings
+    const distinctCategories = new Set(
+      allCategoriesResult
+        .filter(row => row.category && row.category.trim() !== '')
+        .map(row => row.category)
+    );
+    const categoryCount = distinctCategories.size;
+
+    console.log('[Statistics] Query Results:');
+    console.log('  - Total public activities:', totalResult[0]?.value);
+    console.log('  - Free public activities:', freeResult[0]?.value);
+    console.log('  - Total trips in DB:', allTripsCount[0]?.value);
+    console.log('  - Raw categories from DB:', allCategoriesResult.length, 'rows');
+    console.log('  - First 5 category rows:', JSON.stringify(allCategoriesResult.slice(0, 5)));
+    console.log('  - Distinct categories (after filtering):', categoryCount);
+    console.log('  - Distinct category values:', Array.from(distinctCategories).slice(0, 10));
+
+    const stats = {
+      totalActivities: totalResult[0]?.value || 0,
+      freeActivities: freeResult[0]?.value || 0,
+      totalCategories: categoryCount,
+    };
+
+    return stats;
+  } catch (error) {
+    console.error('[Statistics] Error:', error);
+    return {
+      totalActivities: 0,
+      freeActivities: 0,
+      totalCategories: 0,
+      categories: [],
+    };
+  }
 }
 
 
@@ -923,4 +979,53 @@ export async function deleteVideo(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return await db.delete(tripVideos).where(eq(tripVideos.id, id));
+}
+
+// ===== User Functions =====
+export async function deleteUser(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete all related data in cascade order
+  // Get all trips for this user
+  const userTrips = await db.select({ id: trips.id }).from(trips).where(eq(trips.userId, userId));
+  const tripIds = userTrips.map(t => t.id);
+
+  // Delete trip-related data for all trips
+  for (const tripId of tripIds) {
+    await db.delete(tripParticipants).where(eq(tripParticipants.tripId, tripId));
+    await db.delete(tripPhotos).where(eq(tripPhotos.tripId, tripId));
+    await db.delete(tripComments).where(eq(tripComments.tripId, tripId));
+    await db.delete(tripAttributes).where(eq(tripAttributes.tripId, tripId));
+    await db.delete(tripJournal).where(eq(tripJournal.tripId, tripId));
+    await db.delete(tripVideos).where(eq(tripVideos.tripId, tripId));
+  }
+
+  // Delete day plans and associated data
+  const userDayPlans = await db.select({ id: dayPlans.id }).from(dayPlans).where(eq(dayPlans.userId, userId));
+  const dayPlanIds = userDayPlans.map(dp => dp.id);
+
+  for (const dpId of dayPlanIds) {
+    await db.delete(dayPlanItems).where(eq(dayPlanItems.dayPlanId, dpId));
+    await db.delete(packingListItems).where(eq(packingListItems.dayPlanId, dpId));
+    await db.delete(budgetItems).where(eq(budgetItems.dayPlanId, dpId));
+    await db.delete(checklistItems).where(eq(checklistItems.dayPlanId, dpId));
+  }
+
+  // Delete day plans
+  await db.delete(dayPlans).where(eq(dayPlans.userId, userId));
+
+  // Delete trips
+  await db.delete(trips).where(eq(trips.userId, userId));
+
+  // Delete destinations
+  await db.delete(destinations).where(eq(destinations.userId, userId));
+
+  // Note: The following tables are not yet implemented in the schema:
+  // - friendships, notifications, pushSubscriptions
+  // - userLocations, userSettings, passwordResetTokens
+  // Delete operations for these tables are commented out until they are properly implemented
+
+  // Finally, delete the user
+  return await db.delete(users).where(eq(users.id, userId));
 }

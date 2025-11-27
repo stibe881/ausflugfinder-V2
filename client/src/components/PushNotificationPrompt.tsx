@@ -24,6 +24,11 @@ export const PushNotificationPrompt = () => {
   const [alreadyTriedSubscribe, setAlreadyTriedSubscribe] = useState(false);
 
   useEffect(() => {
+    // Check if Notification API is available
+    if (!('Notification' in window)) {
+      return;
+    }
+
     const permission = Notification.permission;
 
     console.log('[PushNotificationPrompt] useEffect triggered - Checking conditions:', {
@@ -57,6 +62,13 @@ export const PushNotificationPrompt = () => {
     setError(null);
 
     try {
+      // Check if Notification API is available
+      if (!('Notification' in window)) {
+        setError('Benachrichtigungen werden in diesem Browser nicht unterstützt.');
+        setIsLoading(false);
+        return;
+      }
+
       console.log('[PushNotificationPrompt] handleSubscribe called');
       const permission = Notification.permission;
       console.log('[PushNotificationPrompt] Current permission:', permission);

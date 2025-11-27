@@ -62,7 +62,8 @@ export function DragAndDropFileInput({
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       const file = files[0];
-      if (file.type.match(accept.replace(/\*/g, ''))) { // Basic type check based on accept prop
+      const allowedTypes = accept.split(',').map(t => t.trim());
+      if (allowedTypes.includes(file.type)) {
         onFileSelected(file);
       } else {
         alert(`Invalid file type. Please upload a ${accept} file.`);
@@ -74,7 +75,8 @@ export function DragAndDropFileInput({
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      if (file.type.match(accept.replace(/\*/g, ''))) {
+      const allowedTypes = accept.split(',').map(t => t.trim());
+      if (allowedTypes.includes(file.type)) {
         onFileSelected(file);
       } else {
         alert(`Invalid file type. Please upload a ${accept} file.`);

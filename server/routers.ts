@@ -1,7 +1,6 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { pushRouter } from "./routers/pushRouter";
 import { protectedProcedure, publicProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import {
@@ -31,15 +30,16 @@ import {
   addChecklistItem, getChecklistItems, updateChecklistItem, deleteChecklistItem,
   addJournalEntry, getTripJournalEntries, updateJournalEntry, deleteJournalEntry,
   addVideo, getTripVideos, deleteVideo,
+  deleteUser,
   getDb
 } from "./db";
 import { eq } from "drizzle-orm";
 import { dayPlanItems, trips } from "../drizzle/schema";
+import { saveBase64ImageLocal, validateImageFile } from "./storage";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
-  push: pushRouter,
   auth: router({
     me: publicProcedure.query(async (opts) => {
       try {
@@ -75,6 +75,37 @@ export const appRouter = router({
       } catch (error) {
         console.error('[Auth Logout] Error during logout:', error);
         const appError = handleError(error, "auth.logout");
+        throw toTRPCError(appError);
+      }
+    }),
+    deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
+      try {
+        if (!ctx.user) {
+          throw new UnauthorizedError("User not authenticated");
+        }
+
+        console.log('[Auth DeleteAccount] Deleting user account:', ctx.user.id);
+
+        // Delete all user data from database
+        await deleteUser(ctx.user.id);
+
+        // Clear the session cookie
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, {
+          path: cookieOptions.path,
+          httpOnly: cookieOptions.httpOnly,
+          secure: cookieOptions.secure,
+          sameSite: cookieOptions.sameSite,
+        });
+
+        console.log('[Auth DeleteAccount] User account deleted successfully');
+
+        return {
+          success: true,
+        } as const;
+      } catch (error) {
+        console.error('[Auth DeleteAccount] Error deleting account:', error);
+        const appError = handleError(error, "auth.deleteAccount");
         throw toTRPCError(appError);
       }
     }),
@@ -358,12 +389,6 @@ export const appRouter = router({
             }
           }
 
-          // Send push notification if trip is public
-          if (input.isPublic === 1) {
-            const { sendNewPublicTripNotification } = await import('./_core/pushNotifications');
-            await sendNewPublicTripNotification(result.id, input.title, ctx.user.id);
-          }
-
           return { id: result.id };
         } catch (error) {
           const appError = handleError(error, "trips.create");
@@ -544,11 +569,11 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         try {
-          await addTripPhoto({
+          const result = await addTripPhoto({
             ...input,
             isPrimary: input.isPrimary ? 1 : 0,
           });
-          return { success: true };
+          return { success: true, id: result.insertId };
         } catch (error) {
           const appError = handleError(error, "photos.add");
           throw toTRPCError(appError);
@@ -703,7 +728,7 @@ export const appRouter = router({
           throw toTRPCError(appError);
         }
       }),
-    getItems: publicProcedure
+    getItems: protectedProcedure
       .input(z.object({ dayPlanId: z.number() }))
       .query(async ({ input }) => {
         try {
@@ -1038,10 +1063,9 @@ export const appRouter = router({
           filename: z.string().optional(),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         try {
           // OPTIMIZATION #8: Move images from Base64 to filesystem storage
-          const { saveBase64ImageLocal, validateImageFile } = await import("../storage");
 
           // Extract base64 data
           const base64Data = input.base64.includes(",")
@@ -1056,11 +1080,15 @@ export const appRouter = router({
             throw new Error(validation.error || "Invalid image file");
           }
 
-          // Save to filesystem
-          const result = await saveBase64ImageLocal(input.base64, input.filename);
+          // Save to filesystem (use already-extracted base64Data)
+          const result = await saveBase64ImageLocal(base64Data, input.filename);
+
+          // Construct full URL from request origin
+          const origin = ctx.req.headers.origin || `${ctx.req.headers['x-forwarded-proto'] || 'https'}://${ctx.req.headers['x-forwarded-host'] || ctx.req.headers.host || 'ausflugfinder.ch'}`;
+          const fullUrl = `${origin}${result.path}`;
 
           return {
-            url: result.path,
+            url: fullUrl,
             filename: result.filename,
             success: true
           };

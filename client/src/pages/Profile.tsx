@@ -8,19 +8,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Calendar, MapPin, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Bell } from "lucide-react";
+import { User, Mail, Calendar, Heart, CheckCircle2, Plane, LogOut, ArrowLeft, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { toast } from "sonner";
-import { NotificationSettings } from "@/components/NotificationSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Profile() {
   const { t } = useI18n();
   const { user, loading, isAuthenticated, logout } = useAuth();
-  const { data: trips } = trpc.trips.list.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: tripsResponse } = trpc.trips.myTrips.useQuery(undefined, { enabled: isAuthenticated });
   const { data: dayPlans } = trpc.dayPlans.list.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: destinations } = trpc.destinations.list.useQuery(undefined, { enabled: isAuthenticated });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const deleteAccountMutation = trpc.auth.deleteAccount.useMutation({
+    onSuccess: () => {
+      toast.success(t("profile.deleteAccountSuccess"));
+      setIsDeleteDialogOpen(false);
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+    },
+    onError: (error) => {
+      toast.error(t("profile.deleteAccountError"));
+      console.error('Delete account error:', error);
+    },
+  });
 
   if (loading) {
     return (
@@ -54,8 +76,9 @@ export default function Profile() {
     );
   }
 
-  const favoriteTrips = trips?.filter(t => t.isFavorite === 1) || [];
-  const completedTrips = trips?.filter(t => t.isDone === 1) || [];
+  const trips = tripsResponse?.data || [];
+  const favoriteTrips = trips.filter(t => t.isFavorite === 1) || [];
+  const completedTrips = trips.filter(t => t.isDone === 1) || [];
   const initials = user.name?.split(" ")?.map(n => n[0])?.join("")?.toUpperCase() || "U";
 
   const handleLogout = () => {
@@ -103,8 +126,8 @@ export default function Profile() {
                   {user.role === "admin" ? t("profile.admin") : t("profile.user")}
                 </Badge>
                 {user.role === "admin" && (
-                  <Link href="/admin">
-                    <Button variant="default" size="sm" className="mt-4">
+                  <Link href="/admin" className="mt-4 block">
+                    <Button variant="default" size="sm" className="w-full">
                       {t("profile.adminPortal")}
                     </Button>
                   </Link>
@@ -120,11 +143,31 @@ export default function Profile() {
                     <Calendar className="w-4 h-4" />
                     <span>{t("profile.memberSince")} {new Date(user.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="w-4 h-4" />
-                    <span>{t("profile.loginMethod")} {user.loginMethod || t("profile.loginDefault")}</span>
-                  </div>
                 </div>
+                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="w-full">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {t("profile.deleteAccount")}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogTitle>{t("profile.deleteAccountConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("profile.deleteAccountConfirm")}
+                    </AlertDialogDescription>
+                    <div className="flex gap-2 justify-end">
+                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteAccountMutation.mutate()}
+                        disabled={deleteAccountMutation.isPending}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteAccountMutation.isPending ? t("common.loading") : t("profile.deleteAccountBtn")}
+                      </AlertDialogAction>
+                    </div>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </div>
@@ -132,12 +175,8 @@ export default function Profile() {
           {/* Content with Tabs */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-1">
                 <TabsTrigger value="overview">Übersicht</TabsTrigger>
-                <TabsTrigger value="notifications" className="flex items-center gap-2">
-                  <Bell className="w-4 h-4" />
-                  Benachrichtigungen
-                </TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
@@ -177,18 +216,6 @@ export default function Profile() {
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-8 h-8 text-green-500" />
                       <span className="text-3xl font-bold">{completedTrips.length}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardDescription>{t("profile.destinationsCount")}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-8 h-8 text-orange-500" />
-                      <span className="text-3xl font-bold">{destinations?.length || 0}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -254,11 +281,6 @@ export default function Profile() {
                 </CardContent>
               </Card>
             )}
-              </TabsContent>
-
-              {/* Notifications Tab */}
-              <TabsContent value="notifications" className="space-y-6">
-                <NotificationSettings />
               </TabsContent>
             </Tabs>
           </div>

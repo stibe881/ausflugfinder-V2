@@ -10,11 +10,12 @@ import {
 import { useTheme } from "@/contexts/ThemeContext";
 import { useI18n, type Language } from "@/contexts/i18nContext";
 import { Moon, Sun, Globe } from "lucide-react";
-import { InstallButton } from "./InstallButton"; // Import InstallButton
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 
 interface ThemeLanguageToggleProps {
-  isAppInstalled: boolean;
-  handleInstallClick: () => void;
+  isAppInstalled?: boolean;
+  handleInstallClick?: () => void;
 }
 
 export function ThemeLanguageToggle({
@@ -23,6 +24,26 @@ export function ThemeLanguageToggle({
 }: ThemeLanguageToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
+  const [location] = useLocation();
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Hide buttons on profile page and when scrolling
+  useEffect(() => {
+    const isProfilePage = location === '/profile';
+    if (isProfilePage) {
+      setIsVisible(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      // Hide when scrolled down, show when at top
+      setIsVisible(scrollTop < 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location]);
 
   const languages: { code: Language; name: string }[] = [
     { code: "de", name: "Deutsch" },
@@ -31,8 +52,12 @@ export function ThemeLanguageToggle({
     { code: "it", name: "Italiano" },
   ];
 
+  if (!isVisible) {
+    return null;
+  }
+
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 transition-opacity duration-300">
       {/* Theme Toggle */}
       <Button
         variant="outline"
@@ -79,13 +104,6 @@ export function ThemeLanguageToggle({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Install Button */}
-      {!isAppInstalled && (
-        <InstallButton
-          onInstall={handleInstallClick}
-        />
-      )}
     </div>
   );
 }

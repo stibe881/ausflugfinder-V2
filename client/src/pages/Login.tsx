@@ -9,12 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 
 
 type AuthMode = "login" | "register";
@@ -25,6 +19,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [agbAccepted, setAgbAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const { refresh } = useAuth();
   const [location, setLocation] = useLocation();
@@ -46,6 +41,11 @@ export default function Login() {
 
     if (mode === "register" && !email) {
       toast.error(t("auth.emailRequired"));
+      return;
+    }
+
+    if (mode === "register" && !agbAccepted) {
+      toast.error(t("auth.agbRequired"));
       return;
     }
 
@@ -178,8 +178,26 @@ export default function Login() {
               )}
             </div>
 
+            {mode === 'register' && (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="agb"
+                  checked={agbAccepted}
+                  onChange={(e) => setAgbAccepted(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="agb" className="text-sm">
+                  {t("auth.agbAccept")}{" "}
+                  <a href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    {t("auth.agb")}
+                  </a>
+                </label>
+              </div>
+            )}
+
             <Button
-              disabled={loading}
+              disabled={loading || (mode === 'register' && !agbAccepted)}
               onClick={handleSubmit as any}
               className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
             >

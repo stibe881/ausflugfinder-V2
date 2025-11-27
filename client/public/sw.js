@@ -1,4 +1,4 @@
-// Service Worker for Ausflug Manager PWA
+// Service Worker for AusflugFinder PWA
 const CACHE_VERSION = 'v2';
 const CACHE_NAME = `ausflug-manager-${CACHE_VERSION}`;
 const API_CACHE = `ausflug-api-${CACHE_VERSION}`;
@@ -293,14 +293,14 @@ self.addEventListener('push', (event) => {
   } catch (e) {
     console.warn('[Service Worker] Failed to parse push payload as JSON');
     payload = {
-      title: 'Ausflug Manager',
+      title: 'AusflugFinder',
       message: event.data.text(),
     };
   }
 
   const options = {
     body: payload.message || 'Neue Benachrichtigung',
-    title: payload.title || 'Ausflug Manager',
+    title: payload.title || 'AusflugFinder',
     icon: payload.icon || '/icons/icon-192.png',
     badge: payload.badge || '/icons/icon-192.png',
     tag: payload.tag || 'notification',
