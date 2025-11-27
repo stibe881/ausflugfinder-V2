@@ -23,7 +23,6 @@ services:
 
 volumes:
   uploads_data:
-    driver: local
 
 networks:
   ausflug-network:
