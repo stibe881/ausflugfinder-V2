@@ -70,7 +70,19 @@ export default function PlannerDetail() {
 
   const { data: plan, isLoading: planLoading } = trpc.dayPlans.getById.useQuery({ id: planId });
   const { data: planItems, refetch: refetchItems } = trpc.dayPlans.getItems.useQuery({ dayPlanId: planId });
-  const { data: allTrips } = trpc.trips.search.useQuery({ keyword: "", category: "", region: "", cost: "" });
+  const { data: allTrips } = trpc.trips.search.useQuery({
+    keyword: "",
+    category: "",
+    region: "",
+    cost: "",
+    isPublic: true // Only show public trips
+  });
+
+  // Filter and sort trips alphabetically, excluding deleted trips
+  const availableTrips = allTrips?.data
+    ?.filter(trip => trip.id > 0) // Ensure valid IDs
+    ?.sort((a, b) => a.title.localeCompare(b.title)) || [];
+
   const { data: packingList, refetch: refetchPacking } = trpc.packingList.list.useQuery({ dayPlanId: planId });
   const { data: budget, refetch: refetchBudget } = trpc.budget.list.useQuery({ dayPlanId: planId });
   const { data: checklist, refetch: refetchChecklist } = trpc.checklist.list.useQuery({ dayPlanId: planId });
@@ -84,6 +96,9 @@ export default function PlannerDetail() {
       setTripTime({ start: "", end: "" });
       setTripNotes("");
       setTripAssignedDate("");
+    },
+    onError: (error) => {
+      toast.error(`Fehler beim Hinzufügen: ${error.message}`);
     },
   });
 
@@ -632,7 +647,7 @@ export default function PlannerDetail() {
                                   <SelectValue placeholder="Ausflug wählen..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {allTrips?.data?.map((trip) => (
+                                  {availableTrips?.map((trip) => (
                                     <SelectItem key={trip.id} value={trip.id.toString()}>
                                       {trip.title} - {trip.destination}
                                     </SelectItem>
