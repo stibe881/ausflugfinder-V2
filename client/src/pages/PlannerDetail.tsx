@@ -46,6 +46,7 @@ export default function PlannerDetail() {
   const params = useParams();
   const planId = params.id ? parseInt(params.id) : 0;
   const { user } = useAuth();
+  const utils = trpc.useContext();
   
   const [addTripDialog, setAddTripDialog] = useState(false);
   const [addTripMode, setAddTripMode] = useState<"select" | "custom">("select");
@@ -91,7 +92,7 @@ export default function PlannerDetail() {
   const addTripMutation = trpc.dayPlans.addTrip.useMutation({
     onSuccess: () => {
       toast.success(t("plannerDetail.tripAdded"));
-      refetchItems();
+      utils.dayPlans.getItems.invalidate({ dayPlanId });
       setAddTripDialog(false);
       setSelectedTripId(null);
       setTripTime({ start: "", end: "" });
