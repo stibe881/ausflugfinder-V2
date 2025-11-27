@@ -92,7 +92,7 @@ export default function PlannerDetail() {
   const addTripMutation = trpc.dayPlans.addTrip.useMutation({
     onSuccess: () => {
       toast.success(t("plannerDetail.tripAdded"));
-      utils.dayPlans.getItems.invalidate({ dayPlanId });
+      utils.dayPlans.getItems.invalidate({ dayPlanId: planId });
       setAddTripDialog(false);
       setSelectedTripId(null);
       setTripTime({ start: "", end: "" });
