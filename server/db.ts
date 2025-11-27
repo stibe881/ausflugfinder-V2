@@ -751,57 +751,22 @@ export async function getDayPlanItemsWithTrips(dayPlanId: number) {
   const db = await getDb();
   if (!db) return [];
 
-  // OPTIMIZATION #5: Single JOIN query instead of N+1 pattern
-  // Before: 1 query for items + N queries for trips = N+1 total
-  // After: 1 query with LEFT JOIN = massive performance improvement
+  // Correctly join and select the full table objects
   const results = await db
     .select({
-      // Day plan item fields
-      id: dayPlanItems.id,
-      dayPlanId: dayPlanItems.dayPlanId,
-      tripId: dayPlanItems.tripId,
-      dayNumber: dayPlanItems.dayNumber,
-      orderIndex: dayPlanItems.orderIndex,
-      startTime: dayPlanItems.startTime,
-      endTime: dayPlanItems.endTime,
-      notes: dayPlanItems.notes,
-      dateAssigned: dayPlanItems.dateAssigned,
-      createdAt: dayPlanItems.createdAt,
-      // Trip fields (nested object)
-      trip: {
-        id: trips.id,
-        userId: trips.userId,
-        title: trips.title,
-        description: trips.description,
-        destination: trips.destination,
-        startDate: trips.startDate,
-        endDate: trips.endDate,
-        participants: trips.participants,
-        status: trips.status,
-        cost: trips.cost,
-        ageRecommendation: trips.ageRecommendation,
-        routeType: trips.routeType,
-        category: trips.category,
-        region: trips.region,
-        address: trips.address,
-        websiteUrl: trips.websiteUrl,
-        contactEmail: trips.contactEmail,
-        contactPhone: trips.contactPhone,
-        latitude: trips.latitude,
-        longitude: trips.longitude,
-        image: trips.image,
-        isFavorite: trips.isFavorite,
-        isDone: trips.isDone,
-        isPublic: trips.isPublic,
-        createdAt: trips.createdAt,
-        updatedAt: trips.updatedAt,
-      }
+      item: dayPlanItems,
+      trip: trips,
     })
     .from(dayPlanItems)
     .leftJoin(trips, eq(dayPlanItems.tripId, trips.id))
-    .where(eq(dayPlanItems.dayPlanId, dayPlanId));
+    .where(eq(dayPlanItems.dayPlanId, dayPlanId))
+    .orderBy(dayPlanItems.orderIndex);
 
-  return results;
+  // Manually restructure the data to match the nested format the frontend expects
+  return results.map(r => ({
+    ...r.item,
+    trip: r.trip,
+  }));
 }
 
 /**
