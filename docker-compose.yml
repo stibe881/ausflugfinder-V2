@@ -19,10 +19,7 @@ services:
     networks:
       - ausflug-network
     volumes:
-      - uploads_data:/app/uploads
-
-volumes:
-  uploads_data:
+      - ./uploads:/app/uploads
 
 networks:
   ausflug-network:
