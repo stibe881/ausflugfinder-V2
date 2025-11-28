@@ -98,7 +98,6 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
     "@capacitor/android": "^7.4.4",
     "@capacitor/ios": "^7.4.4",
     "@tailwindcss/typography": "^0.5.15",
